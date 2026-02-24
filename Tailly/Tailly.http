@@ -1,0 +1,6 @@
+@Tailly_HostAddress = http://localhost:5084
+
+GET {{Tailly_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
