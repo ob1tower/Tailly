@@ -29,11 +29,11 @@ public class UsersRepository : IUsersRepository
         await _authDbContext.SaveChangesAsync();
     }
 
-    public async Task<User?> GetByEmailAsync(string email)
+    public async Task<User?> GetByEmailAndRoleAsync(string email, int roleId)
     {
         var userEntity = await _authDbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Email == email);
+            .FirstOrDefaultAsync(u => u.Email == email && u.RoleId == roleId);
 
         if (userEntity == null)
             return null;
@@ -48,10 +48,10 @@ public class UsersRepository : IUsersRepository
         };
     }
 
-    public async Task<bool> ExistsByEmailAsync(string email)
+    public async Task<bool> ExistsAsync(string email, int roleId)
     {
         return await _authDbContext.Users
-            .AnyAsync(u => u.Email == email);
+            .AnyAsync(u => u.Email == email && u.RoleId == roleId);
     }
 
     public async Task<User?> GetByIdAsync(Guid id)

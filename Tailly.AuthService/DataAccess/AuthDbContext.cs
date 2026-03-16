@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Tailly.AuthService.Configurations;
+using Tailly.AuthService.Configurations.Entities;
 using Tailly.AuthService.Entities;
 
 namespace Tailly.AuthService.DataAccess;

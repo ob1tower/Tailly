@@ -20,10 +20,10 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         var tokenEntity = new RefreshTokenEntity
         {
             Id = token.Id,
-            Token = token.Token,
-            CreatedAt = token.CreatedAt,
-            ExpiresAt = token.ExpiresAt,
-            RevokedAt = token.RevokedAt,
+            TokenHash = token.TokenHash,
+            Created = token.Created,
+            Expires = token.Expires,
+            Revoked = token.Revoked,
             UserId = token.UserId
         };
 
@@ -35,7 +35,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     {
         var tokenEntity = await _authDbContext.RefreshTokens
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Token == token);
+            .FirstOrDefaultAsync(x => x.TokenHash == token);
 
         if (tokenEntity == null)
             return null;
@@ -43,10 +43,10 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         return new RefreshToken
         {
             Id = tokenEntity.Id,
-            Token = tokenEntity.Token,
-            CreatedAt = tokenEntity.CreatedAt,
-            ExpiresAt = tokenEntity.ExpiresAt,
-            RevokedAt = tokenEntity.RevokedAt,
+            TokenHash = tokenEntity.TokenHash,
+            Created = tokenEntity.Created,
+            Expires = tokenEntity.Expires,
+            Revoked = tokenEntity.Revoked,
             UserId = tokenEntity.UserId
         };
     }
@@ -54,12 +54,12 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     public async Task InvalidateAsync(string token)
     {
         var tokenEntity = await _authDbContext.RefreshTokens
-            .FirstOrDefaultAsync(x => x.Token == token);
+            .FirstOrDefaultAsync(x => x.TokenHash == token);
 
         if (tokenEntity == null)
             return;
 
-        tokenEntity.RevokedAt = DateTime.UtcNow;
+        tokenEntity.Revoked = DateTime.UtcNow;
 
         await _authDbContext.SaveChangesAsync();
     }

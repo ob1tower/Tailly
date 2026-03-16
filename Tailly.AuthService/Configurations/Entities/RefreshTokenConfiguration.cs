@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Tailly.AuthService.Entities;
 
-namespace Tailly.AuthService.Configurations;
+namespace Tailly.AuthService.Configurations.Entities;
 
 public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshTokenEntity>
 {
@@ -11,20 +11,17 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshTokenEn
 
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Token)
-            .HasMaxLength(500)
+        builder.Property(x => x.TokenHash)
+            .HasMaxLength(64)
             .IsRequired();
 
-        builder.HasIndex(x => x.Token)
-            .IsUnique();
-
-        builder.Property(x => x.CreatedAt)
+        builder.Property(x => x.Created)
             .IsRequired();
 
-        builder.Property(x => x.ExpiresAt)
+        builder.Property(x => x.Expires)
             .IsRequired();
 
-        builder.Property(x => x.RevokedAt)
+        builder.Property(x => x.Revoked)
             .IsRequired(false);
 
         builder.Property(x => x.UserId)
