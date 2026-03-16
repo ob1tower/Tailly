@@ -2,28 +2,27 @@
 using Tailly.AuthService.Entities;
 using Tailly.AuthService.Errors;
 using Tailly.AuthService.Models;
-using Tailly.AuthService.Repositories;
 using Tailly.AuthService.Repositories.Interfaces;
 using Tailly.AuthService.Service.Security;
 using Tailly.AuthService.Service.Tokens;
 
 namespace Tailly.AuthService.Service.Auth;
 
-public class AuthService
+public class AuthenticationService : IAuthenticationService
 {
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHashingService _passwordHasher;
     private readonly IJwtTokenService _jwtService;
     private readonly IRefreshTokenService _refreshTokenService;
-    private readonly ILogger<AuthService> _logger;
+    private readonly ILogger<AuthenticationService> _logger;
 
-    public AuthService(IUsersRepository usersRepository,
+    public AuthenticationService(IUsersRepository usersRepository,
                        IRefreshTokenRepository refreshTokenRepository,
                        IPasswordHashingService passwordHasher,
                        IJwtTokenService jwtService,
-                       IRefreshTokenService refreshTokenService, 
-                       ILogger<AuthService> logger)
+                       IRefreshTokenService refreshTokenService,
+                       ILogger<AuthenticationService> logger)
     {
         _usersRepository = usersRepository;
         _refreshTokenRepository = refreshTokenRepository;
@@ -62,7 +61,7 @@ public class AuthService
         return Result.Success(user.Id);
     }
 
-    public async Task<Result<AuthResult>> LoginAsync(string email, string password, 
+    public async Task<Result<AuthResult>> LoginAsync(string email, string password,
                                                      int roleId)
     {
         var user = await _usersRepository.GetByEmailAndRoleAsync(email, roleId);

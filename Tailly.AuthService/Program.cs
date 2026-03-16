@@ -1,27 +1,13 @@
-using Microsoft.EntityFrameworkCore;
-using Tailly.AuthService.DataAccess;
+using Tailly.AuthService.Configurations.Extensions;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddConfiguration(builder.Configuration);
 
-builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("AuthDb")));
+WebApplication app = builder.Build();
 
-var app = builder.Build();
+await app.ApplyMigrationsAsync();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
+app.Configure();
 
 app.Run();
