@@ -1,5 +1,5 @@
 ﻿using System.Security.Authentication;
-using Tailly.AuthService.Dtos;
+using Tailly.AuthService.Dtos.Common;
 
 namespace Tailly.AuthService.Middlewares;
 

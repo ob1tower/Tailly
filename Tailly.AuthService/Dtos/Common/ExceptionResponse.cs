@@ -1,4 +1,4 @@
-﻿namespace Tailly.AuthService.Dtos;
+﻿namespace Tailly.AuthService.Dtos.Common;
 
 public sealed class ExceptionResponse
 {
