@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Tailly.AuthService.Entities;
 
-namespace Tailly.AuthService.Configurations;
+namespace Tailly.AuthService.Configurations.Entities;
 
 public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
 {
@@ -13,9 +13,6 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
         builder.Property(x => x.Email)
             .HasMaxLength(256)
             .IsRequired();
-
-        builder.HasIndex(x => x.Email)
-            .IsUnique();
 
         builder.Property(x => x.PasswordHash)
             .HasMaxLength(500)

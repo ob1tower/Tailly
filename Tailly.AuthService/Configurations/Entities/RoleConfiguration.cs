@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Tailly.AuthService.Entities;
 using Tailly.AuthService.Enums;
 
-namespace Tailly.AuthService.Configurations;
+namespace Tailly.AuthService.Configurations.Entities;
 
 public class RoleConfiguration : IEntityTypeConfiguration<RoleEntity>
 {
