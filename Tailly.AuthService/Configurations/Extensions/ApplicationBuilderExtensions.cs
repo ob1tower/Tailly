@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Tailly.AuthService.Middlewares;
 
 namespace Tailly.AuthService.Configurations.Extensions;
 
 public static class ApplicationBuilderExtensions
 {
-    public static WebApplication Configure(this WebApplication app)
+    public static IApplicationBuilder Configure(this WebApplication app)
     {
+        app.UseExceptionHandlerMiddleware();
         app.UseHttpsRedirection();
         app.UseSwaggerSetup();
         app.UseAuthentication();
@@ -34,6 +36,14 @@ public static class ApplicationBuilderExtensions
                 }
             });
         }
+
+        return app;
+    }
+
+    private static IApplicationBuilder UseExceptionHandlerMiddleware(
+    this IApplicationBuilder app)
+    {
+        app.UseMiddleware<ExceptionHandlerMiddleware>();
 
         return app;
     }
