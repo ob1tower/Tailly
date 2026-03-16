@@ -30,7 +30,6 @@ public static class DependencyInjectionExtensions
         services.AddAuthenticationCore();
 
         services.AddApplicationRepositories();
-        services.AddApplicationServices();
 
         return services;
     }
@@ -68,18 +67,15 @@ public static class DependencyInjectionExtensions
 
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+            .AddJwtBearer("Access", options =>
             {
                 options.TokenValidationParameters = new()
                 {
                     ValidateIssuer = true,
                     ValidIssuer = settings.Issuer,
-
                     ValidateAudience = true,
                     ValidAudience = settings.Audience,
-
                     ValidateLifetime = true,
-
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = key
                 };
@@ -111,14 +107,6 @@ public static class DependencyInjectionExtensions
     {
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-
-        return services;
-    }
-
-    private static IServiceCollection AddApplicationServices(
-        this IServiceCollection services)
-    {
-        services.AddScoped<IAuthenticationService, AuthenticationService>();
 
         return services;
     }

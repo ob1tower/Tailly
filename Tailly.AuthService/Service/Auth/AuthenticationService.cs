@@ -1,4 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
+using Microsoft.Extensions.Options;
+using Tailly.AuthService.Configurations.Options;
 using Tailly.AuthService.Entities;
 using Tailly.AuthService.Errors;
 using Tailly.AuthService.Models;
@@ -15,6 +17,7 @@ public class AuthenticationService : IAuthenticationService
     private readonly IPasswordHashingService _passwordHasher;
     private readonly IJwtTokenService _jwtService;
     private readonly IRefreshTokenService _refreshTokenService;
+    private readonly JwtOptions _jwtOptions;
     private readonly ILogger<AuthenticationService> _logger;
 
     public AuthenticationService(IUsersRepository usersRepository,
@@ -22,6 +25,7 @@ public class AuthenticationService : IAuthenticationService
                        IPasswordHashingService passwordHasher,
                        IJwtTokenService jwtService,
                        IRefreshTokenService refreshTokenService,
+                       IOptions<JwtOptions> jwtOptions,
                        ILogger<AuthenticationService> logger)
     {
         _usersRepository = usersRepository;
@@ -29,6 +33,7 @@ public class AuthenticationService : IAuthenticationService
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
         _refreshTokenService = refreshTokenService;
+        _jwtOptions = jwtOptions.Value;
         _logger = logger;
     }
 
@@ -89,7 +94,18 @@ public class AuthenticationService : IAuthenticationService
 
         var (rawRefreshToken, hashedRefreshToken) = _refreshTokenService.GenerateToken();
 
-        var refreshExpires = DateTime.UtcNow.AddDays(30);
+        var refreshExpires = DateTime.UtcNow.AddDays(_jwtOptions.RefreshExpiresDays);
+
+        var newRefreshToken = new RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            TokenHash = hashedRefreshToken,
+            UserId = user.Id,
+            Created = DateTime.UtcNow,
+            Expires = refreshExpires
+        };
+
+        await _refreshTokenRepository.AddAsync(newRefreshToken);
 
         var result = new AuthResult
         {
@@ -137,9 +153,9 @@ public class AuthenticationService : IAuthenticationService
 
         var (rawRefreshToken, hashedRefreshToken) = _refreshTokenService.GenerateToken();
 
-        storedToken.Revoked = DateTime.UtcNow;
-
         await _refreshTokenRepository.InvalidateAsync(storedToken.TokenHash);
+
+        var refreshExpires = DateTime.UtcNow.AddDays(_jwtOptions.RefreshExpiresDays);
 
         var newRefreshToken = new RefreshToken
         {
@@ -147,7 +163,7 @@ public class AuthenticationService : IAuthenticationService
             TokenHash = hashedRefreshToken,
             UserId = user.Id,
             Created = DateTime.UtcNow,
-            Expires = DateTime.UtcNow.AddDays(30)
+            Expires = refreshExpires
         };
 
         await _refreshTokenRepository.AddAsync(newRefreshToken);
