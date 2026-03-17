@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
+using Tailly.AuthService.Configurations.Constants;
 using Tailly.AuthService.Configurations.Options;
 using Tailly.AuthService.DataAccess;
 using Tailly.AuthService.Dtos.Common;
@@ -28,6 +30,7 @@ public static class DependencyInjectionExtensions
         services.AddControllers();
         services.AddFixedRateLimiter();
         services.AddSwaggerSetup();
+        services.AddRedis(configuration);
         services.AddPostgres(configuration);
         services.AddOptions(configuration);
         services.AddJwtAuthentication(configuration);
@@ -38,19 +41,32 @@ public static class DependencyInjectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddPostgres(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    private static IServiceCollection AddPostgres(this IServiceCollection services,
+                                                  IConfiguration configuration)
     {
         services.AddDbContext<AuthDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("Postgres")));
+            options.UseNpgsql(configuration.GetConnectionString(ConnectionStrings.Postgres)));
 
         return services;
     }
 
-    private static IServiceCollection AddOptions(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    private static IServiceCollection AddRedis(this IServiceCollection services,
+                                               IConfiguration configuration)
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString(ConnectionStrings.Redis);
+        });
+
+        services.AddSingleton<IConnectionMultiplexer>(_ =>
+            ConnectionMultiplexer.Connect(
+                configuration.GetConnectionString(ConnectionStrings.Redis)!));
+
+        return services;
+    }
+
+    private static IServiceCollection AddOptions(this IServiceCollection services,
+                                                 IConfiguration configuration)
     {
         services.Configure<JwtOptions>(
             configuration.GetSection(nameof(JwtOptions)));
