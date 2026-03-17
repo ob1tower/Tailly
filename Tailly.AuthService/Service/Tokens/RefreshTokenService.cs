@@ -1,10 +1,18 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
+using Tailly.AuthService.Configurations.Options;
 
 namespace Tailly.AuthService.Service.Tokens;
 
 public class RefreshTokenService : IRefreshTokenService
 {
+    private readonly JwtOptions _options;
+    public RefreshTokenService(IOptions<JwtOptions> options)
+    {
+        _options = options.Value;
+    }
+
     public (string rawToken, string hashedToken) GenerateToken()
     {
         var bytes = RandomNumberGenerator.GetBytes(64);
@@ -22,5 +30,10 @@ public class RefreshTokenService : IRefreshTokenService
 
         using var sha = SHA256.Create();
         return Convert.ToBase64String(sha.ComputeHash(bytes));
+    }
+
+    public DateTime GetRefreshTokenExpiryDate()
+    {
+        return DateTime.UtcNow.AddDays(_options.RefreshExpiresDays);
     }
 }

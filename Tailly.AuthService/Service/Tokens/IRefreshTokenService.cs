@@ -4,5 +4,6 @@
     {
         (string rawToken, string hashedToken) GenerateToken();
         string HashToken(string rawToken);
+        DateTime GetRefreshTokenExpiryDate();
     }
 }

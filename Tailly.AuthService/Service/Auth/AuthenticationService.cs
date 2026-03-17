@@ -1,6 +1,4 @@
 ﻿using CSharpFunctionalExtensions;
-using Microsoft.Extensions.Options;
-using Tailly.AuthService.Configurations.Options;
 using Tailly.AuthService.Entities;
 using Tailly.AuthService.Errors;
 using Tailly.AuthService.Models;
@@ -17,7 +15,6 @@ public class AuthenticationService : IAuthenticationService
     private readonly IPasswordHashingService _passwordHasher;
     private readonly IJwtTokenService _jwtService;
     private readonly IRefreshTokenService _refreshTokenService;
-    private readonly JwtOptions _jwtOptions;
     private readonly ILogger<AuthenticationService> _logger;
 
     public AuthenticationService(IUsersRepository usersRepository,
@@ -25,7 +22,6 @@ public class AuthenticationService : IAuthenticationService
                        IPasswordHashingService passwordHasher,
                        IJwtTokenService jwtService,
                        IRefreshTokenService refreshTokenService,
-                       IOptions<JwtOptions> jwtOptions,
                        ILogger<AuthenticationService> logger)
     {
         _usersRepository = usersRepository;
@@ -33,13 +29,15 @@ public class AuthenticationService : IAuthenticationService
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
         _refreshTokenService = refreshTokenService;
-        _jwtOptions = jwtOptions.Value;
         _logger = logger;
     }
 
     public async Task<Result<Guid>> RegisterAsync(string email, string password,
                                                   int roleId)
     {
+        email = email?.Trim().ToLowerInvariant()
+                ?? throw new ArgumentNullException(nameof(email));
+
         var result = await _usersRepository.ExistsAsync(email, roleId);
 
         if (result)
@@ -69,6 +67,9 @@ public class AuthenticationService : IAuthenticationService
     public async Task<Result<AuthResult>> LoginAsync(string email, string password,
                                                      int roleId)
     {
+        email = email?.Trim().ToLowerInvariant()
+                ?? throw new ArgumentNullException(nameof(email));
+
         var user = await _usersRepository.GetByEmailAndRoleAsync(email, roleId);
 
         if (user == null)
@@ -94,7 +95,7 @@ public class AuthenticationService : IAuthenticationService
 
         var (rawRefreshToken, hashedRefreshToken) = _refreshTokenService.GenerateToken();
 
-        var refreshExpires = DateTime.UtcNow.AddDays(_jwtOptions.RefreshExpiresDays);
+        var refreshExpires = _refreshTokenService.GetRefreshTokenExpiryDate();
 
         var newRefreshToken = new RefreshToken
         {
@@ -126,13 +127,13 @@ public class AuthenticationService : IAuthenticationService
 
         if (storedToken == null)
         {
-            _logger.LogWarning("Refresh failed. Token not found");
+            _logger.LogWarning("Refresh failed. Token not found.");
             return Result.Failure<AuthResult>(AuthErrors.InvalidRefreshToken.Description);
         }
 
         if (storedToken.Expires < DateTime.UtcNow)
         {
-            _logger.LogWarning("Refresh failed. Token expired");
+            _logger.LogWarning("Refresh failed. Token expired.");
             return Result.Failure<AuthResult>(AuthErrors.RefreshTokenExpired.Description);
         }
 
@@ -140,7 +141,7 @@ public class AuthenticationService : IAuthenticationService
 
         if (user == null)
         {
-            _logger.LogWarning("Refresh failed. User not found");
+            _logger.LogWarning("Refresh failed. User not found.");
             return Result.Failure<AuthResult>(AuthErrors.InvalidRefreshToken.Description);
         }
 
@@ -155,7 +156,7 @@ public class AuthenticationService : IAuthenticationService
 
         await _refreshTokenRepository.InvalidateAsync(storedToken.TokenHash);
 
-        var refreshExpires = DateTime.UtcNow.AddDays(_jwtOptions.RefreshExpiresDays);
+        var refreshExpires = _refreshTokenService.GetRefreshTokenExpiryDate();
 
         var newRefreshToken = new RefreshToken
         {
@@ -187,13 +188,13 @@ public class AuthenticationService : IAuthenticationService
 
         if (storedToken == null)
         {
-            _logger.LogWarning("Logout failed. Token not found");
+            _logger.LogWarning("Logout failed. Token not found.");
             return Result.Failure(AuthErrors.InvalidRefreshToken.Description);
         }
 
         await _refreshTokenRepository.InvalidateAsync(hashedToken);
 
-        _logger.LogInformation("User logged out. Token revoked");
+        _logger.LogInformation("User logged out. Token revoked.");
 
         return Result.Success();
     }
