@@ -17,31 +17,21 @@ public static class ApplicationBuilderExtensions
         return app;
     }
 
-    private static WebApplication UseSwaggerSetup(
-        this WebApplication app)
+    private static IApplicationBuilder UseSwaggerSetup(this IApplicationBuilder app)
     {
-        if (app.Environment.IsDevelopment())
+        if (app.ApplicationServices.GetService<IWebHostEnvironment>()?.IsDevelopment() == true)
         {
-            IApiVersionDescriptionProvider provider = app.Services
-                .GetRequiredService<IApiVersionDescriptionProvider>();
-
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
-                foreach (ApiVersionDescription description in provider.ApiVersionDescriptions)
-                {
-                    options.SwaggerEndpoint(
-                        $"/swagger/{description.GroupName}/swagger.json",
-                        description.GroupName.ToUpperInvariant());
-                }
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Tailly Auth API V1");
             });
         }
 
         return app;
     }
 
-    private static IApplicationBuilder UseExceptionHandlerMiddleware(
-    this IApplicationBuilder app)
+    private static IApplicationBuilder UseExceptionHandlerMiddleware(this IApplicationBuilder app)
     {
         app.UseMiddleware<ExceptionHandlerMiddleware>();
 
