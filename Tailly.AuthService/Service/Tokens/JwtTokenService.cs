@@ -24,7 +24,7 @@ public class JwtTokenService : IJwtTokenService
     public async Task<(string token, DateTime expires)> CreateAccessTokenAsync(UserEntity user)
     {
         var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_options.Key));
+            Encoding.UTF8.GetBytes(_options.SecretKey));
 
         var creds = new SigningCredentials(
             key,
@@ -36,7 +36,7 @@ public class JwtTokenService : IJwtTokenService
         claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
         claims.Add(new Claim(
             JwtRegisteredClaimNames.Iat,
-            DateTime.UtcNow.ToString(),
+            DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
             ClaimValueTypes.Integer64));
 
         var expires = DateTime.UtcNow.AddMinutes(_options.AccessExpiresMinutes);

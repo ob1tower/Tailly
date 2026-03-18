@@ -63,4 +63,18 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 
         await _authDbContext.SaveChangesAsync();
     }
+
+    public async Task RemoveExpiredTokensAsync()
+    {
+        var expiredTokens = await _authDbContext.RefreshTokens
+            .Where(t => t.Expires < DateTime.UtcNow)
+            .ToListAsync();
+
+        if (!expiredTokens.Any())
+            return;
+
+        _authDbContext.RefreshTokens.RemoveRange(expiredTokens);
+
+        await _authDbContext.SaveChangesAsync();
+    }
 }

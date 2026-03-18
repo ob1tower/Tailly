@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
@@ -15,6 +16,7 @@ using Tailly.AuthService.Dtos.Common;
 using Tailly.AuthService.Repositories;
 using Tailly.AuthService.Repositories.Interfaces;
 using Tailly.AuthService.Service.Auth;
+using Tailly.AuthService.Service.Claims;
 using Tailly.AuthService.Service.Security;
 using Tailly.AuthService.Service.Tokens;
 using Tailly.AuthService.Validators;
@@ -33,7 +35,7 @@ public static class DependencyInjectionExtensions
         services.AddRedis(configuration);
         services.AddPostgres(configuration);
         services.AddOptions(configuration);
-        services.AddJwtAuthentication(configuration);
+        services.AddJwtAuthentication();
         services.AddSecurityAndCore();
         services.AddApplicationRepositories();
         services.AddFluentValidationSetup();
@@ -69,34 +71,36 @@ public static class DependencyInjectionExtensions
                                                  IConfiguration configuration)
     {
         services.Configure<JwtOptions>(
-            configuration.GetSection(nameof(JwtOptions)));
+            configuration.GetSection("JwtConfig"));
 
         return services;
     }
 
-    private static IServiceCollection AddJwtAuthentication(this IServiceCollection services,
-                                                           IConfiguration configuration)
+    private static IServiceCollection AddJwtAuthentication(this IServiceCollection services)
     {
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    var jwtOptions = configuration.GetSection(nameof(JwtOptions))
-                                                  .Get<JwtOptions>()!;
+                .AddJwtBearer();
 
-                    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key));
+        services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+            using var sp = services.BuildServiceProvider();
+            var jwtOptions = sp.GetRequiredService<IOptions<JwtOptions>>().Value;
 
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = jwtOptions.Issuer,
-                        ValidateAudience = true,
-                        ValidAudience = jwtOptions.Audience,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = key,
-                        ClockSkew = TimeSpan.FromSeconds(30)
-                    };
-                });
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtOptions.SecretKey));
+
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = jwtOptions.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtOptions.Audience,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = key,
+                ClockSkew = TimeSpan.FromSeconds(30)
+            };
+        });
 
         return services;
     }
@@ -107,6 +111,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<ClaimProvider>();
 
         return services;
     }
@@ -143,8 +148,10 @@ public static class DependencyInjectionExtensions
                 });
             options.AddPolicy("auth", context =>
             {
+                var key = $"auth:{context.Connection.RemoteIpAddress}";
+
                 return RateLimitPartition.GetFixedWindowLimiter(
-                    context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+                    key,
                     _ => new FixedWindowRateLimiterOptions
                     {
                         PermitLimit = 5,
@@ -154,13 +161,18 @@ public static class DependencyInjectionExtensions
             });
             options.AddPolicy("session", context =>
             {
+                var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var key = userId ?? context.Connection.RemoteIpAddress?.ToString()
+                                 ?? "anonymous";
+
                 return RateLimitPartition.GetFixedWindowLimiter(
-                    context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+                    key,
                     _ => new FixedWindowRateLimiterOptions
                     {
                         PermitLimit = 20,
                         Window = TimeSpan.FromSeconds(30),
-                        QueueLimit = 2
+                        QueueLimit = 0
                     });
             });
             options.OnRejected = async (context, _) =>

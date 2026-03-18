@@ -7,5 +7,6 @@ namespace Tailly.AuthService.Repositories.Interfaces
         Task AddAsync(RefreshToken token);
         Task<RefreshToken?> GetByTokenAsync(string token);
         Task InvalidateAsync(string token);
+        Task RemoveExpiredTokensAsync();
     }
 }

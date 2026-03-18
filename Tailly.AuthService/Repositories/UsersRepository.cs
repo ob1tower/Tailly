@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tailly.AuthService.DataAccess;
 using Tailly.AuthService.Entities;
+using Tailly.AuthService.Enums;
 using Tailly.AuthService.Models;
 using Tailly.AuthService.Repositories.Interfaces;
 
@@ -17,23 +18,24 @@ public class UsersRepository : IUsersRepository
 
     public async Task AddAsync(User user)
     {
-        var userEntity = new UserEntity()
+        var userEntity = new UserEntity
         {
             Id = user.Id,
             Email = user.Email,
             PasswordHash = user.PasswordHash,
-            CreatedAt = DateTime.UtcNow,
-            RoleId = user.RoleId
+            CreatedAt = user.CreatedAt
         };
+
         await _authDbContext.Users.AddAsync(userEntity);
         await _authDbContext.SaveChangesAsync();
     }
 
-    public async Task<User?> GetByEmailAndRoleAsync(string email, int roleId)
+    public async Task<User?> GetByEmailAsync(string email)
     {
         var userEntity = await _authDbContext.Users
+            .Include(x => x.UserRoles)
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Email == email && u.RoleId == roleId);
+            .FirstOrDefaultAsync(u => u.Email == email);
 
         if (userEntity == null)
             return null;
@@ -44,19 +46,23 @@ public class UsersRepository : IUsersRepository
             Email = userEntity.Email,
             PasswordHash = userEntity.PasswordHash,
             CreatedAt = userEntity.CreatedAt,
-            RoleId = userEntity.RoleId
+
+            Roles = userEntity.UserRoles
+                .Select(x => (RoleType)x.RoleId)
+                .ToList()
         };
     }
 
-    public async Task<bool> ExistsAsync(string email, int roleId)
+    public async Task<bool> ExistsAsync(string email)
     {
         return await _authDbContext.Users
-            .AnyAsync(u => u.Email == email && u.RoleId == roleId);
+            .AnyAsync(u => u.Email == email);
     }
 
     public async Task<User?> GetByIdAsync(Guid id)
     {
         var userEntity = await _authDbContext.Users
+            .Include(x => x.UserRoles)
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == id);
 
@@ -69,7 +75,28 @@ public class UsersRepository : IUsersRepository
             Email = userEntity.Email,
             PasswordHash = userEntity.PasswordHash,
             CreatedAt = userEntity.CreatedAt,
-            RoleId = userEntity.RoleId
+
+            Roles = userEntity.UserRoles
+                .Select(x => (RoleType)x.RoleId)
+                .ToList()
         };
+    }
+
+    public async Task AddRoleAsync(Guid userId, int roleId)
+    {
+        var exists = await _authDbContext.UserRoles
+            .AnyAsync(x => x.UserId == userId && x.RoleId == roleId);
+
+        if (exists)
+            return;
+
+        var userRole = new UserRoleEntity
+        {
+            UserId = userId,
+            RoleId = roleId
+        };
+
+        await _authDbContext.UserRoles.AddAsync(userRole);
+        await _authDbContext.SaveChangesAsync();
     }
 }

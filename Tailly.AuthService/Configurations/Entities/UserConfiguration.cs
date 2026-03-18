@@ -21,13 +21,9 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
         builder.Property(x => x.CreatedAt)
             .IsRequired();
 
-        builder.Property(x => x.RoleId)
-            .IsRequired();
-
-        builder.HasOne(x => x.Role)
-            .WithMany(x => x.Users)
-            .HasForeignKey(x => x.RoleId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasMany(x => x.UserRoles)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId);
 
         builder.HasMany(x => x.RefreshTokens)
             .WithOne(x => x.User)

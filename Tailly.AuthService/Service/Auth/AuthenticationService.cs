@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using Tailly.AuthService.Entities;
+using Tailly.AuthService.Enums;
 using Tailly.AuthService.Errors;
 using Tailly.AuthService.Models;
 using Tailly.AuthService.Repositories.Interfaces;
@@ -32,17 +33,16 @@ public class AuthenticationService : IAuthenticationService
         _logger = logger;
     }
 
-    public async Task<Result<Guid>> RegisterAsync(string email, string password,
-                                                  int roleId)
+    public async Task<Result<Guid>> RegisterAsync(string email, string password)
     {
         email = email?.Trim().ToLowerInvariant()
                 ?? throw new ArgumentNullException(nameof(email));
 
-        var result = await _usersRepository.ExistsAsync(email, roleId);
+        var result = await _usersRepository.ExistsAsync(email);
 
         if (result)
         {
-            _logger.LogWarning("Registration failed. User already exists: {Email}, role {RoleId}", email, roleId);
+            _logger.LogWarning("Registration failed. User already exists: {Email}", email);
             return Result.Failure<Guid>(AuthErrors.UserAlreadyExists.Description);
         }
 
@@ -53,28 +53,30 @@ public class AuthenticationService : IAuthenticationService
             Id = Guid.NewGuid(),
             Email = email,
             PasswordHash = passwordHash,
-            RoleId = roleId,
             CreatedAt = DateTime.UtcNow
         };
 
         await _usersRepository.AddAsync(user);
+
+        await _usersRepository.AddRoleAsync(user.Id, (int)RoleType.Client);
 
         _logger.LogInformation("User registered successfully: {UserId}", user.Id);
 
         return Result.Success(user.Id);
     }
 
-    public async Task<Result<AuthResult>> LoginAsync(string email, string password,
-                                                     int roleId)
+    public async Task<Result<AuthResult>> LoginAsync(string email, string password)
     {
+        await _refreshTokenRepository.RemoveExpiredTokensAsync();
+
         email = email?.Trim().ToLowerInvariant()
                 ?? throw new ArgumentNullException(nameof(email));
 
-        var user = await _usersRepository.GetByEmailAndRoleAsync(email, roleId);
+        var user = await _usersRepository.GetByEmailAsync(email);
 
         if (user == null)
         {
-            _logger.LogWarning("Login failed. User not found: {Email}, role {RoleId}", email, roleId);
+            _logger.LogWarning("Login failed. User not found: {Email}", email);
             return Result.Failure<AuthResult>(AuthErrors.InvalidCredentials.Description);
         }
 
@@ -90,7 +92,12 @@ public class AuthenticationService : IAuthenticationService
         {
             Id = user.Id,
             Email = user.Email,
-            RoleId = user.RoleId
+
+            UserRoles = user.Roles.Select(r => new UserRoleEntity
+            {
+                UserId = user.Id,
+                RoleId = (int)r
+            }).ToList()
         });
 
         var (rawRefreshToken, hashedRefreshToken) = _refreshTokenService.GenerateToken();
@@ -121,6 +128,8 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<Result<AuthResult>> RefreshTokenAsync(string refreshToken)
     {
+        await _refreshTokenRepository.RemoveExpiredTokensAsync();
+
         var hashedToken = _refreshTokenService.HashToken(refreshToken);
 
         var storedToken = await _refreshTokenRepository.GetByTokenAsync(hashedToken);
@@ -131,10 +140,10 @@ public class AuthenticationService : IAuthenticationService
             return Result.Failure<AuthResult>(AuthErrors.InvalidRefreshToken.Description);
         }
 
-        if (storedToken.Expires < DateTime.UtcNow)
+        if (!storedToken.IsActive)
         {
-            _logger.LogWarning("Refresh failed. Token expired.");
-            return Result.Failure<AuthResult>(AuthErrors.RefreshTokenExpired.Description);
+            _logger.LogWarning("Refresh failed. Token revoked or expired.");
+            return Result.Failure<AuthResult>(AuthErrors.InvalidRefreshToken.Description);
         }
 
         var user = await _usersRepository.GetByIdAsync(storedToken.UserId);
@@ -149,7 +158,12 @@ public class AuthenticationService : IAuthenticationService
         {
             Id = user.Id,
             Email = user.Email,
-            RoleId = user.RoleId
+
+            UserRoles = user.Roles.Select(r => new UserRoleEntity
+            {
+                UserId = user.Id,
+                RoleId = (int)r
+            }).ToList()
         });
 
         var (rawRefreshToken, hashedRefreshToken) = _refreshTokenService.GenerateToken();
@@ -189,6 +203,12 @@ public class AuthenticationService : IAuthenticationService
         if (storedToken == null)
         {
             _logger.LogWarning("Logout failed. Token not found.");
+            return Result.Failure(AuthErrors.InvalidRefreshToken.Description);
+        }
+
+        if (!storedToken.IsActive)
+        {
+            _logger.LogWarning("Logout failed. Token already revoked or expired.");
             return Result.Failure(AuthErrors.InvalidRefreshToken.Description);
         }
 

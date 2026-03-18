@@ -10,7 +10,7 @@ public class PasswordHashingService : IPasswordHashingService
     private const int HashSize = 32;
     private const int DegreeOfParallelism = 8;
     private const int Iterations = 4;
-    private const int MemorySize = 1024 * 1024;
+    private const int MemorySize = 64 * 1024;
 
     public string HashPassword(string password)
     {
