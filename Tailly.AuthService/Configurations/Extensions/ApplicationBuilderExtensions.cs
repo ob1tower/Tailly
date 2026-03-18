@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Tailly.AuthService.Middlewares;
+﻿using Tailly.AuthService.Middlewares;
 
 namespace Tailly.AuthService.Configurations.Extensions;
 
@@ -12,6 +11,7 @@ public static class ApplicationBuilderExtensions
         app.UseSwaggerSetup();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseRateLimiter();
         app.MapControllers();
 
         return app;

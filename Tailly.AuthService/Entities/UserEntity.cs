@@ -7,7 +7,7 @@ public class UserEntity
     public string PasswordHash { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public int RoleId { get; set; }
-    public RoleEntity Role { get; set; } = default!;
+    public ICollection<UserRoleEntity> UserRoles { get; set; } = [];
+
     public ICollection<RefreshTokenEntity> RefreshTokens { get; set; } = [];
 }
