@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Tailly.AuthService.Entities;
+using Tailly.AuthService.Enums;
 
 namespace Tailly.AuthService.Service.Claims;
 
@@ -15,7 +16,7 @@ public class ClaimProvider
         };
         claims.AddRange(
             user.UserRoles.Select(r =>
-                new Claim(ClaimTypes.Role, r.RoleId.ToString()))
+                new Claim(ClaimTypes.Role, ((RoleType)r.RoleId).ToString()))
         );
 
         return Task.FromResult(claims);
