@@ -218,4 +218,39 @@ public class AuthenticationService : IAuthenticationService
 
         return Result.Success();
     }
+
+    public async Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
+    {
+        var user = await _usersRepository.GetByIdAsync(userId);
+
+        if (user == null)
+        {
+            _logger.LogWarning("ChangePassword failed. User not found: {UserId}", userId);
+            return Result.Failure(AuthErrors.InvalidCredentials.Description);
+        }
+
+        var isValid = _passwordHasher.VerifyPassword(currentPassword, user.PasswordHash);
+
+        if (!isValid)
+        {
+            _logger.LogWarning("ChangePassword failed. Invalid current password for user: {UserId}", userId);
+            return Result.Failure(AuthErrors.InvalidPassword.Description);
+        }
+
+        if (_passwordHasher.VerifyPassword(newPassword, user.PasswordHash))
+        {
+            _logger.LogWarning("ChangePassword failed. New password same as old for user: {UserId}", userId);
+            return Result.Failure(AuthErrors.SamePassword.Description);
+        }
+
+        var newHash = _passwordHasher.HashPassword(newPassword);
+
+        user.PasswordHash = newHash;
+
+        await _usersRepository.UpdateAsync(user);
+
+        _logger.LogInformation("Password changed successfully for user: {UserId}", userId);
+
+        return Result.Success();
+    }
 }

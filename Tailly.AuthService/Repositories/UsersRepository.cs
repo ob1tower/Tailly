@@ -99,4 +99,17 @@ public class UsersRepository : IUsersRepository
         await _authDbContext.UserRoles.AddAsync(userRole);
         await _authDbContext.SaveChangesAsync();
     }
+
+    public async Task UpdateAsync(User user)
+    {
+        var userEntity = await _authDbContext.Users
+            .FirstOrDefaultAsync(x => x.Id == user.Id);
+
+        if (userEntity == null)
+            return;
+
+        userEntity.PasswordHash = user.PasswordHash;
+
+        await _authDbContext.SaveChangesAsync();
+    }
 }

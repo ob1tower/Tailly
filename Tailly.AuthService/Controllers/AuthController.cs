@@ -1,7 +1,10 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using System.Security.Claims;
 using Tailly.AuthService.Dtos.Auth;
+using Tailly.AuthService.Errors;
 using Tailly.AuthService.Service.Auth;
 
 namespace Tailly.AuthService.Controllers;
@@ -14,16 +17,19 @@ public class AuthController : ControllerBase
     private readonly IValidator<RegisterRequest> _registerValidator;
     private readonly IValidator<LoginRequest> _loginValidator;
     private readonly IValidator<RefreshTokenRequest> _refreshValidator;
+    private readonly IValidator<ChangePasswordRequest> _changePasswordValidator;
 
     public AuthController(IAuthenticationService authService,
                           IValidator<RegisterRequest> registerValidator,
                           IValidator<LoginRequest> loginValidator,
-                          IValidator<RefreshTokenRequest> refreshValidator)
+                          IValidator<RefreshTokenRequest> refreshValidator,
+                          IValidator<ChangePasswordRequest> changePasswordValidator)
     {
         _authService = authService;
         _registerValidator = registerValidator;
         _loginValidator = loginValidator;
         _refreshValidator = refreshValidator;
+        _changePasswordValidator = changePasswordValidator;
     }
 
     [HttpPost("register")]
@@ -33,7 +39,7 @@ public class AuthController : ControllerBase
         var validation = await _registerValidator.ValidateAsync(request);
 
         if (!validation.IsValid)
-            return BadRequest(validation.Errors);
+            return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
 
         var result = await _authService.RegisterAsync(
             request.Email,
@@ -52,7 +58,7 @@ public class AuthController : ControllerBase
         var validation = await _loginValidator.ValidateAsync(request);
 
         if (!validation.IsValid)
-            return BadRequest(validation.Errors);
+            return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
 
         var result = await _authService.LoginAsync(
             request.Email,
@@ -79,7 +85,7 @@ public class AuthController : ControllerBase
         var validation = await _refreshValidator.ValidateAsync(request);
 
         if (!validation.IsValid)
-            return BadRequest(validation.Errors);
+            return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
 
         var result = await _authService.RefreshTokenAsync(request.RefreshToken);
 
@@ -104,7 +110,7 @@ public class AuthController : ControllerBase
         var validation = await _refreshValidator.ValidateAsync(request);
 
         if (!validation.IsValid)
-            return BadRequest(validation.Errors);
+            return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
 
         var result = await _authService.LogoutAsync(request.RefreshToken);
 
@@ -112,5 +118,28 @@ public class AuthController : ControllerBase
             return BadRequest(result.Error);
 
         return Ok();
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    [EnableRateLimiting("session")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var validation = await _changePasswordValidator.ValidateAsync(request);
+
+        if (!validation.IsValid)
+            return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
+
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var result = await _authService.ChangePasswordAsync(
+            userId,
+            request.CurrentPassword,
+            request.NewPassword);
+
+        if (result.IsFailure)
+            return BadRequest(result.Error);
+
+        return Ok("Password changed successfully.");
     }
 }
