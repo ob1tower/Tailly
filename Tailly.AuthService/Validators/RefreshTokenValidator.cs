@@ -3,9 +3,9 @@ using Tailly.AuthService.Dtos.Auth;
 
 namespace Tailly.AuthService.Validators;
 
-public class RefreshTokenRequestValidator : AbstractValidator<RefreshTokenRequest>
+public class RefreshTokenValidator : AbstractValidator<RefreshTokenRequest>
 {
-    public RefreshTokenRequestValidator()
+    public RefreshTokenValidator()
     {
         RuleFor(x => x.RefreshToken)
             .NotEmpty()

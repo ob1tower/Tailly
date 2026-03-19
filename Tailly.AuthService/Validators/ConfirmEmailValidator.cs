@@ -3,11 +3,11 @@ using Tailly.AuthService.Dtos.Auth;
 
 namespace Tailly.AuthService.Validators;
 
-public class ConfirmEmailRequestValidator : AbstractValidator<ConfirmEmailRequest>
+public class ConfirmEmailValidator : AbstractValidator<ConfirmEmailRequest>
 {
     private const int CODE_LENGTH = 6;
 
-    public ConfirmEmailRequestValidator()
+    public ConfirmEmailValidator()
     {
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required.")

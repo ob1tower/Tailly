@@ -3,12 +3,12 @@ using Tailly.AuthService.Dtos.Auth;
 
 namespace Tailly.AuthService.Validators;
 
-public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>
+public class ChangePasswordValidator : AbstractValidator<ChangePasswordRequest>
 {
     private const int MIN_PASS = 8;
     private const int MAX_PASS = 128;
 
-    public ChangePasswordRequestValidator()
+    public ChangePasswordValidator()
     {
         RuleFor(x => x.CurrentPassword)
             .NotEmpty().WithMessage("Current password is required.")

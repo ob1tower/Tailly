@@ -3,15 +3,14 @@ using Tailly.AuthService.Dtos.Auth;
 
 namespace Tailly.AuthService.Validators;
 
-public class LoginUserRequestValidator : AbstractValidator<LoginRequest>
+public class RegisterUserValidator : AbstractValidator<RegisterRequest>
 {
     private const int MIN_EMAIL = 6;
     private const int MAX_EMAIL = 100;
 
     private const int MIN_PASS = 8;
     private const int MAX_PASS = 128;
-
-    public LoginUserRequestValidator()
+    public RegisterUserValidator()
     {
         RuleFor(x => x.Email)
                .NotEmpty().WithMessage("Email is required.")
