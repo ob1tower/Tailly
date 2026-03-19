@@ -16,4 +16,10 @@ public static class AuthErrors
 
     public static readonly Error SamePassword =
         new("Auth.SamePassword", "New password must be different from current password.");
+
+    public static readonly Error EmailNotConfirmed =
+        new("Auth.EmailNotConfirmed", "Email is not confirmed.");
+
+    public static readonly Error InvalidVerificationCode =
+        new("Auth.InvalidVerificationCode", "Invalid verification code.");
 }

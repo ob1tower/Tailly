@@ -12,7 +12,7 @@ using Tailly.AuthService.DataAccess;
 namespace Tailly.AuthService.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20260318113710_InitialCreate")]
+    [Migration("20260319103252_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -113,6 +113,11 @@ namespace Tailly.AuthService.Migrations
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

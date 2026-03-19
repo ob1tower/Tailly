@@ -46,6 +46,7 @@ public class UsersRepository : IUsersRepository
             Email = userEntity.Email,
             PasswordHash = userEntity.PasswordHash,
             CreatedAt = userEntity.CreatedAt,
+            EmailConfirmed = userEntity.EmailConfirmed,
 
             Roles = userEntity.UserRoles
                 .Select(x => (RoleType)x.RoleId)
@@ -75,6 +76,7 @@ public class UsersRepository : IUsersRepository
             Email = userEntity.Email,
             PasswordHash = userEntity.PasswordHash,
             CreatedAt = userEntity.CreatedAt,
+            EmailConfirmed = userEntity.EmailConfirmed,
 
             Roles = userEntity.UserRoles
                 .Select(x => (RoleType)x.RoleId)
@@ -109,6 +111,7 @@ public class UsersRepository : IUsersRepository
             return;
 
         userEntity.PasswordHash = user.PasswordHash;
+        userEntity.EmailConfirmed = user.EmailConfirmed;
 
         await _authDbContext.SaveChangesAsync();
     }

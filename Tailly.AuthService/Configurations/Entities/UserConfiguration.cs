@@ -21,6 +21,10 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
         builder.Property(x => x.CreatedAt)
             .IsRequired();
 
+        builder.Property(x => x.EmailConfirmed)
+            .IsRequired()
+            .HasDefaultValue(false);
+
         builder.HasMany(x => x.UserRoles)
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserId);
