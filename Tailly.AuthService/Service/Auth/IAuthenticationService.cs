@@ -10,5 +10,6 @@ namespace Tailly.AuthService.Service.Auth
         Task<Result<AuthResult>> RefreshTokenAsync(string refreshToken);
         Task<Result<Guid>> RegisterAsync(string email, string password);
         Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
+        Task<Result> ConfirmEmailAsync(string email, string code);
     }
 }

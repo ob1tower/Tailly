@@ -4,6 +4,7 @@ using Tailly.AuthService.Enums;
 using Tailly.AuthService.Errors;
 using Tailly.AuthService.Models;
 using Tailly.AuthService.Repositories.Interfaces;
+using Tailly.AuthService.Service.Email;
 using Tailly.AuthService.Service.Security;
 using Tailly.AuthService.Service.Tokens;
 
@@ -16,6 +17,8 @@ public class AuthenticationService : IAuthenticationService
     private readonly IPasswordHashingService _passwordHasher;
     private readonly IJwtTokenService _jwtService;
     private readonly IRefreshTokenService _refreshTokenService;
+    private readonly IEmailSender _emailSender;
+    private readonly IVerificationCodeService _verificationCodeService;
     private readonly ILogger<AuthenticationService> _logger;
 
     public AuthenticationService(IUsersRepository usersRepository,
@@ -23,6 +26,8 @@ public class AuthenticationService : IAuthenticationService
                        IPasswordHashingService passwordHasher,
                        IJwtTokenService jwtService,
                        IRefreshTokenService refreshTokenService,
+                       IEmailSender emailSender,
+                       IVerificationCodeService verificationCodeService,
                        ILogger<AuthenticationService> logger)
     {
         _usersRepository = usersRepository;
@@ -30,6 +35,8 @@ public class AuthenticationService : IAuthenticationService
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
         _refreshTokenService = refreshTokenService;
+        _emailSender = emailSender;
+        _verificationCodeService = verificationCodeService;
         _logger = logger;
     }
 
@@ -53,14 +60,29 @@ public class AuthenticationService : IAuthenticationService
             Id = Guid.NewGuid(),
             Email = email,
             PasswordHash = passwordHash,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            EmailConfirmed = false
         };
 
         await _usersRepository.AddAsync(user);
 
         await _usersRepository.AddRoleAsync(user.Id, (int)RoleType.Client);
 
+        var code = VerificationCodeGenerator.GenerateCode();
+        await _verificationCodeService.SetCodeAsync(email, code);
+
+        await _emailSender.SendEmailAsync(
+              user.Email,
+              "Email confirmation",
+              $"""
+              <h2>Email confirmation</h2>
+              <p>Your verification code:</p>
+              <h1>{code}</h1>
+              <p>This code will expire in 15 minutes.</p>
+              """);
+
         _logger.LogInformation("User registered successfully: {UserId}", user.Id);
+        _logger.LogInformation("Confirmation email sent to {Email}", email);
 
         return Result.Success(user.Id);
     }
@@ -78,6 +100,12 @@ public class AuthenticationService : IAuthenticationService
         {
             _logger.LogWarning("Login failed. User not found: {Email}", email);
             return Result.Failure<AuthResult>(AuthErrors.InvalidCredentials.Description);
+        }
+
+        if (!user.EmailConfirmed)
+        {
+            _logger.LogWarning("Login failed. Email not confirmed: {Email}", email);
+            return Result.Failure<AuthResult>(AuthErrors.EmailNotConfirmed.Description);
         }
 
         var validPassword = _passwordHasher.VerifyPassword(password, user.PasswordHash);
@@ -215,6 +243,42 @@ public class AuthenticationService : IAuthenticationService
         await _refreshTokenRepository.InvalidateAsync(hashedToken);
 
         _logger.LogInformation("User logged out. Token revoked.");
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ConfirmEmailAsync(string email, string code)
+    {
+        email = email?.Trim().ToLowerInvariant()
+                ?? throw new ArgumentNullException(nameof(email));
+
+        var user = await _usersRepository.GetByEmailAsync(email);
+
+        if (user == null)
+        {
+            _logger.LogWarning("ConfirmEmail failed. User not found: {Email}", email);
+            return Result.Failure(AuthErrors.InvalidCredentials.Description);
+        }
+
+        if (user.EmailConfirmed)
+        {
+            _logger.LogInformation("Email already confirmed: {Email}", email);
+            return Result.Success();
+        }
+
+        var isValid = await _verificationCodeService.VerifyCodeAsync(email, code);
+
+        if (!isValid)
+        {
+            _logger.LogWarning("ConfirmEmail failed. Invalid or expired code: {Email}", email);
+            return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
+        }
+
+        user.EmailConfirmed = true;
+
+        await _usersRepository.UpdateAsync(user);
+
+        _logger.LogInformation("Email confirmed successfully: {UserId}", user.Id);
 
         return Result.Success();
     }

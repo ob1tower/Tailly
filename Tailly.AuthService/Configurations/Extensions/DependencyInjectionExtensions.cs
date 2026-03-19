@@ -17,6 +17,7 @@ using Tailly.AuthService.Repositories;
 using Tailly.AuthService.Repositories.Interfaces;
 using Tailly.AuthService.Service.Auth;
 using Tailly.AuthService.Service.Claims;
+using Tailly.AuthService.Service.Email;
 using Tailly.AuthService.Service.Security;
 using Tailly.AuthService.Service.Tokens;
 using Tailly.AuthService.Validators;
@@ -73,6 +74,9 @@ public static class DependencyInjectionExtensions
         services.Configure<JwtOptions>(
             configuration.GetSection("JwtConfig"));
 
+        services.Configure<EmailSettings>(
+            configuration.GetSection("EmailSettings"));
+
         return services;
     }
 
@@ -112,6 +116,8 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<ClaimProvider>();
+        services.AddScoped<IEmailSender, EmailSender>();
+        services.AddScoped<IVerificationCodeService, VerificationCodeService>();
 
         return services;
     }

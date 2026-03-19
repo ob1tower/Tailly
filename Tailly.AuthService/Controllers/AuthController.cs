@@ -51,6 +51,20 @@ public class AuthController : ControllerBase
         return Ok(new { UserId = result.Value });
     }
 
+    [HttpPost("confirm-email")]
+    [EnableRateLimiting("auth")]
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
+    {
+        var result = await _authService.ConfirmEmailAsync(
+            request.Email,
+            request.Code);
+
+        if (result.IsFailure)
+            return BadRequest(result.Error);
+
+        return Ok("Email confirmed successfully.");
+    }
+
     [HttpPost("login")]
     [EnableRateLimiting("auth")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
