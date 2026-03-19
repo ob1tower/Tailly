@@ -283,6 +283,76 @@ public class AuthenticationService : IAuthenticationService
         return Result.Success();
     }
 
+    public async Task<Result> ForgotPasswordAsync(string email)
+    {
+        email = email?.Trim().ToLowerInvariant()
+                ?? throw new ArgumentNullException(nameof(email));
+
+        var user = await _usersRepository.GetByEmailAsync(email);
+
+        if (user == null)
+        {
+            _logger.LogWarning("USER NOT FOUND: {Email}", email);
+            return Result.Success();
+        }
+
+        var code = VerificationCodeGenerator.GenerateCode();
+
+        await _verificationCodeService.SetCodeAsync(email, code);
+
+        await _emailSender.SendEmailAsync(
+            email,
+            "Password reset",
+            $"""
+            <h2>Password reset</h2>
+            <p>Your reset code:</p>
+            <h1>{code}</h1>
+            <p>This code will expire in 15 minutes.</p>
+            """);
+
+        _logger.LogInformation("Password reset code sent to {Email}", email);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ResetPasswordAsync(string email, string code, string newPassword)
+    {
+        email = email?.Trim().ToLowerInvariant()
+                ?? throw new ArgumentNullException(nameof(email));
+
+        var user = await _usersRepository.GetByEmailAsync(email);
+
+        if (user == null)
+        {
+            _logger.LogWarning("ResetPassword failed. User not found: {Email}", email);
+            return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
+        }
+
+        if (_passwordHasher.VerifyPassword(newPassword, user.PasswordHash))
+        {
+            _logger.LogWarning("ResetPassword failed. Same password: {Email}", email);
+            return Result.Failure(AuthErrors.SamePassword.Description);
+        }
+
+        var isValid = await _verificationCodeService.VerifyCodeAsync(email, code);
+
+        if (!isValid)
+        {
+            _logger.LogWarning("ResetPassword failed. Invalid or expired code: {Email}", email);
+            return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
+        }
+
+        var newHash = _passwordHasher.HashPassword(newPassword);
+
+        user.PasswordHash = newHash;
+
+        await _usersRepository.UpdateAsync(user);
+
+        _logger.LogInformation("Password reset successfully: {UserId}", user.Id);
+
+        return Result.Success();
+    }
+
     public async Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
     {
         var user = await _usersRepository.GetByIdAsync(userId);

@@ -211,9 +211,13 @@ public static class DependencyInjectionExtensions
 
     private static IServiceCollection AddFluentValidationSetup(this IServiceCollection services)
     {
-        services.AddValidatorsFromAssemblyContaining<LoginUserRequestValidator>();
-        services.AddValidatorsFromAssemblyContaining<RefreshTokenRequestValidator>();
-        services.AddValidatorsFromAssemblyContaining<RegisterUserRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<LoginUserValidator>();
+        services.AddValidatorsFromAssemblyContaining<RefreshTokenValidator>();
+        services.AddValidatorsFromAssemblyContaining<RegisterUserValidator>();
+        services.AddValidatorsFromAssemblyContaining<ChangePasswordValidator>();
+        services.AddValidatorsFromAssemblyContaining<ConfirmEmailValidator>();
+        services.AddValidatorsFromAssemblyContaining<ForgotPasswordValidator>();
+        services.AddValidatorsFromAssemblyContaining<ResetPasswordValidator>();
 
         return services;
     }

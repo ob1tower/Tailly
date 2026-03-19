@@ -18,27 +18,35 @@ public class EmailSender : IEmailSender
 
     public async Task SendEmailAsync(string to, string subject, string html)
     {
-        try
+        for (int i = 0; i < 3; i++)
         {
-            var email = new MimeMessage();
+            try
+            {
+                var email = new MimeMessage();
 
-            email.From.Add(new MailboxAddress(_settings.SenderName, _settings.Email));
-            email.To.Add(MailboxAddress.Parse(to));
-            email.Subject = subject;
+                email.From.Add(new MailboxAddress(_settings.SenderName, _settings.Email));
+                email.To.Add(MailboxAddress.Parse(to));
+                email.Subject = subject;
+                email.Body = new TextPart("html") { Text = html };
 
-            email.Body = new TextPart("html") { Text = html };
+                using var smtp = new SmtpClient();
 
-            using var smtp = new SmtpClient();
+                await smtp.ConnectAsync(_settings.Server, _settings.Port, MailKit.Security.SecureSocketOptions.StartTls);
+                await smtp.AuthenticateAsync(_settings.Email, _settings.Password);
 
-            await smtp.ConnectAsync(_settings.Server, _settings.Port, MailKit.Security.SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(_settings.Email, _settings.Password);
+                await smtp.SendAsync(email);
+                await smtp.DisconnectAsync(true);
 
-            await smtp.SendAsync(email);
-            await smtp.DisconnectAsync(true);
+                _logger.LogInformation("Email sent");
+                return;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Retry {i + 1} failed");
+                await Task.Delay(2000);
+            }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to send email to {Email}", to);
-        }
+
+        throw new Exception("Email failed after retries");
     }
 }

@@ -6,6 +6,7 @@ using System.Security.Claims;
 using Tailly.AuthService.Dtos.Auth;
 using Tailly.AuthService.Errors;
 using Tailly.AuthService.Service.Auth;
+using Tailly.AuthService.Validators;
 
 namespace Tailly.AuthService.Controllers;
 
@@ -18,18 +19,24 @@ public class AuthController : ControllerBase
     private readonly IValidator<LoginRequest> _loginValidator;
     private readonly IValidator<RefreshTokenRequest> _refreshValidator;
     private readonly IValidator<ChangePasswordRequest> _changePasswordValidator;
+    private readonly IValidator<ResetPasswordRequest> _resetPasswordValidator;
+    private readonly IValidator<ForgotPasswordRequest> _forgotPasswordValidator;
 
     public AuthController(IAuthenticationService authService,
                           IValidator<RegisterRequest> registerValidator,
                           IValidator<LoginRequest> loginValidator,
                           IValidator<RefreshTokenRequest> refreshValidator,
-                          IValidator<ChangePasswordRequest> changePasswordValidator)
+                          IValidator<ChangePasswordRequest> changePasswordValidator,
+                          IValidator<ResetPasswordRequest> resetPasswordValidator,
+                          IValidator<ForgotPasswordRequest> forgotPasswordValidator)
     {
         _authService = authService;
         _registerValidator = registerValidator;
         _loginValidator = loginValidator;
         _refreshValidator = refreshValidator;
         _changePasswordValidator = changePasswordValidator;
+        _resetPasswordValidator = resetPasswordValidator;
+        _forgotPasswordValidator = forgotPasswordValidator;
     }
 
     [HttpPost("register")]
@@ -132,6 +139,40 @@ public class AuthController : ControllerBase
             return BadRequest(result.Error);
 
         return Ok();
+    }
+
+    [HttpPost("forgot-password")]
+    [EnableRateLimiting("auth")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        var validation = await _forgotPasswordValidator.ValidateAsync(request);
+
+        if (!validation.IsValid)
+            return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
+
+        var result = await _authService.ForgotPasswordAsync(request.Email);
+
+        return Ok();
+    }
+
+    [HttpPost("reset-password")]
+    [EnableRateLimiting("auth")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        var validation = await _resetPasswordValidator.ValidateAsync(request);
+
+        if (!validation.IsValid)
+            return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
+
+        var result = await _authService.ResetPasswordAsync(
+            request.Email,
+            request.Code,
+            request.NewPassword);
+
+        if (result.IsFailure)
+            return BadRequest(result.Error);
+
+        return Ok("Password reset successfully.");
     }
 
     [HttpPost("change-password")]
