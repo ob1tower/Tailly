@@ -1,4 +1,5 @@
 ﻿using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using Tailly.AuthService.Configurations.Options;
@@ -16,37 +17,32 @@ public class EmailSender : IEmailSender
         _logger = logger;
     }
 
-    public async Task SendEmailAsync(string to, string subject, string html)
+    public async Task SendEmailAsync(string to, string subject, string body, CancellationToken ct = default)
     {
-        for (int i = 0; i < 3; i++)
+        try
         {
-            try
+            var email = new MimeMessage();
+            email.From.Add(new MailboxAddress(_settings.SenderName, _settings.Email));
+            email.To.Add(MailboxAddress.Parse(to));
+            email.Subject = subject;
+            email.Body = new TextPart("html") { Text = body };
+
+            using var smtp = new SmtpClient
             {
-                var email = new MimeMessage();
+                Timeout = 45000
+            };
 
-                email.From.Add(new MailboxAddress(_settings.SenderName, _settings.Email));
-                email.To.Add(MailboxAddress.Parse(to));
-                email.Subject = subject;
-                email.Body = new TextPart("html") { Text = html };
+            await smtp.ConnectAsync(_settings.Server, _settings.Port, SecureSocketOptions.StartTls, ct);
+            await smtp.AuthenticateAsync(_settings.Email, _settings.Password, ct);
+            await smtp.SendAsync(email, ct);
+            await smtp.DisconnectAsync(true, ct);
 
-                using var smtp = new SmtpClient();
-
-                await smtp.ConnectAsync(_settings.Server, _settings.Port, MailKit.Security.SecureSocketOptions.StartTls);
-                await smtp.AuthenticateAsync(_settings.Email, _settings.Password);
-
-                await smtp.SendAsync(email);
-                await smtp.DisconnectAsync(true);
-
-                _logger.LogInformation("Email sent");
-                return;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, $"Retry {i + 1} failed");
-                await Task.Delay(2000);
-            }
+            _logger.LogInformation("Real email sent to {To}", to);
         }
-
-        throw new Exception("Email failed after retries");
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Real send failed to {To}", to);
+            throw;
+        }
     }
 }

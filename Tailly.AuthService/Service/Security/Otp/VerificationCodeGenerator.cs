@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace Tailly.AuthService.Service.Security;
+namespace Tailly.AuthService.Service.Security.Otp;
 
 public static class VerificationCodeGenerator
 {

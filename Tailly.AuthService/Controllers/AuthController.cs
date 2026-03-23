@@ -3,10 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
-using Tailly.AuthService.Dtos.Auth;
+using Tailly.AuthService.Dtos.Auth.Email;
+using Tailly.AuthService.Dtos.Auth.Login;
+using Tailly.AuthService.Dtos.Auth.Password;
+using Tailly.AuthService.Dtos.Auth.Register;
+using Tailly.AuthService.Dtos.Auth.Token;
 using Tailly.AuthService.Errors;
 using Tailly.AuthService.Service.Auth;
-using Tailly.AuthService.Validators;
 
 namespace Tailly.AuthService.Controllers;
 
@@ -21,6 +24,8 @@ public class AuthController : ControllerBase
     private readonly IValidator<ChangePasswordRequest> _changePasswordValidator;
     private readonly IValidator<ResetPasswordRequest> _resetPasswordValidator;
     private readonly IValidator<ForgotPasswordRequest> _forgotPasswordValidator;
+    private readonly IValidator<ChangeEmailRequest> _changeEmailValidator;
+    private readonly IValidator<ConfirmEmailChangeRequest> _confirmChangeEmailValidator;
 
     public AuthController(IAuthenticationService authService,
                           IValidator<RegisterRequest> registerValidator,
@@ -28,7 +33,9 @@ public class AuthController : ControllerBase
                           IValidator<RefreshTokenRequest> refreshValidator,
                           IValidator<ChangePasswordRequest> changePasswordValidator,
                           IValidator<ResetPasswordRequest> resetPasswordValidator,
-                          IValidator<ForgotPasswordRequest> forgotPasswordValidator)
+                          IValidator<ForgotPasswordRequest> forgotPasswordValidator,
+                          IValidator<ChangeEmailRequest> changeEmailValidator,
+                          IValidator<ConfirmEmailChangeRequest> confirmChangeEmailValidator)
     {
         _authService = authService;
         _registerValidator = registerValidator;
@@ -37,10 +44,12 @@ public class AuthController : ControllerBase
         _changePasswordValidator = changePasswordValidator;
         _resetPasswordValidator = resetPasswordValidator;
         _forgotPasswordValidator = forgotPasswordValidator;
+        _changeEmailValidator = changeEmailValidator;
+        _confirmChangeEmailValidator = confirmChangeEmailValidator;
     }
 
     [HttpPost("register")]
-    [EnableRateLimiting("auth")]
+    [EnableRateLimiting("registration")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         var validation = await _registerValidator.ValidateAsync(request);
@@ -59,7 +68,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("confirm-email")]
-    [EnableRateLimiting("auth")]
+    [EnableRateLimiting("verification")]
     public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
     {
         var result = await _authService.ConfirmEmailAsync(
@@ -69,7 +78,7 @@ public class AuthController : ControllerBase
         if (result.IsFailure)
             return BadRequest(result.Error);
 
-        return Ok("Email confirmed successfully.");
+        return Ok();
     }
 
     [HttpPost("login")]
@@ -142,7 +151,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("forgot-password")]
-    [EnableRateLimiting("auth")]
+    [EnableRateLimiting("registration")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
         var validation = await _forgotPasswordValidator.ValidateAsync(request);
@@ -156,7 +165,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("reset-password")]
-    [EnableRateLimiting("auth")]
+    [EnableRateLimiting("verification")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
     {
         var validation = await _resetPasswordValidator.ValidateAsync(request);
@@ -172,7 +181,7 @@ public class AuthController : ControllerBase
         if (result.IsFailure)
             return BadRequest(result.Error);
 
-        return Ok("Password reset successfully.");
+        return Ok();
     }
 
     [HttpPost("change-password")]
@@ -195,6 +204,49 @@ public class AuthController : ControllerBase
         if (result.IsFailure)
             return BadRequest(result.Error);
 
-        return Ok("Password changed successfully.");
+        return Ok();
+    }
+
+    [HttpPost("change-email/request")]
+    [Authorize]
+    [EnableRateLimiting("verification")]
+    public async Task<IActionResult> RequestEmailChange([FromBody] ChangeEmailRequest request)
+    {
+        var validation = await _changeEmailValidator.ValidateAsync(request);
+
+        if (!validation.IsValid)
+            return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
+
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var result = await _authService.RequestEmailChangeAsync(userId, request.NewEmail);
+
+        if (result.IsFailure)
+            return BadRequest(result.Error);
+
+        return Ok();
+    }
+
+    [HttpPost("change-email/confirm")]
+    [Authorize]
+    [EnableRateLimiting("verification")]
+    public async Task<IActionResult> ConfirmEmailChange([FromBody] ConfirmEmailChangeRequest request)
+    {
+        var validation = await _confirmChangeEmailValidator.ValidateAsync(request);
+
+        if (!validation.IsValid)
+            return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
+
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var result = await _authService.ConfirmEmailChangeAsync(
+            userId,
+            request.NewEmail,
+            request.Code);
+
+        if (result.IsFailure)
+            return BadRequest(result.Error);
+
+        return Ok();
     }
 }

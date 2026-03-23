@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using Tailly.AuthService.Dtos.Auth;
+using Tailly.AuthService.Dtos.Auth.Token;
 
 namespace Tailly.AuthService.Validators;
 

@@ -1,4 +1,4 @@
-﻿namespace Tailly.AuthService.Dtos.Auth;
+﻿namespace Tailly.AuthService.Dtos.Auth.Token;
 
 public sealed class RefreshTokenRequest
 {

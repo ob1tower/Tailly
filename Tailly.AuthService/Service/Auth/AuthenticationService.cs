@@ -6,6 +6,7 @@ using Tailly.AuthService.Models;
 using Tailly.AuthService.Repositories.Interfaces;
 using Tailly.AuthService.Service.Email;
 using Tailly.AuthService.Service.Security;
+using Tailly.AuthService.Service.Security.Otp;
 using Tailly.AuthService.Service.Tokens;
 
 namespace Tailly.AuthService.Service.Auth;
@@ -71,18 +72,24 @@ public class AuthenticationService : IAuthenticationService
         var code = VerificationCodeGenerator.GenerateCode();
         await _verificationCodeService.SetCodeAsync(email, code);
 
-        await _emailSender.SendEmailAsync(
-              user.Email,
-              "Email confirmation",
-              $"""
-              <h2>Email confirmation</h2>
-              <p>Your verification code:</p>
-              <h1>{code}</h1>
-              <p>This code will expire in 15 minutes.</p>
-              """);
-
-        _logger.LogInformation("User registered successfully: {UserId}", user.Id);
-        _logger.LogInformation("Confirmation email sent to {Email}", email);
+        try
+        {
+            await _emailSender.SendEmailAsync(
+                user.Email,
+                "Email confirmation",
+                $"""
+                <h2>Email confirmation</h2>
+                <p>Your verification code:</p>
+                <h1>{code}</h1>
+                <p>This code will expire in 15 minutes.</p>
+                """);
+            _logger.LogInformation("Confirmation email sent to {Email}", email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send confirmation email to {Email}. User still created.", email);
+            _logger.LogWarning("Generated code for manual send: {Code} for {Email}", code, email);
+        }
 
         return Result.Success(user.Id);
     }
@@ -266,9 +273,9 @@ public class AuthenticationService : IAuthenticationService
             return Result.Success();
         }
 
-        var isValid = await _verificationCodeService.VerifyCodeAsync(email, code);
+        var result = await _verificationCodeService.VerifyCodeAsync(email, code);
 
-        if (!isValid)
+        if (!result.Success)
         {
             _logger.LogWarning("ConfirmEmail failed. Invalid or expired code: {Email}", email);
             return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
@@ -292,7 +299,7 @@ public class AuthenticationService : IAuthenticationService
 
         if (user == null)
         {
-            _logger.LogWarning("USER NOT FOUND: {Email}", email);
+            _logger.LogInformation("Password reset requested for non-existent email: {Email}", email);
             return Result.Success();
         }
 
@@ -300,17 +307,24 @@ public class AuthenticationService : IAuthenticationService
 
         await _verificationCodeService.SetCodeAsync(email, code);
 
-        await _emailSender.SendEmailAsync(
-            email,
-            "Password reset",
-            $"""
-            <h2>Password reset</h2>
-            <p>Your reset code:</p>
-            <h1>{code}</h1>
-            <p>This code will expire in 15 minutes.</p>
-            """);
-
-        _logger.LogInformation("Password reset code sent to {Email}", email);
+        try
+        {
+            await _emailSender.SendEmailAsync(
+                email,
+                "Password reset",
+                $"""
+                <h2>Password reset</h2>
+                <p>Your reset code:</p>
+                <h1>{code}</h1>
+                <p>This code will expire in 15 minutes.</p>
+                """);
+            _logger.LogInformation("Password reset code sent to {Email}", email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send password reset email to {Email}. Code still generated.", email);
+            _logger.LogWarning("Generated reset code for manual send: {Code} for {Email}", code, email);
+        }
 
         return Result.Success();
     }
@@ -324,7 +338,7 @@ public class AuthenticationService : IAuthenticationService
 
         if (user == null)
         {
-            _logger.LogWarning("ResetPassword failed. User not found: {Email}", email);
+            _logger.LogInformation("Reset password attempted for non-existent email: {Email}", email);
             return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
         }
 
@@ -334,9 +348,9 @@ public class AuthenticationService : IAuthenticationService
             return Result.Failure(AuthErrors.SamePassword.Description);
         }
 
-        var isValid = await _verificationCodeService.VerifyCodeAsync(email, code);
+        var result = await _verificationCodeService.VerifyCodeAsync(email, code);
 
-        if (!isValid)
+        if (!result.Success)
         {
             _logger.LogWarning("ResetPassword failed. Invalid or expired code: {Email}", email);
             return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
@@ -384,6 +398,92 @@ public class AuthenticationService : IAuthenticationService
         await _usersRepository.UpdateAsync(user);
 
         _logger.LogInformation("Password changed successfully for user: {UserId}", userId);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> RequestEmailChangeAsync(Guid userId, string newEmail)
+    {
+        newEmail = newEmail?.Trim().ToLowerInvariant()
+            ?? throw new ArgumentNullException(nameof(newEmail));
+
+        var user = await _usersRepository.GetByIdAsync(userId);
+
+        if (user == null)
+        {
+            _logger.LogWarning("ChangeEmail request failed. User not found: {UserId}", userId);
+            return Result.Failure(AuthErrors.InvalidCredentials.Description);
+        }
+
+        if (user.Email == newEmail)
+        {
+            _logger.LogWarning("ChangeEmail request failed. Same email: {Email}", newEmail);
+            return Result.Failure(AuthErrors.SameEmail.Description);
+        }
+
+        var exists = await _usersRepository.ExistsAsync(newEmail);
+
+        if (exists)
+        {
+            _logger.LogWarning("ChangeEmail request failed. Email already exists: {Email}", newEmail);
+            return Result.Failure(AuthErrors.UserAlreadyExists.Description);
+        }
+
+        var code = VerificationCodeGenerator.GenerateCode();
+
+        await _verificationCodeService.SetCodeAsync(newEmail, code, "change-email");
+
+        try
+        {
+            await _emailSender.SendEmailAsync(
+                newEmail,
+                "Confirm email change",
+                $"""
+                <h2>Email change</h2>
+                <p>Your verification code:</p>
+                <h1>{code}</h1>
+                <p>This code will expire in 15 minutes.</p>
+                """);
+
+            _logger.LogInformation("Email change code sent to {Email}", newEmail);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send email change code to {Email}", newEmail);
+        }
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ConfirmEmailChangeAsync(Guid userId, string newEmail, string code)
+    {
+        newEmail = newEmail?.Trim().ToLowerInvariant()
+            ?? throw new ArgumentNullException(nameof(newEmail));
+
+        var user = await _usersRepository.GetByIdAsync(userId);
+
+        if (user == null)
+        {
+            _logger.LogWarning("ConfirmEmailChange failed. User not found: {UserId}", userId);
+            return Result.Failure(AuthErrors.InvalidCredentials.Description);
+        }
+
+        var result = await _verificationCodeService.VerifyCodeAsync(newEmail, code, "change-email");
+
+        if (!result.Success)
+        {
+            _logger.LogWarning("ConfirmEmailChange failed. Invalid code for {Email}", newEmail);
+            return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
+        }
+
+        user.Email = newEmail;
+        user.EmailConfirmed = true;
+
+        await _usersRepository.UpdateAsync(user);
+
+        await _refreshTokenRepository.InvalidateAllAsync(userId);
+
+        _logger.LogInformation("Email changed successfully for user: {UserId}", userId);
 
         return Result.Success();
     }

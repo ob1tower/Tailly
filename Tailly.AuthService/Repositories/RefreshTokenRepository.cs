@@ -77,4 +77,23 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 
         await _authDbContext.SaveChangesAsync();
     }
+
+    public async Task InvalidateAllAsync(Guid userId)
+    {
+        var tokens = await _authDbContext.RefreshTokens
+            .Where(x => x.UserId == userId && x.Revoked == null)
+            .ToListAsync();
+
+        if (!tokens.Any())
+            return;
+
+        var now = DateTime.UtcNow;
+
+        foreach (var token in tokens)
+        {
+            token.Revoked = now;
+        }
+
+        await _authDbContext.SaveChangesAsync();
+    }
 }

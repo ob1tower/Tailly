@@ -18,8 +18,11 @@ public static class AuthErrors
         new("Auth.SamePassword", "New password must be different from current password.");
 
     public static readonly Error EmailNotConfirmed =
-        new("Auth.EmailNotConfirmed", "Email is not confirmed.");
+        new("Auth.EmailNotConfirmed", "Email is not confirmed. Please verify your email first.");
 
-    public static readonly Error InvalidVerificationCode =
-        new("Auth.InvalidVerificationCode", "Invalid verification code.");
+    public static readonly Error InvalidVerificationCode = 
+        new("Auth.InvalidVerificationCode", "The code is incorrect, expired, or the number of attempts exceeded. Request a new code.");
+
+    public static readonly Error SameEmail =
+        new("Auth.SameEmail", "New email must be different from current.");
 }
