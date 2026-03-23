@@ -1,4 +1,4 @@
-﻿namespace Tailly.AuthService.Dtos.Auth;
+﻿namespace Tailly.AuthService.Dtos.Auth.Password;
 
 public sealed class ForgotPasswordRequest
 {

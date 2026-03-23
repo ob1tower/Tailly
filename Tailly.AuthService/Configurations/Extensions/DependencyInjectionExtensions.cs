@@ -19,6 +19,7 @@ using Tailly.AuthService.Service.Auth;
 using Tailly.AuthService.Service.Claims;
 using Tailly.AuthService.Service.Email;
 using Tailly.AuthService.Service.Security;
+using Tailly.AuthService.Service.Security.Otp;
 using Tailly.AuthService.Service.Tokens;
 using Tailly.AuthService.Validators;
 
@@ -76,6 +77,9 @@ public static class DependencyInjectionExtensions
 
         services.Configure<EmailSettings>(
             configuration.GetSection("EmailSettings"));
+
+        services.Configure<SecurityOptions>(
+            configuration.GetSection("Security"));
 
         return services;
     }
@@ -137,50 +141,84 @@ public static class DependencyInjectionExtensions
             options.GlobalLimiter = PartitionedRateLimiter
                 .Create<HttpContext, string>(context =>
                 {
-                    string key =
-                        context.User.FindFirstValue(ClaimTypes.NameIdentifier)
-                        ?? context.Connection.RemoteIpAddress?.ToString()
-                        ?? "anonymous";
+                    var key = context.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                           ?? context.Connection.RemoteIpAddress?.ToString()
+                           ?? "anonymous";
 
                     return RateLimitPartition.GetFixedWindowLimiter(
                         key,
-                        _ => new FixedWindowRateLimiterOptions()
+                        _ => new FixedWindowRateLimiterOptions
                         {
                             PermitLimit = 100,
                             QueueLimit = 10,
                             Window = TimeSpan.FromSeconds(10),
-                            AutoReplenishment = true,
+                            AutoReplenishment = true
                         });
                 });
+
             options.AddPolicy("auth", context =>
             {
-                var key = $"auth:{context.Connection.RemoteIpAddress}";
+                var ip = context.Connection.RemoteIpAddress?.ToString() ?? "anon";
 
                 return RateLimitPartition.GetFixedWindowLimiter(
-                    key,
+                    ip,
                     _ => new FixedWindowRateLimiterOptions
                     {
                         PermitLimit = 5,
-                        Window = TimeSpan.FromSeconds(30),
+                        Window = TimeSpan.FromMinutes(1),
                         QueueLimit = 0
                     });
             });
+
             options.AddPolicy("session", context =>
             {
                 var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                var key = userId ?? context.Connection.RemoteIpAddress?.ToString()
-                                 ?? "anonymous";
+                var key = userId ?? context.Connection.RemoteIpAddress?.ToString() ?? "anonymous";
 
                 return RateLimitPartition.GetFixedWindowLimiter(
                     key,
                     _ => new FixedWindowRateLimiterOptions
                     {
-                        PermitLimit = 20,
-                        Window = TimeSpan.FromSeconds(30),
+                        PermitLimit = 30,
+                        Window = TimeSpan.FromSeconds(60),
                         QueueLimit = 0
                     });
             });
+
+            options.AddPolicy("registration", context =>
+            {
+                var ip = context.Connection.RemoteIpAddress?.ToString() ?? "anon";
+                var email = context.Items["RateLimitEmail"] as string ?? "unknown";
+
+                var key = $"reg:{email}:{ip}";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    key,
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 100,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 0
+                    });
+            });
+
+            options.AddPolicy("verification", context =>
+            {
+                var ip = context.Connection.RemoteIpAddress?.ToString() ?? "anon";
+                var email = context.Items["RateLimitEmail"] as string ?? "unknown";
+
+                var key = $"verify:{email}:{ip}";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    key,
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 8,
+                        Window = TimeSpan.FromMinutes(15),
+                        QueueLimit = 0
+                    });
+            });
+
             options.OnRejected = async (context, _) =>
             {
                 if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out TimeSpan retryAfter))
@@ -191,18 +229,16 @@ public static class DependencyInjectionExtensions
                     context.HttpContext.Response.Headers.Append("X-Limit-Remaining", "0");
                 }
 
-                ExceptionResponse response = new()
+                var response = new ExceptionResponse
                 {
                     StatusCode = StatusCodes.Status429TooManyRequests,
-                    Message = "Too many requests. Please try again later.",
+                    Message = "Too many requests. Please try again later."
                 };
 
                 context.HttpContext.Response.ContentType = "application/json";
                 context.HttpContext.Response.StatusCode = response.StatusCode;
 
-                await context.HttpContext.Response.WriteAsJsonAsync(
-                    response,
-                    CancellationToken.None);
+                await context.HttpContext.Response.WriteAsJsonAsync(response, CancellationToken.None);
             };
         });
 
@@ -218,6 +254,8 @@ public static class DependencyInjectionExtensions
         services.AddValidatorsFromAssemblyContaining<ConfirmEmailValidator>();
         services.AddValidatorsFromAssemblyContaining<ForgotPasswordValidator>();
         services.AddValidatorsFromAssemblyContaining<ResetPasswordValidator>();
+        services.AddValidatorsFromAssemblyContaining<ChangeEmailValidator>();
+        services.AddValidatorsFromAssemblyContaining<ConfirmEmailChangeValidator>();
 
         return services;
     }

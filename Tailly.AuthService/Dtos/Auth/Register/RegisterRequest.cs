@@ -1,4 +1,4 @@
-﻿namespace Tailly.AuthService.Dtos.Auth;
+﻿namespace Tailly.AuthService.Dtos.Auth.Register;
 
 public sealed class RegisterRequest
 {

@@ -110,6 +110,7 @@ public class UsersRepository : IUsersRepository
         if (userEntity == null)
             return;
 
+        userEntity.Email = user.Email;
         userEntity.PasswordHash = user.PasswordHash;
         userEntity.EmailConfirmed = user.EmailConfirmed;
 
