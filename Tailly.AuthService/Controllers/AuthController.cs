@@ -48,6 +48,12 @@ public class AuthController : ControllerBase
         _confirmChangeEmailValidator = confirmChangeEmailValidator;
     }
 
+    /// <summary>
+    /// Registers a new user in the system.
+    /// Sends a confirmation code to the provided email address.
+    /// </summary>
+    /// <param name="request">Registration data (email and password)</param>
+    /// <returns>User ID of the newly created user</returns>
     [HttpPost("register")]
     [EnableRateLimiting("registration")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
@@ -67,6 +73,11 @@ public class AuthController : ControllerBase
         return Ok(new { UserId = result.Value });
     }
 
+    /// <summary>
+    /// Confirms the user's email address using the verification code.
+    /// </summary>
+    /// <param name="request">Email and verification code</param>
+    /// <returns>Success message if email was confirmed</returns>
     [HttpPost("confirm-email")]
     [EnableRateLimiting("verification")]
     public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
@@ -81,6 +92,11 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Authenticates a user and returns JWT access + refresh tokens.
+    /// </summary>
+    /// <param name="request">Login credentials (email and password)</param>
+    /// <returns>Access and refresh tokens with expiration dates</returns>
     [HttpPost("login")]
     [EnableRateLimiting("auth")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
@@ -108,6 +124,12 @@ public class AuthController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Refreshes the access token using a valid refresh token.
+    /// Implements refresh token rotation for better security.
+    /// </summary>
+    /// <param name="request">Refresh token</param>
+    /// <returns>New pair of access and refresh tokens</returns>
     [HttpPost("refresh")]
     [EnableRateLimiting("session")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
@@ -133,6 +155,10 @@ public class AuthController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Logs out the user by invalidating the current refresh token.
+    /// </summary>
+    /// <param name="request">Refresh token to invalidate</param>
     [HttpPost("logout")]
     [EnableRateLimiting("session")]
     public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
@@ -150,6 +176,11 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Initiates password reset process.
+    /// Sends a reset code to the user's email (even if email doesn't exist - for security reasons).
+    /// </summary>
+    /// <param name="request">User email</param>
     [HttpPost("forgot-password")]
     [EnableRateLimiting("registration")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
@@ -164,6 +195,11 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Initiates password reset process.
+    /// Sends a reset code to the user's email (even if email doesn't exist - for security reasons).
+    /// </summary>
+    /// <param name="request">User email</param>
     [HttpPost("reset-password")]
     [EnableRateLimiting("verification")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
@@ -184,6 +220,11 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Changes password for currently authenticated user.
+    /// Requires current password for verification.
+    /// </summary>
+    /// <param name="request">Current password and new password</param>
     [HttpPost("change-password")]
     [Authorize]
     [EnableRateLimiting("session")]
@@ -207,6 +248,11 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Requests to change the user's email address.
+    /// Sends a confirmation code to the new email.
+    /// </summary>
+    /// <param name="request">New email address</param>
     [HttpPost("change-email/request")]
     [Authorize]
     [EnableRateLimiting("verification")]
@@ -227,6 +273,10 @@ public class AuthController : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Confirms the email address change using the verification code.
+    /// </summary>
+    /// <param name="request">New email and confirmation code</param>
     [HttpPost("change-email/confirm")]
     [Authorize]
     [EnableRateLimiting("verification")]
