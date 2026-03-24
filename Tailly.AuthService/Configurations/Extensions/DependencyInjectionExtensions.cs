@@ -1,18 +1,22 @@
 ﻿using FluentValidation;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
+using System;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
+using Tailly.AuthService.BackgroundServices;
 using Tailly.AuthService.Configurations.Constants;
 using Tailly.AuthService.Configurations.Options;
 using Tailly.AuthService.DataAccess;
 using Tailly.AuthService.Dtos.Common;
+using Tailly.AuthService.RabbitMq.Consumers;
 using Tailly.AuthService.Repositories;
 using Tailly.AuthService.Repositories.Interfaces;
 using Tailly.AuthService.Service.Auth;
@@ -41,6 +45,7 @@ public static class DependencyInjectionExtensions
         services.AddSecurityAndCore();
         services.AddApplicationRepositories();
         services.AddFluentValidationSetup();
+        services.AddRabbitMq(configuration);
 
         return services;
     }
@@ -80,6 +85,9 @@ public static class DependencyInjectionExtensions
 
         services.Configure<SecurityOptions>(
             configuration.GetSection("Security"));
+
+        services.Configure<RabbitMqSettings>(
+            configuration.GetSection("RabbitMq"));
 
         return services;
     }
@@ -122,6 +130,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<ClaimProvider>();
         services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IVerificationCodeService, VerificationCodeService>();
+        services.AddHostedService<RefreshTokenCleanupService>();
 
         return services;
     }
@@ -260,12 +269,48 @@ public static class DependencyInjectionExtensions
         return services;
     }
 
+    private static IServiceCollection AddRabbitMq(this IServiceCollection services,
+                                                  IConfiguration configuration)
+    {
+        services.AddMassTransit(x =>
+        {
+            x.AddConsumer<EmailConsumer>();
+
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                var settings = configuration.GetSection("RabbitMq").Get<RabbitMqSettings>()
+                    ?? throw new InvalidOperationException("RabbitMq configuration is missing.");
+
+                cfg.Host(new Uri($"amqp://{settings.Host}:{settings.Port}"), h =>
+                {
+                    h.Username(settings.Username);
+                    h.Password(settings.Password);
+                });
+
+                cfg.ReceiveEndpoint(settings.Queue, e =>
+                {
+                    e.ConfigureConsumer<EmailConsumer>(context);
+
+                    e.UseMessageRetry(r =>
+                    {
+                        r.Interval(3, TimeSpan.FromSeconds(5));
+                    });
+                });
+            });
+        });
+
+        return services;
+    }
+
     private static IServiceCollection AddSwaggerSetup(this IServiceCollection services)
     {
         services.AddEndpointsApiExplorer();
 
         services.AddSwaggerGen(options =>
         {
+            var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            options.IncludeXmlComments(System.IO.Path.Combine(AppContext.BaseDirectory, xmlFilename));
+
             options.AddSecurityDefinition(
                 JwtBearerDefaults.AuthenticationScheme,
                 new OpenApiSecurityScheme

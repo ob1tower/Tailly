@@ -1,10 +1,11 @@
 ﻿using CSharpFunctionalExtensions;
+using MassTransit;
 using Tailly.AuthService.Entities;
 using Tailly.AuthService.Enums;
 using Tailly.AuthService.Errors;
 using Tailly.AuthService.Models;
+using Tailly.AuthService.RabbitMq.Messages;
 using Tailly.AuthService.Repositories.Interfaces;
-using Tailly.AuthService.Service.Email;
 using Tailly.AuthService.Service.Security;
 using Tailly.AuthService.Service.Security.Otp;
 using Tailly.AuthService.Service.Tokens;
@@ -18,8 +19,8 @@ public class AuthenticationService : IAuthenticationService
     private readonly IPasswordHashingService _passwordHasher;
     private readonly IJwtTokenService _jwtService;
     private readonly IRefreshTokenService _refreshTokenService;
-    private readonly IEmailSender _emailSender;
     private readonly IVerificationCodeService _verificationCodeService;
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<AuthenticationService> _logger;
 
     public AuthenticationService(IUsersRepository usersRepository,
@@ -27,8 +28,8 @@ public class AuthenticationService : IAuthenticationService
                        IPasswordHashingService passwordHasher,
                        IJwtTokenService jwtService,
                        IRefreshTokenService refreshTokenService,
-                       IEmailSender emailSender,
                        IVerificationCodeService verificationCodeService,
+                       IPublishEndpoint publishEndpoint,
                        ILogger<AuthenticationService> logger)
     {
         _usersRepository = usersRepository;
@@ -36,8 +37,8 @@ public class AuthenticationService : IAuthenticationService
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
         _refreshTokenService = refreshTokenService;
-        _emailSender = emailSender;
         _verificationCodeService = verificationCodeService;
+        _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
 
@@ -72,32 +73,26 @@ public class AuthenticationService : IAuthenticationService
         var code = VerificationCodeGenerator.GenerateCode();
         await _verificationCodeService.SetCodeAsync(email, code);
 
-        try
+        await _publishEndpoint.Publish(new SendEmailMessage
         {
-            await _emailSender.SendEmailAsync(
-                user.Email,
-                "Email confirmation",
-                $"""
-                <h2>Email confirmation</h2>
-                <p>Your verification code:</p>
-                <h1>{code}</h1>
-                <p>This code will expire in 15 minutes.</p>
-                """);
-            _logger.LogInformation("Confirmation email sent to {Email}", email);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to send confirmation email to {Email}. User still created.", email);
-            _logger.LogWarning("Generated code for manual send: {Code} for {Email}", code, email);
-        }
+            To = user.Email,
+            Subject = "Email confirmation",
+            Body = $"""
+            <h2>Email confirmation</h2>
+            <p>Your verification code:</p>
+            <h1>{code}</h1>
+            <p>This code will expire in 15 minutes.</p>
+            """,
+            Purpose = "confirmation"
+        });
+
+        _logger.LogInformation("Confirmation email message published to RabbitMQ for {Email}", email);
 
         return Result.Success(user.Id);
     }
 
     public async Task<Result<AuthResult>> LoginAsync(string email, string password)
     {
-        await _refreshTokenRepository.RemoveExpiredTokensAsync();
-
         email = email?.Trim().ToLowerInvariant()
                 ?? throw new ArgumentNullException(nameof(email));
 
@@ -163,10 +158,7 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<Result<AuthResult>> RefreshTokenAsync(string refreshToken)
     {
-        await _refreshTokenRepository.RemoveExpiredTokensAsync();
-
         var hashedToken = _refreshTokenService.HashToken(refreshToken);
-
         var storedToken = await _refreshTokenRepository.GetByTokenAsync(hashedToken);
 
         if (storedToken == null)
@@ -177,15 +169,25 @@ public class AuthenticationService : IAuthenticationService
 
         if (!storedToken.IsActive)
         {
-            _logger.LogWarning("Refresh failed. Token revoked or expired.");
+            if (storedToken.Revoked != null)
+            {
+                _logger.LogWarning("Refresh token reuse detected for user {UserId}. All tokens invalidated.",
+                    storedToken.UserId);
+
+                await _refreshTokenRepository.InvalidateAllAsync(storedToken.UserId);
+            }
+            else
+            {
+                _logger.LogWarning("Refresh failed. Token expired for user {UserId}", storedToken.UserId);
+            }
+
             return Result.Failure<AuthResult>(AuthErrors.InvalidRefreshToken.Description);
         }
 
         var user = await _usersRepository.GetByIdAsync(storedToken.UserId);
-
         if (user == null)
         {
-            _logger.LogWarning("Refresh failed. User not found.");
+            _logger.LogWarning("Refresh failed. User not found for token.");
             return Result.Failure<AuthResult>(AuthErrors.InvalidRefreshToken.Description);
         }
 
@@ -193,7 +195,6 @@ public class AuthenticationService : IAuthenticationService
         {
             Id = user.Id,
             Email = user.Email,
-
             UserRoles = user.Roles.Select(r => new UserRoleEntity
             {
                 UserId = user.Id,
@@ -202,10 +203,9 @@ public class AuthenticationService : IAuthenticationService
         });
 
         var (rawRefreshToken, hashedRefreshToken) = _refreshTokenService.GenerateToken();
+        var refreshExpires = _refreshTokenService.GetRefreshTokenExpiryDate();
 
         await _refreshTokenRepository.InvalidateAsync(storedToken.TokenHash);
-
-        var refreshExpires = _refreshTokenService.GetRefreshTokenExpiryDate();
 
         var newRefreshToken = new RefreshToken
         {
@@ -225,6 +225,8 @@ public class AuthenticationService : IAuthenticationService
             RefreshToken = rawRefreshToken,
             RefreshTokenExpires = newRefreshToken.Expires
         };
+
+        _logger.LogInformation("Token refreshed successfully for user {UserId}", user.Id);
 
         return Result.Success(result);
     }
@@ -304,27 +306,22 @@ public class AuthenticationService : IAuthenticationService
         }
 
         var code = VerificationCodeGenerator.GenerateCode();
-
         await _verificationCodeService.SetCodeAsync(email, code);
 
-        try
+        await _publishEndpoint.Publish(new SendEmailMessage
         {
-            await _emailSender.SendEmailAsync(
-                email,
-                "Password reset",
-                $"""
-                <h2>Password reset</h2>
-                <p>Your reset code:</p>
-                <h1>{code}</h1>
-                <p>This code will expire in 15 minutes.</p>
-                """);
-            _logger.LogInformation("Password reset code sent to {Email}", email);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to send password reset email to {Email}. Code still generated.", email);
-            _logger.LogWarning("Generated reset code for manual send: {Code} for {Email}", code, email);
-        }
+            To = email,
+            Subject = "Password reset",
+            Body = $"""
+            <h2>Password reset</h2>
+            <p>Your reset code:</p>
+            <h1>{code}</h1>
+            <p>This code will expire in 15 minutes.</p>
+            """,
+            Purpose = "password-reset"
+        });
+
+        _logger.LogInformation("Password reset message published to RabbitMQ for {Email}", email);
 
         return Result.Success();
     }
@@ -433,24 +430,20 @@ public class AuthenticationService : IAuthenticationService
 
         await _verificationCodeService.SetCodeAsync(newEmail, code, "change-email");
 
-        try
+        await _publishEndpoint.Publish(new SendEmailMessage
         {
-            await _emailSender.SendEmailAsync(
-                newEmail,
-                "Confirm email change",
-                $"""
-                <h2>Email change</h2>
-                <p>Your verification code:</p>
-                <h1>{code}</h1>
-                <p>This code will expire in 15 minutes.</p>
-                """);
+            To = newEmail,
+            Subject = "Confirm email change",
+            Body = $"""
+            <h2>Email change</h2>
+            <p>Your verification code:</p>
+            <h1>{code}</h1>
+            <p>This code will expire in 15 minutes.</p>
+            """,
+            Purpose = "change-email"
+        });
 
-            _logger.LogInformation("Email change code sent to {Email}", newEmail);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to send email change code to {Email}", newEmail);
-        }
+        _logger.LogInformation("Email change message published to RabbitMQ for {Email}", newEmail);
 
         return Result.Success();
     }

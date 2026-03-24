@@ -1,6 +1,6 @@
 ﻿namespace Tailly.AuthService.Configurations.Options;
 
-public class EmailSettings
+public sealed class EmailSettings
 {
     public required string Server { get; set; }
     public required int Port { get; set; }
