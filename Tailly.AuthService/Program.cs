@@ -1,4 +1,4 @@
-using Tailly.AuthService.Configurations.Extensions;
+using Tailly.AuthService.Infrastructure.Configurations.Extensions;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
