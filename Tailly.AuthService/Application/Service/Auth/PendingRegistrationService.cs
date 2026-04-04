@@ -8,7 +8,9 @@ namespace Tailly.AuthService.Application.Service.Auth;
 public class PendingRegistrationService : IPendingRegistrationService
 {
     private readonly IDatabase _redis;
+
     private const string KeyPrefix = "register:";
+    private const string TokenPrefix = "register-token:";
     private static readonly TimeSpan Ttl = TimeSpan.FromMinutes(15);
 
     public PendingRegistrationService(IConnectionMultiplexer redis)
@@ -48,10 +50,42 @@ public class PendingRegistrationService : IPendingRegistrationService
         return (data!.Email, data.PasswordHash);
     }
 
+    public async Task AttachTokenAsync(string registrationId, string verificationToken)
+    {
+        await _redis.StringSetAsync(
+            BuildTokenKey(verificationToken),
+            registrationId,
+            Ttl
+        );
+    }
+
+    public async Task<(string Email, string PasswordHash)?> GetByTokenAsync(string verificationToken)
+    {
+        var registrationId = await _redis.StringGetAsync(BuildTokenKey(verificationToken));
+
+        if (registrationId.IsNullOrEmpty)
+            return null;
+
+        return await GetAsync(registrationId!);
+    }
+
+    public async Task RemoveByTokenAsync(string verificationToken)
+    {
+        var registrationId = await _redis.StringGetAsync(BuildTokenKey(verificationToken));
+
+        if (!registrationId.IsNullOrEmpty)
+        {
+            await RemoveAsync(registrationId!);
+        }
+
+        await _redis.KeyDeleteAsync(BuildTokenKey(verificationToken));
+    }
+
     public async Task RemoveAsync(string registrationId)
     {
         await _redis.KeyDeleteAsync(BuildKey(registrationId));
     }
 
     private static string BuildKey(string id) => $"{KeyPrefix}{id}";
+    private static string BuildTokenKey(string token) => $"{TokenPrefix}{token}";
 }

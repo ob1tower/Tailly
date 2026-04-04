@@ -7,4 +7,6 @@
   </Project>
   <Project Path="Tailly.ApiGateway/Tailly.ApiGateway.csproj" Id="f1793168-cb40-4d0a-be92-d1f40b6e417b" />
   <Project Path="Tailly.AuthService/Tailly.AuthService.csproj" />
+  <Project Path="Tailly.ClientProfileService/Tailly.ClientProfileService.csproj" Id="3aa3b762-c114-433f-ae86-d7531b8a22a4" />
+  <Project Path="Tailly.Contracts/Tailly.Contracts.csproj" Id="3b0113a9-3355-4e9e-8eca-88519a1f331e" />
 </Solution>

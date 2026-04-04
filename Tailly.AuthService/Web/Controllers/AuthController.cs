@@ -132,8 +132,12 @@ public class AuthController : ControllerBase
             return BadRequest(ErrorFormatter.Deserialize(validationResult.Errors));
 
         var result = await _authService.CompleteRegisterAsync(
-            request.RegistrationId,
-            request.VerificationToken);
+            request.VerificationToken,
+            request.FirstName,
+            request.LastName,
+            request.MiddleName,
+            request.CityName,
+            request.CityId);
 
         if (result.IsFailure)
             return BadRequest(result.Error);
@@ -338,7 +342,7 @@ public class AuthController : ControllerBase
         if (userId == null)
             return Unauthorized();
 
-        var result = await _authService.ChangePasswordAsync(userId.Value, request.CurrentPassword, request.NewPassword);
+        var result = await _authService.ChangePasswordAsync(userId.Value, request.OldPassword, request.NewPassword);
 
         if (result.IsFailure)
             return BadRequest(result.Error);

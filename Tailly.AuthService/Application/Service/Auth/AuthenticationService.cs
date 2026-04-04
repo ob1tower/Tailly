@@ -13,6 +13,7 @@ using Tailly.AuthService.Core.Enums;
 using Tailly.AuthService.Core.Models;
 using Tailly.AuthService.Infrastructure.Messaging.Messages;
 using Tailly.AuthService.Infrastructure.Repositories.Interfaces;
+using Tailly.Contracts.Messages;
 
 namespace Tailly.AuthService.Application.Service.Auth;
 
@@ -115,31 +116,25 @@ public class AuthenticationService : IAuthenticationService
             "ok",
             "register-token");
 
+        await _pendingRegistrationService.AttachTokenAsync(registrationId, verificationToken);
+
         _logger.LogInformation("Email verified for {Email}", email);
 
         return Result.Success<string, Error>(verificationToken);
     }
 
-    public async Task<Result<AuthResult, Error>> CompleteRegisterAsync(string registrationId, string verificationToken)
+    public async Task<Result<AuthResult, Error>> CompleteRegisterAsync(string verificationToken, string firstName, string lastName, 
+                                                                       string? middleName, string? cityName, string cityId)
     {
         var tokenValid = await _verificationCodeService.VerifyCodeAsync(
-            verificationToken,
-            "ok",
-            "register-token");
+            verificationToken, "ok", "register-token");
 
         if (!tokenValid.Success)
-        {
-            _logger.LogWarning("CompleteRegister failed. Invalid token.");
             return Result.Failure<AuthResult, Error>(AuthErrors.InvalidVerificationToken);
-        }
 
-        var data = await _pendingRegistrationService.GetAsync(registrationId);
-
+        var data = await _pendingRegistrationService.GetByTokenAsync(verificationToken);
         if (data == null)
-        {
-            _logger.LogWarning("CompleteRegister failed. Registration not found: {RegistrationId}", registrationId);
             return Result.Failure<AuthResult, Error>(AuthErrors.RegistrationNotFound);
-        }
 
         var (email, passwordHash) = data.Value;
 
@@ -149,29 +144,22 @@ public class AuthenticationService : IAuthenticationService
             Email = email,
             PasswordHash = passwordHash,
             CreatedAt = DateTime.UtcNow,
-            EmailConfirmed = true,
-            SpecialistId = null,
-            AdminId = null,
-            SpecialistSlug = null
+            EmailConfirmed = true
         };
 
         await _usersRepository.AddAsync(user);
         await _usersRepository.AddRoleAsync(user.Id, (int)RoleType.Client);
 
-        await _pendingRegistrationService.RemoveAsync(registrationId);
+        await _pendingRegistrationService.RemoveByTokenAsync(verificationToken);
 
         var (accessToken, accessExpires) = await _jwtService.CreateAccessTokenAsync(new UserEntity
         {
             Id = user.Id,
             Email = user.Email,
             UserRoles = new List<UserRoleEntity>
-            {
-                new UserRoleEntity
-                {
-                    UserId = user.Id,
-                    RoleId = (int)RoleType.Client
-                }
-            }
+        {
+            new UserRoleEntity { UserId = user.Id, RoleId = (int)RoleType.Client }
+        }
         });
 
         var (rawRefreshToken, hashedRefreshToken) = _refreshTokenService.GenerateToken();
@@ -196,6 +184,17 @@ public class AuthenticationService : IAuthenticationService
         };
 
         _logger.LogInformation("User registered successfully: {UserId}", user.Id);
+
+        await _publishEndpoint.Publish(new UserRegisteredMessage
+        {
+            UserId = user.Id,
+            Email = user.Email,
+            FirstName = firstName,
+            LastName = lastName,
+            MiddleName = middleName,
+            CityName = cityName,
+            CityId = cityId
+        });
 
         return Result.Success<AuthResult, Error>(result);
     }
