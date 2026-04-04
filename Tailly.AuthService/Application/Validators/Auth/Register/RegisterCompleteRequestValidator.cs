@@ -7,10 +7,22 @@ public class RegisterCompleteRequestValidator : AbstractValidator<RegisterComple
 {
     public RegisterCompleteRequestValidator()
     {
-        RuleFor(r => r.RegistrationId)
-            .NotEmpty().WithMessage("RegistrationId is required.");
-
         RuleFor(r => r.VerificationToken)
             .NotEmpty().WithMessage("VerificationToken is required.");
+
+        RuleFor(r => r.FirstName)
+            .NotEmpty().WithMessage("FirstName is required.")
+            .MaximumLength(100);
+
+        RuleFor(r => r.LastName)
+            .NotEmpty().WithMessage("LastName is required.")
+            .MaximumLength(100);
+
+        RuleFor(r => r.CityName)
+            .NotEmpty().WithMessage("City is required.")
+            .MaximumLength(100);
+
+        RuleFor(r => r.CityId)
+            .MaximumLength(50);
     }
 }

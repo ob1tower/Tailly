@@ -7,7 +7,6 @@
     <UserSecretsId>3f7a41e1-7421-40db-a1f6-fac26f6760a5</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
-
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
@@ -36,6 +35,7 @@
 
   <ItemGroup>
     <Folder Include="Web\Controllers\" />
+	<ProjectReference Include="../Tailly.Contracts/Tailly.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

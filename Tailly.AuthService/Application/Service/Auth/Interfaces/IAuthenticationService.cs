@@ -8,7 +8,8 @@ namespace Tailly.AuthService.Application.Service.Auth.Interfaces;
 public interface IAuthenticationService
 {
     Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
-    Task<Result<AuthResult, Error>> CompleteRegisterAsync(string registrationId, string verificationToken);
+    Task<Result<AuthResult, Error>> CompleteRegisterAsync(string verificationToken, string firstName, string lastName, 
+                                                          string? middleName, string? cityName, string cityId);
     Task<Result> ConfirmEmailChangeAsync(Guid userId, string requestId, string newEmail, string code);
     Task<Result<AuthResult, Error>> LoginAsync(string email, string password, RoleType role);
     Task<Result> LogoutAsync(string refreshToken);
