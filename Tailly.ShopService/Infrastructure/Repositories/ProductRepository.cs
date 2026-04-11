@@ -1,0 +1,143 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Tailly.ShopService.Core.Enums;
+using Tailly.ShopService.Core.Models.Products;
+using Tailly.ShopService.Infrastructure.DataAccess;
+using Tailly.ShopService.Infrastructure.Mappers;
+using Tailly.ShopService.Infrastructure.Repositories.Interfaces;
+
+namespace Tailly.ShopService.Infrastructure.Repositories;
+
+public class ProductRepository : IProductRepository
+{
+    private readonly ShopDbContext _context;
+
+    public ProductRepository(ShopDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<Product?> GetByIdAsync(Guid id)
+    {
+        var entity = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Images)
+            .Include(p => p.Reviews)
+            .ThenInclude(r => r.Reply)       
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        return entity == null ? null : ProductEntityMapper.ToDomain(entity);
+    }
+
+    public async Task<Product?> GetBySlugAsync(string slug)
+    {
+        var entity = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Images)
+            .Include(p => p.Reviews)
+            .ThenInclude(r => r.Reply)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Slug == slug);
+
+        return entity == null ? null : ProductEntityMapper.ToDomain(entity);
+    }
+
+    public async Task<List<Product>> GetByIdsAsync(List<Guid> ids)
+    {
+        if (ids == null || !ids.Any())
+            return new List<Product>();
+
+        var entities = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Images)
+            .AsNoTracking()
+            .Where(p => ids.Contains(p.Id))
+            .ToListAsync();
+
+        return entities.Select(ProductEntityMapper.ToDomain).ToList();
+    }
+
+    public async Task<(List<Product> products, int total)> GetCatalogAsync(string? search, List<string>? categoryIds, decimal? minPrice, decimal? maxPrice, bool onlyAvailable, ProductSort sort, int page, int limit)
+    {
+        var query = _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Images.Take(1))          
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchTerm = search.ToLower();
+            query = query.Where(p =>
+                p.Title.ToLower().Contains(searchTerm) ||
+                p.ShortDescription.ToLower().Contains(searchTerm));
+        }
+
+        if (categoryIds != null && categoryIds.Any())
+        {
+            var categoryGuids = categoryIds
+                .Select(id => Guid.TryParse(id, out var guid) ? guid : Guid.Empty)
+                .Where(g => g != Guid.Empty)
+                .ToList();
+
+            if (categoryGuids.Any())
+                query = query.Where(p => categoryGuids.Contains(p.CategoryId));
+        }
+
+        if (minPrice.HasValue)
+            query = query.Where(p => p.Price >= minPrice.Value);
+
+        if (maxPrice.HasValue)
+            query = query.Where(p => p.Price <= maxPrice.Value);
+
+        if (onlyAvailable)
+            query = query.Where(p => p.IsAvailable && p.StockQuantity > 0);
+
+        query = sort switch
+        {
+            ProductSort.PriceAsc => query.OrderBy(p => p.Price),
+            ProductSort.PriceDesc => query.OrderByDescending(p => p.Price),
+            ProductSort.RatingDesc => query.OrderByDescending(p => p.Rating),
+            ProductSort.Newest => query.OrderByDescending(p => p.CreatedAt),
+            ProductSort.Popular => query.OrderByDescending(p => p.ReviewsCount),
+            _ => query.OrderByDescending(p => p.CreatedAt)
+        };
+
+        var total = await query.CountAsync();
+        var entities = await query
+            .Skip((page - 1) * limit)
+            .Take(limit)
+            .ToListAsync();
+
+        var products = entities.Select(ProductEntityMapper.ToDomain).ToList();
+
+        return (products, total);
+    }
+
+    public async Task<(List<Category> categories, decimal minPrice, decimal maxPrice)> GetCatalogMetaAsync()
+    {
+        var categoryEntities = await _context.Categories
+            .AsNoTracking()
+            .ToListAsync();
+
+        var priceStats = await _context.Products
+            .AsNoTracking()
+            .Where(p => p.IsAvailable)
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                MinPrice = g.Min(p => p.Price),
+                MaxPrice = g.Max(p => p.Price)
+            })
+            .FirstOrDefaultAsync();
+
+        var categories = categoryEntities.Select(c => new Category
+        {
+            Id = c.Id,
+            Slug = c.Slug,
+            Title = c.Title
+        }).ToList();
+
+        return (categories, priceStats?.MinPrice ?? 0m, priceStats?.MaxPrice ?? 0m);
+    }
+}
