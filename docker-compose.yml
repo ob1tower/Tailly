@@ -10,6 +10,8 @@ services:
     depends_on:
       - auth
       - clientprofile
+      - shop
+      - posts
 
   auth:
     build:
@@ -33,6 +35,34 @@ services:
       dockerfile: Tailly.ClientProfileService/Dockerfile
     ports:
       - "5002:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  shop:
+    build:
+      context: .
+      dockerfile: Tailly.ShopService/Dockerfile
+    ports:
+      - "5003:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  posts:
+    build:
+      context: .
+      dockerfile: Tailly.PostsService/Dockerfile
+    ports:
+      - "5004:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
     depends_on:

@@ -1,5 +1,4 @@
-using Tailly.AuthService.Infrastructure.Configurations.Extensions;
-using Tailly.AuthService.Infrastructure.Seed;
+using Tailly.PostsService.Infrastructure.Configurations.Extensions;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -8,8 +7,6 @@ builder.Services.AddConfiguration(builder.Configuration);
 WebApplication app = builder.Build();
 
 await app.ApplyMigrationsAsync();
-
-await app.SeedSuperAdminAsync();
 
 app.Configure();
 
