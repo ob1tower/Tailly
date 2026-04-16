@@ -1,0 +1,153 @@
+﻿using CSharpFunctionalExtensions;
+using MassTransit;
+using Tailly.AuthService.Application.Errors;
+using Tailly.AuthService.Application.Service.Security;
+using Tailly.AuthService.Application.Service.Security.Interfaces;
+using Tailly.AuthService.Application.Service.Security.Otp;
+using Tailly.AuthService.Core.Common;
+using Tailly.AuthService.Core.Models;
+using Tailly.AuthService.Infrastructure.Messaging.Messages;
+using Tailly.AuthService.Infrastructure.Repositories.Interfaces;
+
+namespace Tailly.AuthService.Application.Service.Auth.Security;
+
+public class UserSecurityService : IUserSecurityService
+{
+    private readonly IUsersRepository _usersRepository;
+    private readonly IPasswordHashingService _passwordHasher;
+    private readonly IVerificationCodeService _verificationCodeService;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly ILogger<UserSecurityService> _logger;
+
+    public UserSecurityService(IUsersRepository usersRepository,
+                               IPasswordHashingService passwordHasher,
+                               IVerificationCodeService verificationCodeService,
+                               IRefreshTokenRepository refreshTokenRepository,
+                               IPublishEndpoint publishEndpoint,
+                               ILogger<UserSecurityService> logger)
+    {
+        _usersRepository = usersRepository;
+        _passwordHasher = passwordHasher;
+        _verificationCodeService = verificationCodeService;
+        _refreshTokenRepository = refreshTokenRepository;
+        _publishEndpoint = publishEndpoint;
+        _logger = logger;
+    }
+
+    public async Task<Result> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
+    {
+        var user = await _usersRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            _logger.LogWarning("ChangePassword failed. User not found: {UserId}", userId);
+            return Result.Failure(AuthErrors.InvalidCredentials.Description);
+        }
+
+        if (!_passwordHasher.VerifyPassword(currentPassword, user.PasswordHash))
+        {
+            _logger.LogWarning("ChangePassword failed. Invalid current password for user: {UserId}", userId);
+            return Result.Failure(AuthErrors.InvalidPassword.Description);
+        }
+
+        if (_passwordHasher.VerifyPassword(newPassword, user.PasswordHash))
+        {
+            _logger.LogWarning("ChangePassword failed. New password same as old for user: {UserId}", userId);
+            return Result.Failure(AuthErrors.SamePassword.Description);
+        }
+
+        var newHash = _passwordHasher.HashPassword(newPassword);
+        user.PasswordHash = newHash;
+        await _usersRepository.UpdateAsync(user);
+
+        await _refreshTokenRepository.InvalidateAllAsync(userId);
+
+        _logger.LogInformation("Password changed successfully for user: {UserId}", userId);
+        return Result.Success();
+    }
+
+    public async Task<Result<EmailChangeResult, Error>> RequestEmailChangeAsync(Guid userId, string newEmail)
+    {
+        newEmail = newEmail?.Trim().ToLowerInvariant()
+            ?? throw new ArgumentNullException(nameof(newEmail));
+
+        var user = await _usersRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            _logger.LogWarning("RequestEmailChange failed. User not found: {UserId}", userId);
+            return Result.Failure<EmailChangeResult, Error>(AuthErrors.InvalidCredentials);
+        }
+
+        if (user.Email.Equals(newEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogWarning("RequestEmailChange failed. Same email for user: {UserId}", userId);
+            return Result.Failure<EmailChangeResult, Error>(AuthErrors.SameEmail);
+        }
+
+        if (await _usersRepository.ExistsAsync(newEmail))
+        {
+            _logger.LogWarning("RequestEmailChange failed. Email already exists: {NewEmail}", newEmail);
+            return Result.Failure<EmailChangeResult, Error>(AuthErrors.UserAlreadyExists);
+        }
+
+        var requestId = Guid.NewGuid().ToString();
+        var code = VerificationCodeGenerator.GenerateCode();
+
+        await _verificationCodeService.SetCodeAsync(newEmail, code, "change-email");
+
+        await _publishEndpoint.Publish(new SendEmailMessage
+        {
+            To = newEmail,
+            Subject = "Email Change Confirmation",
+            Body = $"""
+            <h2>Email Change Request</h2>
+            <p>Your confirmation code:</p>
+            <h1>{code}</h1>
+            <p>The code is valid for 15 minutes.</p>
+            """,
+            Purpose = "change-email"
+        });
+
+        var maskedOldEmail = EmailHelper.Mask(user.Email);
+
+        _logger.LogInformation("Email change requested for user {UserId} → {NewEmail} (RequestId: {RequestId})",
+            userId, newEmail, requestId);
+
+        var emailChangeResult = new EmailChangeResult
+        {
+            RequestId = requestId,
+            MaskedOldEmail = maskedOldEmail
+        };
+
+        return Result.Success<EmailChangeResult, Error>(emailChangeResult);
+    }
+
+    public async Task<Result> ConfirmEmailChangeAsync(Guid userId, string requestId, string newEmail, string code)
+    {
+        newEmail = newEmail?.Trim().ToLowerInvariant()
+            ?? throw new ArgumentNullException(nameof(newEmail));
+
+        var user = await _usersRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            _logger.LogWarning("ConfirmEmailChange failed. User not found: {UserId}", userId);
+            return Result.Failure(AuthErrors.InvalidCredentials.Description);
+        }
+
+        var verifyResult = await _verificationCodeService.VerifyCodeAsync(newEmail, code, "change-email");
+        if (!verifyResult.Success)
+        {
+            _logger.LogWarning("ConfirmEmailChange failed. Invalid code for new email: {NewEmail}", newEmail);
+            return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
+        }
+
+        user.Email = newEmail;
+        user.EmailConfirmed = true;
+        await _usersRepository.UpdateAsync(user);
+
+        await _refreshTokenRepository.InvalidateAllAsync(userId);
+
+        _logger.LogInformation("Email changed successfully for user {UserId} to {NewEmail}", userId, newEmail);
+        return Result.Success();
+    }
+}

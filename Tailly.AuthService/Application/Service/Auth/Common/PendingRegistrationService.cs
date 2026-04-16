@@ -1,9 +1,8 @@
 ﻿using StackExchange.Redis;
 using System.Text.Json;
-using Tailly.AuthService.Application.Service.Auth.Interfaces;
 using Tailly.AuthService.Core.Models.Internal;
 
-namespace Tailly.AuthService.Application.Service.Auth;
+namespace Tailly.AuthService.Application.Service.Auth.Common;
 
 public class PendingRegistrationService : IPendingRegistrationService
 {

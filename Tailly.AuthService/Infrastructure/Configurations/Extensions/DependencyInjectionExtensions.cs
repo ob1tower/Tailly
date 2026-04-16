@@ -12,8 +12,12 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Tailly.AuthService.Application.Dtos.Common;
-using Tailly.AuthService.Application.Service.Auth;
-using Tailly.AuthService.Application.Service.Auth.Interfaces;
+using Tailly.AuthService.Application.Service.Auth.Common;
+using Tailly.AuthService.Application.Service.Auth.Login;
+using Tailly.AuthService.Application.Service.Auth.PasswordRecovery;
+using Tailly.AuthService.Application.Service.Auth.Registration;
+using Tailly.AuthService.Application.Service.Auth.Security;
+using Tailly.AuthService.Application.Service.Auth.Token;
 using Tailly.AuthService.Application.Service.Claims;
 using Tailly.AuthService.Application.Service.Security;
 using Tailly.AuthService.Application.Service.Security.Interfaces;
@@ -142,10 +146,14 @@ public static class DependencyInjectionExtensions
 
     private static IServiceCollection AddSecurityAndCore(this IServiceCollection services)
     {
+        services.AddScoped<IRegistrationService, RegistrationService>();
+        services.AddScoped<ILoginService, LoginService>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IPasswordRecoveryService, PasswordRecoveryService>();
+        services.AddScoped<IUserSecurityService, UserSecurityService>();
         services.AddScoped<IPasswordHashingService, PasswordHashingService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
-        services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<ClaimProvider>();
         services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IVerificationCodeService, VerificationCodeService>();

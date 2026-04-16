@@ -101,11 +101,10 @@ namespace Tailly.AuthService.Migrations
                 columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
-                    { 1, "Guest" },
-                    { 2, "Client" },
-                    { 3, "Specialist" },
-                    { 4, "SuperAdmin" },
-                    { 5, "Admin" }
+                    { 1, "Client" },
+                    { 2, "Specialist" },
+                    { 3, "SuperAdmin" },
+                    { 4, "Admin" }
                 });
 
             migrationBuilder.CreateIndex(

@@ -29,9 +29,6 @@ public static class AuthMapper
     {
         switch (requestedRole?.Trim().ToLowerInvariant())
         {
-            case "guest":
-                role = RoleType.Guest;
-                return true;
             case "client":
                 role = RoleType.Client;
                 return true;
@@ -52,7 +49,6 @@ public static class AuthMapper
 
     private static string MapRole(RoleType role) => role switch
     {
-        RoleType.Guest => "guest",
         RoleType.Client => "client",
         RoleType.Specialist => "specialist",
         RoleType.Admin => "admin",
