@@ -12,6 +12,7 @@ using Tailly.AuthService.Application.Dtos.Responses;
 using Tailly.AuthService.Application.Errors;
 using Tailly.AuthService.Application.Mappers;
 using Tailly.AuthService.Application.Service.Auth.Interfaces;
+using Tailly.AuthService.Core.Enums;
 using Tailly.AuthService.Infrastructure.Configurations.Extensions;
 
 namespace Tailly.AuthService.Web.Controllers;

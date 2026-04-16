@@ -1,0 +1,77 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/Media/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "clientprofile",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Media/{everything}",
+      "UpstreamHttpMethod": [ "POST", "GET", "PUT", "DELETE" ],
+      "FileUpload": true
+    },
+    {
+      "DownstreamPathTemplate": "/api/ClientProfile/me",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "clientprofile",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/profile",
+      "UpstreamHttpMethod": [ "GET", "PUT" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/ClientProfile/me/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "clientprofile",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/profile/{everything}",
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Pet",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "clientprofile",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/pets",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Pet/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "clientprofile",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/pets/{id}",
+      "UpstreamHttpMethod": [ "PUT", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Breed",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "clientprofile",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/pets/breeds",
+      "UpstreamHttpMethod": [ "GET" ]
+    }
+  ]
+}

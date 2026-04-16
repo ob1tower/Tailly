@@ -9,4 +9,6 @@
   <Project Path="Tailly.AuthService/Tailly.AuthService.csproj" />
   <Project Path="Tailly.ClientProfileService/Tailly.ClientProfileService.csproj" Id="3aa3b762-c114-433f-ae86-d7531b8a22a4" />
   <Project Path="Tailly.Contracts/Tailly.Contracts.csproj" Id="3b0113a9-3355-4e9e-8eca-88519a1f331e" />
+  <Project Path="Tailly.PostsService/Tailly.PostsService.csproj" Id="b9c23f93-8f23-4def-9737-47c0a802e9e6" />
+  <Project Path="Tailly.ShopService/Tailly.ShopService.csproj" Id="f9f1c7f2-a5d9-4e49-9125-0953fb1f1720" />
 </Solution>
