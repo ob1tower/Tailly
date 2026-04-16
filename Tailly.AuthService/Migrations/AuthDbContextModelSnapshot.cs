@@ -73,26 +73,21 @@ namespace Tailly.AuthService.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Guest"
-                        },
-                        new
-                        {
-                            Id = 2,
                             Name = "Client"
                         },
                         new
                         {
-                            Id = 3,
+                            Id = 2,
                             Name = "Specialist"
                         },
                         new
                         {
-                            Id = 4,
+                            Id = 3,
                             Name = "SuperAdmin"
                         },
                         new
                         {
-                            Id = 5,
+                            Id = 4,
                             Name = "Admin"
                         });
                 });

@@ -1,4 +1,4 @@
-﻿namespace Tailly.AuthService.Application.Service.Auth.Interfaces
+﻿namespace Tailly.AuthService.Application.Service.Auth.Common
 {
     public interface IPendingRegistrationService
     {
