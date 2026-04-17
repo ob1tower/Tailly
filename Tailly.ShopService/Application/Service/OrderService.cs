@@ -245,15 +245,15 @@ public class OrderService : IOrderService
         if (order == null || order.OwnerUserId != userId)
             return Result.Failure(ShopErrors.OrderNotFound.Description);
 
-        if (order.Status == OrderStatus.Paid)
+        if (order.Status == OrderStatus.Completed)
             return Result.Success();
 
-        order.Status = OrderStatus.Paid;
+        order.Status = OrderStatus.Completed;
         order.CanBeCancelled = false;
 
         await _orderRepository.UpdateAsync(order);
 
-        _logger.LogInformation("Payment confirmed for order {OrderId} by user {UserId}", orderId, userId);
+        _logger.LogInformation("Order {OrderId} completed after payment by user {UserId}", orderId, userId);
 
         return Result.Success();
     }

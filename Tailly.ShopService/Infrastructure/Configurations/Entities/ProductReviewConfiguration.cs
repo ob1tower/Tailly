@@ -23,13 +23,17 @@ public class ProductReviewConfiguration : IEntityTypeConfiguration<ProductReview
 
         builder.HasOne(x => x.Product)
                .WithMany(x => x.Reviews)
-               .HasForeignKey(x => x.ProductId);
-
-        builder.HasOne(x => x.Reply)
-               .WithOne(x => x.Review)
-               .HasForeignKey<ProductReviewReplyEntity>(x => x.ReviewId)
+               .HasForeignKey(x => x.ProductId)
                .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne(x => x.Reply)                    
+               .WithOne(x => x.Review)                 
+               .HasForeignKey<ProductReviewReplyEntity>(r => r.ReviewId)  
+               .IsRequired(false)                       
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(x => new { x.UserId, x.OrderId, x.ProductId }); 
         builder.HasIndex(x => x.ProductId);
+        builder.HasIndex(x => x.OrderId);
     }
 }

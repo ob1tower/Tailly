@@ -6,8 +6,8 @@ using Tailly.ShopService.Infrastructure.Configurations.Extensions;
 
 namespace Tailly.ShopService.Web.Controllers;
 
-[Route("api/[controller]")]
 [ApiController]
+[Route("api/[controller]")]
 public class FavoriteController : ControllerBase
 {
     private readonly IFavoriteService _favoriteService;

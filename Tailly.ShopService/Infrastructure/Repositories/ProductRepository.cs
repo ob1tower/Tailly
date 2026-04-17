@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Tailly.ShopService.Core.Entities.Product;
 using Tailly.ShopService.Core.Enums;
 using Tailly.ShopService.Core.Models.Products;
 using Tailly.ShopService.Infrastructure.DataAccess;
@@ -61,7 +62,8 @@ public class ProductRepository : IProductRepository
     {
         var query = _context.Products
             .Include(p => p.Category)
-            .Include(p => p.Images.Take(1))          
+            .Include(p => p.Images.Take(1))
+            .Include(p => p.Reviews)
             .AsNoTracking()
             .AsQueryable();
 
@@ -139,5 +141,56 @@ public class ProductRepository : IProductRepository
         }).ToList();
 
         return (categories, priceStats?.MinPrice ?? 0m, priceStats?.MaxPrice ?? 0m);
+    }
+
+    public async Task<ProductReview?> GetReviewByIdAsync(Guid reviewId)
+    {
+        var entity = await _context.ProductReviews
+            .Include(r => r.Reply)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Id == reviewId);
+
+        return entity?.ToDomain();   
+    }
+
+    public async Task AddReviewReplyAsync(Guid reviewId, ProductReviewReply reply)
+    {
+        var replyEntity = new ProductReviewReplyEntity
+        {
+            Id = reply.Id,
+            ReviewId = reviewId,
+            AuthorName = reply.AuthorName,
+            Text = reply.Text,
+            CreatedAt = reply.CreatedAt
+        };
+
+        _context.ProductReviewReplys.Add(replyEntity);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task AddReviewAsync(ProductReview review)
+    {
+        var entity = new ProductReviewEntity
+        {
+            Id = review.Id,
+            ProductId = review.ProductId,
+            UserId = review.UserId,
+            OrderId = review.OrderId,
+            AuthorName = review.AuthorName,
+            Rating = review.Rating,
+            Text = review.Text,
+            CreatedAt = review.CreatedAt
+        };
+
+        _context.ProductReviews.Add(entity);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> HasReviewAsync(Guid userId, Guid orderId, Guid productId)
+    {
+        return await _context.ProductReviews
+            .AnyAsync(r => r.UserId == userId &&
+                           r.OrderId == orderId &&
+                           r.ProductId == productId);
     }
 }

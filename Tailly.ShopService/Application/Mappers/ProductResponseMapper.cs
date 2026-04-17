@@ -53,7 +53,7 @@ public static class ProductResponseMapper
             Rating = review.Rating,
             Text = review.Text,
             CreatedAt = review.CreatedAt,
-            siteReply = review.Reply?.ToResponse()
+            siteReply = review.Reply?.ToResponse()   // временно буква
         };
     }
 

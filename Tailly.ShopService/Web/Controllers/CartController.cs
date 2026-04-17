@@ -88,6 +88,26 @@ public class CartController : ControllerBase
     }
 
     /// <summary>
+    /// Merges guest cart with user cart after login.
+    /// </summary>
+    /// <param name="request">Merge option (true = merge, false = discard guest cart).</param>
+    [HttpPost("carts/merge")]
+    public async Task<IActionResult> Merge([FromBody] MergeRequest request)
+    {
+        var userId = User.GetUserId();
+        var sessionId = HttpContext.GetSessionId();
+
+        if (userId == null)
+            return Unauthorized();
+
+        await _cartService.HandleCartAfterLogin(userId.Value, sessionId, request.Merge);
+
+        Response.Cookies.Delete("sessionId");
+
+        return Ok();
+    }
+
+    /// <summary>
     /// Updates quantity of an item in the cart.
     /// </summary>
     /// <param name="request">Product ID and new quantity.</param>
@@ -106,26 +126,6 @@ public class CartController : ControllerBase
 
         if (result.IsFailure)
             return BadRequest(result.Error);
-
-        return Ok();
-    }
-
-    /// <summary>
-    /// Merges guest cart with user cart after login.
-    /// </summary>
-    /// <param name="request">Merge option (true = merge, false = discard guest cart).</param>
-    [HttpPost("carts/merge")]
-    public async Task<IActionResult> Merge([FromBody] MergeRequest request)
-    {
-        var userId = User.GetUserId();
-        var sessionId = HttpContext.GetSessionId();
-
-        if (userId == null)
-            return Unauthorized();
-
-        await _cartService.HandleCartAfterLogin(userId.Value, sessionId, request.Merge);
-
-        Response.Cookies.Delete("sessionId");
 
         return Ok();
     }

@@ -12,7 +12,7 @@ using Tailly.ShopService.Infrastructure.DataAccess;
 namespace Tailly.ShopService.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    [Migration("20260411101055_InitialCreate")]
+    [Migration("20260417112553_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -288,121 +288,121 @@ namespace Tailly.ShopService.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d5802f5a-ad2d-4a07-8973-febfb61c323d"),
+                            Id = new Guid("965f6af3-1f62-442a-bfa6-c3a0788d71f3"),
                             Address = "Москва, ул. Тверская, 12, стр. 1",
-                            EstimatedDate = new DateTime(2026, 4, 12, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3470),
+                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4511),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Тверской"
                         },
                         new
                         {
-                            Id = new Guid("1160b6c1-94f8-4bce-acd0-983984127815"),
+                            Id = new Guid("5908e866-c82b-4cef-be77-a7825f8b66d3"),
                             Address = "Москва, ул. Братиславская, 21, корп. 2",
-                            EstimatedDate = new DateTime(2026, 4, 12, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3472),
+                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4517),
                             Provider = 1,
                             Title = "ПВЗ СДЭК в Марьино"
                         },
                         new
                         {
-                            Id = new Guid("ac0d7301-e88e-4db4-88e4-df62f317fd53"),
+                            Id = new Guid("45b7336a-bbd1-4631-89c7-a70a14c07c0e"),
                             Address = "Москва, Ленинский проспект, 45",
-                            EstimatedDate = new DateTime(2026, 4, 13, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3474),
+                            EstimatedDate = new DateTime(2026, 4, 19, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4518),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Ленинском проспекте"
                         },
                         new
                         {
-                            Id = new Guid("18133511-4538-415e-b759-4f06cf5c1d39"),
+                            Id = new Guid("d4622018-e132-4c66-89b4-2fe77ec52596"),
                             Address = "Москва, г. Химки, ул. Ленинградская, 29",
-                            EstimatedDate = new DateTime(2026, 4, 12, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3475),
+                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4520),
                             Provider = 1,
                             Title = "ПВЗ СДЭК в Химках"
                         },
                         new
                         {
-                            Id = new Guid("a2dd8080-ecac-4f57-adf5-2f6c67dd1f3a"),
+                            Id = new Guid("f94c8281-a2b7-4d1b-a0df-21d96082b499"),
                             Address = "Москва, проспект Мира, 119, стр. 23",
-                            EstimatedDate = new DateTime(2026, 4, 13, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3477),
+                            EstimatedDate = new DateTime(2026, 4, 19, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4521),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на ВДНХ"
                         },
                         new
                         {
-                            Id = new Guid("f63b286f-dc06-4f74-b7ef-01c3e3598b03"),
+                            Id = new Guid("72efe398-a289-4b3e-ba8f-c7aba435a796"),
                             Address = "Санкт-Петербург, Невский проспект, 56",
-                            EstimatedDate = new DateTime(2026, 4, 12, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3481),
+                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4523),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Невском"
                         },
                         new
                         {
-                            Id = new Guid("86390af9-c7bd-428b-a506-a3d8f2584688"),
+                            Id = new Guid("5d3db898-0f42-440c-b749-fcc78124463f"),
                             Address = "Санкт-Петербург, ул. Будапештская, 18",
-                            EstimatedDate = new DateTime(2026, 4, 13, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3483),
+                            EstimatedDate = new DateTime(2026, 4, 19, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4525),
                             Provider = 1,
                             Title = "ПВЗ СДЭК в Купчино"
                         },
                         new
                         {
-                            Id = new Guid("8260749b-f7c1-4949-8274-7b2cd9585024"),
+                            Id = new Guid("173a3489-b338-41c1-9638-9a7cd8e1ead0"),
                             Address = "Санкт-Петербург, Московский проспект, 183",
-                            EstimatedDate = new DateTime(2026, 4, 12, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3485),
+                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4528),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Московском проспекте"
                         },
                         new
                         {
-                            Id = new Guid("d0f1984e-d1cb-4501-9029-c35bba68aeb7"),
+                            Id = new Guid("08a146d1-5248-4b75-beb3-44746cca8774"),
                             Address = "Санкт-Петербург, пр. Испытателей, 15",
-                            EstimatedDate = new DateTime(2026, 4, 13, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3486),
+                            EstimatedDate = new DateTime(2026, 4, 19, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4529),
                             Provider = 1,
                             Title = "ПВЗ СДЭК у станции метро Пионерская"
                         },
                         new
                         {
-                            Id = new Guid("027286f6-ee4d-4c0c-9e7a-cbd0af7ea442"),
+                            Id = new Guid("5c174312-07ce-4e79-b7b0-3dc88dbe406a"),
                             Address = "Екатеринбург, ул. Малышева, 51",
-                            EstimatedDate = new DateTime(2026, 4, 12, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3488),
+                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4531),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Малышева"
                         },
                         new
                         {
-                            Id = new Guid("258dcde6-c023-4b42-b10a-fd405ae55671"),
+                            Id = new Guid("0a450308-5a77-42db-a6fe-53dd00c7c13d"),
                             Address = "Екатеринбург, ул. Космонавтов, 11/1",
-                            EstimatedDate = new DateTime(2026, 4, 13, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3489),
+                            EstimatedDate = new DateTime(2026, 4, 19, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4533),
                             Provider = 1,
                             Title = "ПВЗ СДЭК в Уралмаше"
                         },
                         new
                         {
-                            Id = new Guid("f4665b4f-ef7d-46a4-8fd5-dbfe7a137c32"),
+                            Id = new Guid("81a857a8-5a6e-48cb-868e-29c4e4e139c1"),
                             Address = "Новосибирск, Красный проспект, 52",
-                            EstimatedDate = new DateTime(2026, 4, 12, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3491),
+                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4534),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Красном проспекте"
                         },
                         new
                         {
-                            Id = new Guid("1205a018-3ac4-458f-b1ad-96747a0cba5c"),
+                            Id = new Guid("28c10112-47da-4ad0-8cb8-1d88df5556fb"),
                             Address = "Новосибирск, ул. Ильича, 10",
-                            EstimatedDate = new DateTime(2026, 4, 14, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3493),
+                            EstimatedDate = new DateTime(2026, 4, 20, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4536),
                             Provider = 1,
                             Title = "ПВЗ СДЭК в Академгородке"
                         },
                         new
                         {
-                            Id = new Guid("c85f7634-b297-412d-ba59-e55eeab519c0"),
+                            Id = new Guid("de5248b2-133c-4560-9d8f-78d216853be4"),
                             Address = "Казань, ул. Баумана, 27",
-                            EstimatedDate = new DateTime(2026, 4, 12, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3496),
+                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4537),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Баумана"
                         },
                         new
                         {
-                            Id = new Guid("fd250fe9-51d1-4971-8769-cb38d81165ea"),
+                            Id = new Guid("8c56278c-8933-41f8-b443-ebbc4287ec3e"),
                             Address = "Казань, пр. Победы, 74",
-                            EstimatedDate = new DateTime(2026, 4, 13, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3498),
+                            EstimatedDate = new DateTime(2026, 4, 19, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4539),
                             Provider = 1,
                             Title = "ПВЗ СДЭК в Советском районе"
                         });
@@ -536,399 +536,399 @@ namespace Tailly.ShopService.Migrations
                         {
                             Id = new Guid("1b3647bc-92bd-483f-9aa4-d20130a619a9"),
                             CategoryId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3127),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4205),
                             Description = "Премиальный полнорационный корм для собак старше 1 года. Поддерживает иммунитет и здоровье пищеварения.",
                             IsAvailable = true,
                             OldPrice = 2790m,
                             Price = 2490m,
-                            Rating = 4.9m,
-                            ReviewsCount = 234,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Сухой корм для взрослых собак",
                             Slug = "royal-canin-adult-dog",
                             StockQuantity = 87,
                             Title = "Royal Canin Adult Dog Food",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3128)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4206)
                         },
                         new
                         {
                             Id = new Guid("81acec04-ac74-4f06-861a-261b64eaae85"),
                             CategoryId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3132),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4209),
                             Description = "Нежные кусочки в соусе. Идеальный рацион для взрослых кошек.",
                             IsAvailable = true,
                             Price = 89m,
-                            Rating = 4.7m,
-                            ReviewsCount = 189,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Влажный корм для кошек",
                             Slug = "whiskas-wet-chicken",
                             StockQuantity = 320,
                             Title = "Whiskas Wet Cat Food с курицей",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3132)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4210)
                         },
                         new
                         {
                             Id = new Guid("a9ebd856-d30c-4f8b-8ed2-3ec918a0f865"),
                             CategoryId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3136),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4213),
                             Description = "Сбалансированное питание для правильного роста и развития щенков.",
                             IsAvailable = true,
                             OldPrice = 2190m,
                             Price = 1890m,
-                            Rating = 4.8m,
-                            ReviewsCount = 98,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Корм для щенков всех пород",
                             Slug = "pedigree-puppy",
                             StockQuantity = 64,
                             Title = "Pedigree Puppy для щенков",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3137)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4214)
                         },
                         new
                         {
                             Id = new Guid("d7a9090a-6d01-4a36-9e9d-2fd9fef935a4"),
                             CategoryId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3141),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4220),
                             Description = "Гипоаллергенный корм для собак с чувствительным пищеварением.",
                             IsAvailable = true,
                             Price = 3190m,
-                            Rating = 4.9m,
-                            ReviewsCount = 156,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Беззерновой корм с лососем",
                             Slug = "brit-care-salmon",
                             StockQuantity = 45,
                             Title = "Brit Care Grain-Free Salmon",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3141)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4220)
                         },
                         new
                         {
                             Id = new Guid("f2539156-ab5d-4f0a-b542-dc9cc37c3239"),
                             CategoryId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3145),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4225),
                             Description = "Полезные косточки и палочки для поощрения.",
                             IsAvailable = true,
                             OldPrice = 590m,
                             Price = 450m,
-                            Rating = 4.6m,
-                            ReviewsCount = 87,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Натуральные лакомства",
                             Slug = "bosch-dog-treats",
                             StockQuantity = 210,
                             Title = "Лакомство для собак Bosch",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3145)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4225)
                         },
                         new
                         {
                             Id = new Guid("3461d3bf-6549-4049-beb0-4651ab3a4f62"),
                             CategoryId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3149),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4229),
                             Description = "Автоматический мячик с несколькими режимами движения.",
                             IsAvailable = true,
                             OldPrice = 1590m,
                             Price = 1290m,
-                            Rating = 4.6m,
-                            ReviewsCount = 156,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Умная игрушка с движением",
                             Slug = "interactive-dog-ball",
                             StockQuantity = 42,
                             Title = "Интерактивный мяч для собак",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3150)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4229)
                         },
                         new
                         {
                             Id = new Guid("c7b91735-1896-4dae-8b03-cfe3b90813f0"),
                             CategoryId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3153),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4232),
                             Description = "Лёгкая удочка с яркими перьями.",
                             IsAvailable = true,
                             Price = 490m,
-                            Rating = 4.9m,
-                            ReviewsCount = 312,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Любимая игрушка кошек",
                             Slug = "cat-feather-wand",
                             StockQuantity = 95,
                             Title = "Дразнилка с перьями для кошек",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3154)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4233)
                         },
                         new
                         {
                             Id = new Guid("cbc1ac00-2283-45d3-b33e-0a7f1373ae2c"),
                             CategoryId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3162),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4236),
                             Description = "Прочный плюш с пищалкой внутри.",
                             IsAvailable = true,
                             OldPrice = 1190m,
                             Price = 890m,
-                            Rating = 4.5m,
-                            ReviewsCount = 134,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Мягкая пищащая игрушка",
                             Slug = "squeaky-plush-bear",
                             StockQuantity = 67,
                             Title = "Пищащий плюшевый медведь",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3162)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4236)
                         },
                         new
                         {
                             Id = new Guid("9dac461d-d71a-4420-967f-dc397994f358"),
                             CategoryId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3165),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4238),
                             Description = "Классическая лазерная указка.",
                             IsAvailable = true,
                             Price = 390m,
-                            Rating = 4.8m,
-                            ReviewsCount = 245,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Лазер для активных игр",
                             Slug = "cat-laser-pointer",
                             StockQuantity = 180,
                             Title = "Лазерная указка для кошек",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3166)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4239)
                         },
                         new
                         {
                             Id = new Guid("538fe373-3572-4dd1-b068-f923543f77d9"),
                             CategoryId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3169),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4242),
                             Description = "Прочный канат для игр с собакой.",
                             IsAvailable = true,
                             OldPrice = 890m,
                             Price = 690m,
-                            Rating = 4.7m,
-                            ReviewsCount = 98,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Крепкий канат",
                             Slug = "rope-tug-toy",
                             StockQuantity = 53,
                             Title = "Канатная игрушка для перетягивания",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3169)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4242)
                         },
                         new
                         {
                             Id = new Guid("a3746572-16ff-4cf3-af67-0b8673bffcf7"),
                             CategoryId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3172),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4245),
                             Description = "Мягкая и удобная шлейка для средних и крупных собак.",
                             IsAvailable = true,
                             Price = 1690m,
-                            Rating = 4.8m,
-                            ReviewsCount = 112,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Комфортная шлейка",
                             Slug = "adjustable-dog-harness",
                             StockQuantity = 28,
                             Title = "Регулируемая шлейка для собак",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3172)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4245)
                         },
                         new
                         {
                             Id = new Guid("37083c6d-2711-44de-90a0-b0bf2684dcba"),
                             CategoryId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3176),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4248),
                             Description = "Надёжный нейлоновый поводок для крупных собак.",
-                            IsAvailable = true,
+                            IsAvailable = false,
                             OldPrice = 1490m,
                             Price = 1290m,
-                            Rating = 4.7m,
-                            ReviewsCount = 87,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Прочный поводок",
                             Slug = "xl-nylon-leash",
                             StockQuantity = 33,
                             Title = "Поводок нейлоновый XL",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3176)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4248)
                         },
                         new
                         {
                             Id = new Guid("3080a42d-ab57-414e-8925-82775c1de349"),
                             CategoryId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3179),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4251),
                             Description = "Утеплённый комбинезон с капюшоном.",
                             IsAvailable = true,
                             OldPrice = 2590m,
                             Price = 2190m,
-                            Rating = 4.9m,
-                            ReviewsCount = 76,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Зимняя одежда для собак",
                             Slug = "warm-dog-jumpsuit",
                             StockQuantity = 19,
                             Title = "Теплый комбинезон для собак",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3180)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4251)
                         },
                         new
                         {
                             Id = new Guid("ea88eab3-06a9-4614-80f9-dd8d457a498d"),
                             CategoryId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3182),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4254),
                             Description = "Керамическая миска с резиновым основанием.",
                             IsAvailable = true,
                             Price = 790m,
-                            Rating = 4.6m,
-                            ReviewsCount = 203,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Устойчивая миска",
                             Slug = "ceramic-non-slip-bowl",
                             StockQuantity = 124,
                             Title = "Миска керамическая антискользящая",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3183)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4254)
                         },
                         new
                         {
                             Id = new Guid("23746c5a-0e90-4e6a-b902-445f92756b98"),
                             CategoryId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3188),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4258),
                             Description = "Ошейник с GPS и отслеживанием активности.",
-                            IsAvailable = true,
+                            IsAvailable = false,
                             OldPrice = 3990m,
                             Price = 3490m,
-                            Rating = 4.4m,
-                            ReviewsCount = 45,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Умный ошейник",
                             Slug = "gps-pet-collar",
                             StockQuantity = 12,
                             Title = "Ошейник с GPS-трекером",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3188)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4258)
                         },
                         new
                         {
                             Id = new Guid("ba872d50-5c81-40d4-954e-0ecdb0916efb"),
                             CategoryId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3191),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4261),
                             Description = "Натуральный шампунь с экстрактом алоэ.",
-                            IsAvailable = true,
+                            IsAvailable = false,
                             OldPrice = 990m,
                             Price = 790m,
-                            Rating = 4.6m,
-                            ReviewsCount = 95,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Гипоаллергенный шампунь",
                             Slug = "dog-shampoo-aloe",
                             StockQuantity = 47,
                             Title = "Шампунь для собак с алоэ",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3192)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4262)
                         },
                         new
                         {
                             Id = new Guid("6b729cb8-c2dd-4ccf-89b3-05eed1d16c9b"),
                             CategoryId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3194),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4264),
                             Description = "Профессиональный когтерез с ограничителем.",
                             IsAvailable = true,
                             Price = 690m,
-                            Rating = 4.4m,
-                            ReviewsCount = 73,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Безопасный когтерез",
                             Slug = "pet-nail-clipper",
                             StockQuantity = 55,
                             Title = "Когтерез для животных",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3195)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4265)
                         },
                         new
                         {
                             Id = new Guid("3be4a5fa-fd45-453d-bbf9-1f314b747ff2"),
                             CategoryId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3198),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4267),
                             Description = "Удобная щётка для удаления выпавшей шерсти.",
                             IsAvailable = true,
                             OldPrice = 790m,
                             Price = 590m,
-                            Rating = 4.9m,
-                            ReviewsCount = 128,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Щётка с самоочисткой",
                             Slug = "self-cleaning-cat-brush",
                             StockQuantity = 68,
                             Title = "Самоочищающаяся щетка для кошек",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3198)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4268)
                         },
                         new
                         {
                             Id = new Guid("6d861eaf-a99e-4342-bbe2-c1529376bf06"),
                             CategoryId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3248),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4337),
                             Description = "Быстрое очищение шерсти без купания.",
                             IsAvailable = true,
                             Price = 890m,
-                            Rating = 4.5m,
-                            ReviewsCount = 64,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Сухой шампунь без воды",
                             Slug = "dry-dog-shampoo",
                             StockQuantity = 82,
                             Title = "Сухой шампунь для собак",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3249)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4338)
                         },
                         new
                         {
                             Id = new Guid("60a0315b-ebe9-46e4-b56e-acae29a356b6"),
                             CategoryId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3252),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4341),
                             Description = "Полный набор для ухода за зубами.",
                             IsAvailable = true,
                             OldPrice = 1490m,
                             Price = 1290m,
-                            Rating = 4.8m,
-                            ReviewsCount = 109,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Гигиена полости рта",
                             Slug = "pet-dental-kit",
                             StockQuantity = 37,
                             Title = "Набор для чистки зубов питомцам",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3252)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4341)
                         },
                         new
                         {
                             Id = new Guid("065f9a01-157f-4c29-9743-c9b1a562562d"),
                             CategoryId = new Guid("55555555-5555-5555-5555-555555555555"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3256),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4344),
                             Description = "Комплекс для укрепления суставов и хрящей.",
                             IsAvailable = true,
                             OldPrice = 1790m,
                             Price = 1490m,
-                            Rating = 4.7m,
-                            ReviewsCount = 142,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Поддержка суставов",
                             Slug = "joint-supplement-dogs",
                             StockQuantity = 51,
                             Title = "Витамины для суставов собак",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3257)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4345)
                         },
                         new
                         {
                             Id = new Guid("73db2a59-d927-4060-ab4a-a71a4ebd7f80"),
                             CategoryId = new Guid("55555555-5555-5555-5555-555555555555"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3260),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4347),
                             Description = "Капли на холку от блох и клещей.",
                             IsAvailable = true,
                             Price = 890m,
-                            Rating = 4.9m,
-                            ReviewsCount = 201,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Защита от паразитов",
                             Slug = "anti-parasite-drops-cats",
                             StockQuantity = 73,
                             Title = "Антипаразитарные капли для кошек",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3260)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4348)
                         },
                         new
                         {
                             Id = new Guid("6084749d-cc5a-4f5e-b83e-553b383c2091"),
                             CategoryId = new Guid("55555555-5555-5555-5555-555555555555"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3266),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4351),
                             Description = "Пробиотический комплекс для ЖКТ.",
-                            IsAvailable = true,
+                            IsAvailable = false,
                             OldPrice = 1390m,
                             Price = 1190m,
-                            Rating = 4.6m,
-                            ReviewsCount = 88,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Нормализация микрофлоры",
                             Slug = "probiotics-pet",
                             StockQuantity = 29,
                             Title = "Пробиотики для пищеварения",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3266)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4352)
                         },
                         new
                         {
                             Id = new Guid("ee3b9279-da4b-421e-ac3e-b5b7ae287463"),
                             CategoryId = new Guid("55555555-5555-5555-5555-555555555555"),
-                            CreatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3270),
+                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4355),
                             Description = "Добавка для правильного формирования скелета.",
                             IsAvailable = true,
                             Price = 690m,
-                            Rating = 4.8m,
-                            ReviewsCount = 67,
+                            Rating = 0m,
+                            ReviewsCount = 0,
                             ShortDescription = "Кальций для роста костей",
                             Slug = "calcium-vitamin-d",
                             StockQuantity = 95,
                             Title = "Кальций с витамином D для щенков",
-                            UpdatedAt = new DateTime(2026, 4, 11, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3270)
+                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4355)
                         });
                 });
 
@@ -960,168 +960,168 @@ namespace Tailly.ShopService.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("c0622040-7e6c-4cd1-9bed-9f6fe84c202f"),
+                            Id = new Guid("fa240dc3-ef4d-4522-94f4-aecdbf3c4134"),
                             Alt = "Royal Canin Adult Dog Food",
                             ProductId = new Guid("1b3647bc-92bd-483f-9aa4-d20130a619a9"),
                             Url = "https://picsum.photos/id/237/800/800"
                         },
                         new
                         {
-                            Id = new Guid("c3d397c9-1446-425c-94b9-1e338f79ca7b"),
+                            Id = new Guid("a6bbc854-e9da-419d-a902-0efd18856f45"),
                             Alt = "Whiskas Wet Cat Food",
                             ProductId = new Guid("81acec04-ac74-4f06-861a-261b64eaae85"),
                             Url = "https://picsum.photos/id/1015/800/800"
                         },
                         new
                         {
-                            Id = new Guid("08a8fa90-bce7-4ed9-9f34-9eff534817f6"),
+                            Id = new Guid("e938af59-ba8b-4215-8dd5-cacd851e6aa2"),
                             Alt = "Pedigree Puppy Food",
                             ProductId = new Guid("a9ebd856-d30c-4f8b-8ed2-3ec918a0f865"),
                             Url = "https://picsum.photos/id/106/800/800"
                         },
                         new
                         {
-                            Id = new Guid("63fd849b-949b-46a0-bad3-21e0576f42aa"),
+                            Id = new Guid("47565334-46cf-4f9b-bdce-9b0d5e2c96cc"),
                             Alt = "Brit Care Grain-Free Salmon",
                             ProductId = new Guid("d7a9090a-6d01-4a36-9e9d-2fd9fef935a4"),
                             Url = "https://picsum.photos/id/201/800/800"
                         },
                         new
                         {
-                            Id = new Guid("b1648ab6-3b33-4ee8-aea9-c5801c390362"),
+                            Id = new Guid("888cc252-d288-476e-a141-5f446fb29b19"),
                             Alt = "Bosch Dog Treats",
                             ProductId = new Guid("f2539156-ab5d-4f0a-b542-dc9cc37c3239"),
                             Url = "https://picsum.photos/id/251/800/800"
                         },
                         new
                         {
-                            Id = new Guid("75b584f9-f586-4471-aaed-63cbaef9431f"),
+                            Id = new Guid("25450e32-2cf2-4926-b905-f20f70bab150"),
                             Alt = "Interactive Dog Ball",
                             ProductId = new Guid("3461d3bf-6549-4049-beb0-4651ab3a4f62"),
                             Url = "https://picsum.photos/id/180/800/800"
                         },
                         new
                         {
-                            Id = new Guid("7069ec83-43e8-471f-b72e-847b8165c3f4"),
+                            Id = new Guid("29c4093a-e358-4979-bc55-5923dea984c3"),
                             Alt = "Cat Feather Wand Toy",
                             ProductId = new Guid("c7b91735-1896-4dae-8b03-cfe3b90813f0"),
                             Url = "https://picsum.photos/id/133/800/800"
                         },
                         new
                         {
-                            Id = new Guid("d2c838f6-f2d7-4069-a59a-d730c970e04a"),
+                            Id = new Guid("62340eb1-b10e-42bc-8d23-ca23c43356e3"),
                             Alt = "Squeaky Plush Bear",
                             ProductId = new Guid("cbc1ac00-2283-45d3-b33e-0a7f1373ae2c"),
                             Url = "https://picsum.photos/id/367/800/800"
                         },
                         new
                         {
-                            Id = new Guid("147eed91-5c88-4b4e-af56-bbb388d70840"),
+                            Id = new Guid("4fa2af20-bad5-4ef7-984b-ec24d4935bf7"),
                             Alt = "Cat Laser Pointer",
                             ProductId = new Guid("9dac461d-d71a-4420-967f-dc397994f358"),
                             Url = "https://picsum.photos/id/433/800/800"
                         },
                         new
                         {
-                            Id = new Guid("a34a10e8-e3cf-4699-86fe-12d293f03c64"),
+                            Id = new Guid("2df3f347-4d7c-4671-bed5-04611ce4b28d"),
                             Alt = "Rope Tug Toy",
                             ProductId = new Guid("538fe373-3572-4dd1-b068-f923543f77d9"),
                             Url = "https://picsum.photos/id/201/800/800"
                         },
                         new
                         {
-                            Id = new Guid("0c527aec-7be0-4c8a-ac6c-4eef7a041ecb"),
+                            Id = new Guid("9d1912bf-a143-4b4d-b63b-6ba3caec7fce"),
                             Alt = "Adjustable Dog Harness",
                             ProductId = new Guid("a3746572-16ff-4cf3-af67-0b8673bffcf7"),
                             Url = "https://picsum.photos/id/180/800/800"
                         },
                         new
                         {
-                            Id = new Guid("0a27abb0-6860-4da7-a1aa-8437b6d9a635"),
+                            Id = new Guid("78102a63-d3e8-4c70-bc0b-7546b07f5017"),
                             Alt = "XL Dog Leash",
                             ProductId = new Guid("37083c6d-2711-44de-90a0-b0bf2684dcba"),
                             Url = "https://picsum.photos/id/201/800/800"
                         },
                         new
                         {
-                            Id = new Guid("80aa83de-c471-451d-8573-38cc96512807"),
+                            Id = new Guid("e4b61d80-ccd3-4a0b-87f3-f64ff414079e"),
                             Alt = "Warm Dog Jumpsuit",
                             ProductId = new Guid("3080a42d-ab57-414e-8925-82775c1de349"),
                             Url = "https://picsum.photos/id/251/800/800"
                         },
                         new
                         {
-                            Id = new Guid("061053b7-f878-4dbb-afca-d305e9abc210"),
+                            Id = new Guid("5e557d52-0132-4a24-8aef-3aeaeb902052"),
                             Alt = "Ceramic Non-Slip Bowl",
                             ProductId = new Guid("ea88eab3-06a9-4614-80f9-dd8d457a498d"),
                             Url = "https://picsum.photos/id/367/800/800"
                         },
                         new
                         {
-                            Id = new Guid("91f5fda3-385e-482e-95ea-88fdff77a417"),
+                            Id = new Guid("ebbfaf2f-c246-4fcd-9322-1bd075aaec45"),
                             Alt = "GPS Pet Collar",
                             ProductId = new Guid("23746c5a-0e90-4e6a-b902-445f92756b98"),
                             Url = "https://picsum.photos/id/433/800/800"
                         },
                         new
                         {
-                            Id = new Guid("870e4897-a009-473b-b61d-a2ce2960adda"),
+                            Id = new Guid("41b81da5-d22f-4cb0-ac59-1f230be78428"),
                             Alt = "Dog Shampoo",
                             ProductId = new Guid("ba872d50-5c81-40d4-954e-0ecdb0916efb"),
                             Url = "https://picsum.photos/id/251/800/800"
                         },
                         new
                         {
-                            Id = new Guid("6b9d0e93-82fe-48ce-a3c5-a59075e4f502"),
+                            Id = new Guid("479b7385-9450-4511-87d8-fc9a929678fe"),
                             Alt = "Pet Nail Clipper",
                             ProductId = new Guid("6b729cb8-c2dd-4ccf-89b3-05eed1d16c9b"),
                             Url = "https://picsum.photos/id/367/800/800"
                         },
                         new
                         {
-                            Id = new Guid("cf8c1216-2660-4966-a673-5feba3690e15"),
+                            Id = new Guid("ed671087-db3d-4384-9fb6-991956d6111f"),
                             Alt = "Self-Cleaning Cat Brush",
                             ProductId = new Guid("3be4a5fa-fd45-453d-bbf9-1f314b747ff2"),
                             Url = "https://picsum.photos/id/433/800/800"
                         },
                         new
                         {
-                            Id = new Guid("7ebc623a-0a71-42ed-8690-82b612185aa5"),
+                            Id = new Guid("018f5dd2-420d-4fff-abb4-b3ed68197ca1"),
                             Alt = "Dry Dog Shampoo",
                             ProductId = new Guid("6d861eaf-a99e-4342-bbe2-c1529376bf06"),
                             Url = "https://picsum.photos/id/180/800/800"
                         },
                         new
                         {
-                            Id = new Guid("2a7ddade-bed3-4607-abd8-f89a1228cfed"),
+                            Id = new Guid("1ca940b4-3895-4e32-b6ed-d375e88cdfca"),
                             Alt = "Pet Dental Kit",
                             ProductId = new Guid("60a0315b-ebe9-46e4-b56e-acae29a356b6"),
                             Url = "https://picsum.photos/id/201/800/800"
                         },
                         new
                         {
-                            Id = new Guid("62c99431-90e1-4189-ba92-8f61d7e2c074"),
+                            Id = new Guid("ff15ffeb-140a-4924-b1a7-f34eb0adf34f"),
                             Alt = "Joint Supplement",
                             ProductId = new Guid("065f9a01-157f-4c29-9743-c9b1a562562d"),
                             Url = "https://picsum.photos/id/251/800/800"
                         },
                         new
                         {
-                            Id = new Guid("1cf2ce5f-1044-4193-89d1-7e3560714d5c"),
+                            Id = new Guid("682a07bb-7425-490f-90d4-5c4639ce1806"),
                             Alt = "Anti-Parasite Drops",
                             ProductId = new Guid("73db2a59-d927-4060-ab4a-a71a4ebd7f80"),
                             Url = "https://picsum.photos/id/367/800/800"
                         },
                         new
                         {
-                            Id = new Guid("58d65ca7-1edc-4caa-8b4a-a9e41ea0881a"),
+                            Id = new Guid("3146c744-a4ce-4ac8-9578-078ba6084159"),
                             Alt = "Probiotics",
                             ProductId = new Guid("6084749d-cc5a-4f5e-b83e-553b383c2091"),
                             Url = "https://picsum.photos/id/433/800/800"
                         },
                         new
                         {
-                            Id = new Guid("43443ae0-e95b-43aa-a452-0d7dfaf728a0"),
+                            Id = new Guid("1b497660-1eef-4dc6-89fa-6b5318cffe77"),
                             Alt = "Calcium with Vitamin D",
                             ProductId = new Guid("ee3b9279-da4b-421e-ac3e-b5b7ae287463"),
                             Url = "https://picsum.photos/id/180/800/800"
@@ -1142,42 +1142,35 @@ namespace Tailly.ShopService.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Rating")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("ReplyId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductReviews");
+                    b.HasIndex("UserId", "OrderId", "ProductId");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("a1111111-1111-1111-1111-111111111111"),
-                            AuthorName = "Анна Смирнова",
-                            CreatedAt = new DateTime(2026, 2, 25, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3422),
-                            ProductId = new Guid("1b3647bc-92bd-483f-9aa4-d20130a619a9"),
-                            Rating = 5,
-                            Text = "Отличный корм! Собака ест с огромным удовольствием, шерсть стала намного лучше."
-                        },
-                        new
-                        {
-                            Id = new Guid("a3333333-3333-3333-3333-333333333333"),
-                            AuthorName = "Дмитрий Волков",
-                            CreatedAt = new DateTime(2026, 3, 22, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3427),
-                            ProductId = new Guid("3461d3bf-6549-4049-beb0-4651ab3a4f62"),
-                            Rating = 5,
-                            Text = "Лучшая игрушка за последнее время! Собака не может остановиться."
-                        });
+                    b.ToTable("ProductReviews");
                 });
 
             modelBuilder.Entity("Tailly.ShopService.Core.Entities.Product.ProductReviewReplyEntity", b =>
@@ -1208,24 +1201,6 @@ namespace Tailly.ShopService.Migrations
                         .IsUnique();
 
                     b.ToTable("ProductReviewReplys");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("5873dcb6-0a40-4028-8430-8b2a0e9dbc80"),
-                            AuthorName = "Tailly Shop",
-                            CreatedAt = new DateTime(2026, 2, 26, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3446),
-                            ReviewId = new Guid("a1111111-1111-1111-1111-111111111111"),
-                            Text = "Спасибо большое за отзыв, Анна! Очень рады, что вашему питомцу нравится наш корм ❤️"
-                        },
-                        new
-                        {
-                            Id = new Guid("dbd50f66-98e0-4354-857d-07b9badb1cab"),
-                            AuthorName = "Tailly Shop",
-                            CreatedAt = new DateTime(2026, 3, 23, 10, 10, 55, 494, DateTimeKind.Utc).AddTicks(3448),
-                            ReviewId = new Guid("a3333333-3333-3333-3333-333333333333"),
-                            Text = "Рады, что игрушка понравилась! Это один из наших бестселлеров."
-                        });
                 });
 
             modelBuilder.Entity("Tailly.ShopService.Core.Entities.User.FavoriteEntity", b =>
@@ -1337,8 +1312,7 @@ namespace Tailly.ShopService.Migrations
                     b.HasOne("Tailly.ShopService.Core.Entities.Product.ProductReviewEntity", "Review")
                         .WithOne("Reply")
                         .HasForeignKey("Tailly.ShopService.Core.Entities.Product.ProductReviewReplyEntity", "ReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Review");
                 });

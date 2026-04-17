@@ -7,8 +7,10 @@ namespace Tailly.ShopService.Application.Service.Interfaces;
 
 public interface IProductService
 {
+    Task<Result> CreateReviewAsync(Guid userId, ProductReview review);
+    Task<Result<List<Product>, Error>> GetByIdsAsync(string ids);
     Task<Result<Product, Error>> GetBySlugAsync(string slug);
     Task<Result<(List<Product> products, int total), Error>> GetCatalogAsync(CatalogFilterState filter);
     Task<Result<(List<Category> categories, decimal minPrice, decimal maxPrice), Error>> GetCatalogMetaAsync();
-    Task<Result<List<Product>, Error>> GetByIdsAsync(string ids);
+    Task<Result> ReplyToReviewAsync(Guid reviewId, string replyText);
 }

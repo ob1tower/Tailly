@@ -71,7 +71,9 @@ public static class OrderResponseMapper
             Payment = new OrderPaymentResponse
             {
                 Method = ShopMapper.MapPaymentMethod(order.PaymentMethod),
-                Status = order.Status == OrderStatus.Paid ? "paid" : "pending"
+                Status = (order.Status == OrderStatus.Paid || order.Status == OrderStatus.Completed)
+                ? "paid"
+                : "pending"
             }
         };
     }
