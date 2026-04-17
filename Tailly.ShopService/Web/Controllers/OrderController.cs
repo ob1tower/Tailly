@@ -11,7 +11,7 @@ using Tailly.ShopService.Infrastructure.Configurations.Extensions;
 
 namespace Tailly.ShopService.Web.Controllers;
 
-[Authorize(Roles = "Client,Specialist")]
+[Authorize(Roles = "Client, Specialist")]
 [ApiController]
 [Route("api/[controller]")]
 public class OrderController : ControllerBase
@@ -27,6 +27,47 @@ public class OrderController : ControllerBase
         _orderService = orderService;
         _cartService = cartService;
         _createOrderValidator = сreateOrderValidator;
+    }
+
+    /// <summary>
+    /// Gets all orders belonging to the currently authenticated user.
+    /// </summary>
+    /// <returns>List of the user's orders.</returns>
+    [HttpGet("me/orders/products")]
+    public async Task<IActionResult> GetUserOrders()
+    {
+        var userId = User.GetUserId();
+        if (userId == null)
+            return Unauthorized();
+
+        var result = await _orderService.GetUserOrdersAsync(userId.Value);
+
+        return Ok(result.Value.Select(OrderResponseMapper.ToResponse));
+    }
+
+    /// <summary>
+    /// Gets detailed information about a specific order by its ID.
+    /// </summary>
+    /// <param name="orderId">The unique identifier of the order.</param>
+    /// <returns>Full order details if the user has access to it.</returns>
+    [HttpGet("me/orders/products/{orderId:guid}")]
+    [EnableRateLimiting("product")]
+    public async Task<IActionResult> GetById(Guid orderId)
+    {
+        var userId = User.GetUserId();
+        if (userId == null)
+            return Unauthorized();
+
+        var result = await _orderService.GetOrderByIdAsync(userId.Value, orderId);
+
+        if (result.IsFailure)
+        {
+            return result.Error.Equals(ShopErrors.OrderNotFound)
+                ? NotFound(result.Error)
+                : BadRequest(result.Error);
+        }
+
+        return Ok(OrderResponseMapper.ToResponse(result.Value));
     }
 
     /// <summary>
@@ -88,47 +129,6 @@ public class OrderController : ControllerBase
             return BadRequest(result.Error);
 
         await _cartService.ClearCartAsync(userId, null);
-
-        return Ok(OrderResponseMapper.ToResponse(result.Value));
-    }
-
-    /// <summary>
-    /// Gets all orders belonging to the currently authenticated user.
-    /// </summary>
-    /// <returns>List of the user's orders.</returns>
-    [HttpGet("me/orders/products")]
-    public async Task<IActionResult> GetUserOrders()
-    {
-        var userId = User.GetUserId();
-        if (userId == null)
-            return Unauthorized();
-
-        var result = await _orderService.GetUserOrdersAsync(userId.Value);
-
-        return Ok(result.Value.Select(OrderResponseMapper.ToResponse));
-    }
-
-    /// <summary>
-    /// Gets detailed information about a specific order by its ID.
-    /// </summary>
-    /// <param name="orderId">The unique identifier of the order.</param>
-    /// <returns>Full order details if the user has access to it.</returns>
-    [HttpGet("me/orders/products/{orderId:guid}")]
-    [EnableRateLimiting("product")]
-    public async Task<IActionResult> GetById(Guid orderId)
-    {
-        var userId = User.GetUserId();
-        if (userId == null)
-            return Unauthorized();
-
-        var result = await _orderService.GetOrderByIdAsync(userId.Value, orderId);
-
-        if (result.IsFailure)
-        {
-            return result.Error.Equals(ShopErrors.OrderNotFound)
-                ? NotFound(result.Error)
-                : BadRequest(result.Error);
-        }
 
         return Ok(OrderResponseMapper.ToResponse(result.Value));
     }

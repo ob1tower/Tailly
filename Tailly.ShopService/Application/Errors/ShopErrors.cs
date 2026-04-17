@@ -65,14 +65,29 @@ public static class ShopErrors
         new("Cart.ItemNotFound", "Item not found in cart.");
 
     public static readonly Error CartIdentityRequired = 
-        new("Cart.Identity.Required", "UserId or SessionId must be provided.");
+        new("Cart.IdentityRequired", "UserId or SessionId must be provided.");
 
     public static readonly Error FavoriteIdentityRequired =
-        new("favorite.identity.required", "UserId or SessionId required.");
+        new("FavoriteIdentityRequired", "UserId or SessionId required.");
 
     public static readonly Error FavoriteAlreadyExists =
-        new("favorite.already.exists", "Item already in favorites.");
+        new("FavoriteAlreadyExists", "Item already in favorites.");
 
     public static readonly Error FavoriteNotFound =
-        new("favorite.not.found", "Item not found in favorites.");
+        new("FavoriteNotFound", "Item not found in favorites.");
+
+    public static readonly Error ReviewNotFound =
+        new("Review.NotFound", "Review not found.");
+
+    public static readonly Error ReviewAlreadyHasReply =
+        new("Review.AlreadyHasReply", "This review already has a reply from the shop.");
+
+    public static readonly Error OrderNotCompleted =
+        new("Review.OrderNotCompleted", "You can only leave a review for delivered orders.");
+
+    public static readonly Error ProductNotInOrder =
+        new("Review.ProductNotInOrder", "This product was not purchased in the specified order.");
+
+    public static readonly Error ReviewAlreadyExists =
+        new("Review.AlreadyExists", "You have already reviewed this product in this order.");
 }

@@ -10,4 +10,8 @@ public interface IProductRepository
     Task<(List<Product> products, int total)> GetCatalogAsync(string? search, List<string>? categoryIds, decimal? minPrice, decimal? maxPrice, bool onlyAvailable, ProductSort sort, int page, int limit);
     Task<(List<Category> categories, decimal minPrice, decimal maxPrice)> GetCatalogMetaAsync();
     Task<List<Product>> GetByIdsAsync(List<Guid> ids);
+    Task<ProductReview?> GetReviewByIdAsync(Guid reviewId);
+    Task AddReviewReplyAsync(Guid reviewId, ProductReviewReply reply);
+    Task AddReviewAsync(ProductReview review);
+    Task<bool> HasReviewAsync(Guid userId, Guid orderId, Guid productId);
 }

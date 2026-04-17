@@ -62,4 +62,35 @@ public static class ProductEntityMapper
             Title = entity.Title
         };
     }
+
+    public static ProductReview ToDomain(this ProductReviewEntity entity)
+    {
+        if (entity == null)
+            return null!;
+
+        return new ProductReview
+        {
+            Id = entity.Id,
+            ProductId = entity.ProductId,
+            AuthorName = entity.AuthorName,
+            Rating = entity.Rating,
+            Text = entity.Text,
+            CreatedAt = entity.CreatedAt,
+            Reply = entity.Reply?.ToDomain()
+        };
+    }
+
+    public static ProductReviewReply ToDomain(this ProductReviewReplyEntity entity)
+    {
+        if (entity == null)
+            return null!;
+
+        return new ProductReviewReply
+        {
+            Id = entity.Id,
+            AuthorName = entity.AuthorName,
+            Text = entity.Text,
+            CreatedAt = entity.CreatedAt
+        };
+    }
 }

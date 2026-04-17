@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -8,6 +9,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
+using Tailly.Contracts.Messages;
 using Tailly.ShopService.Application.Service;
 using Tailly.ShopService.Application.Service.Interfaces;
 using Tailly.ShopService.Application.Validators;
@@ -33,6 +35,7 @@ public static class DependencyInjectionExtensions
         services.AddJwtAuthentication();
         services.AddSecurityAndCore();
         services.AddFluentValidationSetup();
+        services.AddRabbitMq(configuration);
         services.AddApplicationRepositories();
 
         return services;
@@ -67,6 +70,9 @@ public static class DependencyInjectionExtensions
         services.Configure<JwtOptions>(
             configuration.GetSection("JwtConfig"));
 
+        services.Configure<RabbitMqSettings>(
+            configuration.GetSection("RabbitMq"));
+
         return services;
     }
 
@@ -94,9 +100,33 @@ public static class DependencyInjectionExtensions
 
     private static IServiceCollection AddFluentValidationSetup(this IServiceCollection services)
     {
-        services.AddValidatorsFromAssemblyContaining<CatalogFilterRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<CreateOrderRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<AddItemRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<ReplyToReviewRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<CreateProductReviewRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<UpdateItemRequestValidator>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddRabbitMq(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddMassTransit(x =>
+        {
+            x.AddRequestClient<GetUserFullNameRequest>(); 
+
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                var settings = configuration.GetSection("RabbitMq").Get<RabbitMqSettings>()
+                    ?? throw new InvalidOperationException("RabbitMq configuration is missing.");
+
+                cfg.Host(new Uri($"amqp://{settings.Host}:{settings.Port}"), h =>
+                {
+                    h.Username(settings.Username);
+                    h.Password(settings.Password);
+                });
+            });
+        });
 
         return services;
     }
@@ -213,6 +243,21 @@ public static class DependencyInjectionExtensions
                 return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
                 {
                     PermitLimit = 30,                   
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0,
+                    AutoReplenishment = true
+                });
+            });
+
+            options.AddPolicy("reviews", context =>
+            {
+                var key = context.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                       ?? context.Connection.RemoteIpAddress?.ToString()
+                       ?? "anon";
+
+                return RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 5,
                     Window = TimeSpan.FromMinutes(1),
                     QueueLimit = 0,
                     AutoReplenishment = true

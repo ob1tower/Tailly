@@ -206,6 +206,7 @@ public static class DependencyInjectionExtensions
         services.AddMassTransit(x =>
         {
             x.AddConsumer<UserRegisteredConsumer>();
+            x.AddConsumer<GetUserFullNameConsumer>();
 
             x.UsingRabbitMq((context, cfg) =>
             {
@@ -221,6 +222,11 @@ public static class DependencyInjectionExtensions
                 cfg.ReceiveEndpoint("client-profile-user-registered", e =>
                 {
                     e.ConfigureConsumer<UserRegisteredConsumer>(context);
+                });
+
+                cfg.ReceiveEndpoint("client-profile-get-fullname", e =>
+                {
+                    e.ConfigureConsumer<GetUserFullNameConsumer>(context);
                 });
             });
         });
