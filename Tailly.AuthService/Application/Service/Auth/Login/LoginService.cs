@@ -74,10 +74,29 @@ public class LoginService : ILoginService
             return Result.Failure<AuthResult, Error>(AuthErrors.InvalidCredentials);
         }
 
-        if (!user.Roles.Contains(role))
+        if (user.Roles.Contains(RoleType.Admin) || user.Roles.Contains(RoleType.SuperAdmin))
         {
-            _logger.LogWarning("Login failed. Invalid role {Role} for {Email}", role, email);
-            return Result.Failure<AuthResult, Error>(AuthErrors.InvalidRole);
+            if (user.Roles.Count > 1)
+            {
+                _logger.LogError("Invalid role configuration for admin user {UserId}", user.Id);
+                return Result.Failure<AuthResult, Error>(AuthErrors.AccessDenied);
+            }
+
+            var actualRole = user.Roles.First();
+
+            if (role != actualRole)
+            {
+                _logger.LogWarning("Admin login with wrong role. Requested: {Requested}, Actual: {Actual}", role, actualRole);
+                return Result.Failure<AuthResult, Error>(AuthErrors.InvalidRole);
+            }
+        }
+        else
+        {
+            if (!user.Roles.Contains(role))
+            {
+                _logger.LogWarning("Login failed. Invalid role {Role} for {Email}", role, email);
+                return Result.Failure<AuthResult, Error>(AuthErrors.InvalidRole);
+            }
         }
 
         var (accessToken, accessExpires) = await _jwtService.CreateAccessTokenAsync(new UserEntity

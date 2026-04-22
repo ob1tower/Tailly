@@ -7,7 +7,6 @@ public record UserRegisteredMessage
     public string FirstName { get; init; } = string.Empty;
     public string LastName { get; init; } = string.Empty;
     public string? MiddleName { get; init; }
-    public string? Phone { get; init; } = string.Empty;
     public string? CityName { get; init; } = string.Empty;
     public string CityId { get; init; } = string.Empty;
 }

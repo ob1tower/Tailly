@@ -5,14 +5,14 @@ namespace Tailly.ClientProfileService.Application.Errors;
 public static class MediaErrors
 {
     public static readonly Error InvalidFile =
-        new("Media.InvalidFile", "Некорректный файл.");
+        new("Media.InvalidFile", "Invalid file.");
 
     public static readonly Error FileTooLarge =
-        new("Media.FileTooLarge", "Файл слишком большой (максимум 10 МБ).");
+        new("Media.FileTooLarge", "The file is too big (maximum 10 MB).");
 
     public static readonly Error InvalidMediaType = 
-        new("Media.InvalidMediaType", "MediaType должен быть 'avatar' или 'pet'.");
+        new("Media.InvalidMediaType", "The MediaType should be 'avatar' or 'pet'.");
 
     public static readonly Error UploadFailed =
-        new("Media.UploadFailed", "Не удалось загрузить файл.");
+        new("Media.UploadFailed", "Failed to upload file.");
 }

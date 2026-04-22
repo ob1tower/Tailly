@@ -1,6 +1,0 @@
-@Tailly.SpecialistProfileService_HostAddress = http://localhost:5175
-
-GET {{Tailly.SpecialistProfileService_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

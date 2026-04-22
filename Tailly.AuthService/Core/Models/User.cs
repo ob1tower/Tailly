@@ -14,10 +14,12 @@ public class User
     public DateTime? BlockedUntil { get; set; }
     public DateTime? SoftDeletedAt { get; set; }
     public DateTime? RestoreUntil { get; set; }
+    public string? BlockReason { get; set; }
     public string? SpecialistSlug { get; set; }
-
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public string? MiddleName { get; set; }
     public Guid? SpecialistId { get; set; } = null;
     public Guid? AdminId { get; set; } = null;
-
     public List<RoleType> Roles { get; set; } = [];
 }

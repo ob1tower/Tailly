@@ -159,6 +159,54 @@
       "UpstreamPathTemplate": "/me/security/email/change/confirm",
       "UpstreamHttpMethod": [ "POST" ]
     },
+    {
+      "DownstreamPathTemplate": "/api/AdminUsers/admin/users",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/users",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AdminUsers/admin/users/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/users/{id}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AdminUsers/admin/users/{id}/block-status",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/users/{id}/block-status",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AdminUsers/admin/users/{id}/restore-from-deletion",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/users/{id}/restore-from-deletion",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
     // =============================================
     // ==================== SHOP SERVICE ====================
     // =============================================
@@ -600,6 +648,152 @@
       ],
       "UpstreamPathTemplate": "/pets/breeds",
       "UpstreamHttpMethod": [ "GET" ]
+    },
+
+    {
+      "DownstreamPathTemplate": "/api/Specialist/specialists/{slug}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{slug}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Specialist/specialists",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Specialist/specialists/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{id}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SpecialistApplication/specialist-applications",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialist-applications",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AdminSpecialistApplication/admin/specialist-applications",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/specialist-applications",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AdminSpecialistApplication/admin/specialist-applications/{id}/assign-interview",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/specialist-applications/{id}/assign-interview",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AdminSpecialistApplication/admin/specialist-applications/{id}/reject",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/specialist-applications/{id}/reject",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AdminSpecialistApplication/admin/specialist-applications/{id}/approve",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/specialist-applications/{id}/approve",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AdminSpecialistApplication/admin/specialist-applications/{id}/attach-specialist-account",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/specialist-applications/{id}/attach-specialist-account",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SpecialistProfile/specialists/{slug}/main",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{slug}/main",
+      "UpstreamHttpMethod": [ "PATCH" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SpecialistProfile/specialists/{slug}/details",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{slug}/details",
+      "UpstreamHttpMethod": [ "PATCH" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Media/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialist/media/{everything}",
+      "UpstreamHttpMethod": [ "POST" ],
+      "FileUpload": true
     }
   ],
   "GlobalConfiguration": {
