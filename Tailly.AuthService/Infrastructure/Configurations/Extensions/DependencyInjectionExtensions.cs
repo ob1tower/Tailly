@@ -12,6 +12,8 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Tailly.AuthService.Application.Dtos.Common;
+using Tailly.AuthService.Application.Service.AccountDeletion;
+using Tailly.AuthService.Application.Service.Admin;
 using Tailly.AuthService.Application.Service.Auth.Common;
 using Tailly.AuthService.Application.Service.Auth.Login;
 using Tailly.AuthService.Application.Service.Auth.PasswordRecovery;
@@ -159,6 +161,8 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IVerificationCodeService, VerificationCodeService>();
         services.AddHostedService<RefreshTokenCleanupService>();
         services.AddScoped<IPendingRegistrationService, PendingRegistrationService>();
+        services.AddScoped<IAdminUserService, AdminUserService>();
+        services.AddScoped<IAccountDeletionService, AccountDeletionService>();
 
         return services;
     }
@@ -167,6 +171,7 @@ public static class DependencyInjectionExtensions
     {
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IAccountDeletionTokenRepository, AccountDeletionTokenRepository>();
 
         return services;
     }
@@ -324,6 +329,8 @@ public static class DependencyInjectionExtensions
         services.AddMassTransit(x =>
         {
             x.AddConsumer<EmailConsumer>();
+            x.AddConsumer<SpecialistAccountCreatedConsumer>();
+            x.AddConsumer<UserProfileUpdatedConsumer>();
 
             x.UsingRabbitMq((context, cfg) =>
             {
@@ -339,6 +346,16 @@ public static class DependencyInjectionExtensions
                 cfg.ReceiveEndpoint(settings.Queue, e =>
                 {
                     e.ConfigureConsumer<EmailConsumer>(context);
+
+                    e.UseMessageRetry(r =>
+                    {
+                        r.Interval(3, TimeSpan.FromSeconds(5));
+                    });
+                });
+
+                cfg.ReceiveEndpoint("specialist-account-created", e =>
+                {
+                    e.ConfigureConsumer<SpecialistAccountCreatedConsumer>(context);
 
                     e.UseMessageRetry(r =>
                     {

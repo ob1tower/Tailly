@@ -1,9 +1,11 @@
 ﻿using CSharpFunctionalExtensions;
+using MassTransit;
 using Tailly.ClientProfileService.Application.Errors;
 using Tailly.ClientProfileService.Application.Service.Interfaces;
 using Tailly.ClientProfileService.Core.Common;
 using Tailly.ClientProfileService.Core.Models;
 using Tailly.ClientProfileService.Infrastructure.Repositories.Interfaces;
+using Tailly.Contracts.Messages;
 
 namespace Tailly.ClientProfileService.Application.Service;
 
@@ -11,12 +13,15 @@ public class ClientProfilesService : IClientProfilesService
 {
     private readonly IClientProfileRepository _repository;
     private readonly ILogger<ClientProfilesService> _logger;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public ClientProfilesService(IClientProfileRepository repository,
-                                 ILogger<ClientProfilesService> logger)
+                                 ILogger<ClientProfilesService> logger,
+                                 IPublishEndpoint publishEndpoint)
     {
         _repository = repository;
         _logger = logger;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<Result<ClientProfile, Error>> GetAsync(Guid userId)
@@ -52,6 +57,14 @@ public class ClientProfilesService : IClientProfilesService
             existing.AvatarUrl = profile.AvatarUrl;
 
         await _repository.UpdateAsync(existing);
+
+        await _publishEndpoint.Publish(new UserProfileUpdatedMessage
+        {
+            UserId = existing.UserId,
+            FirstName = existing.FirstName,
+            LastName = existing.LastName,
+            MiddleName = existing.MiddleName
+        });
 
         _logger.LogInformation("Profile main info updated for user {UserId}", userId);
 

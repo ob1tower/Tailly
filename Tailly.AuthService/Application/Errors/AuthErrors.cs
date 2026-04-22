@@ -42,4 +42,7 @@ public static class AuthErrors
 
     public static readonly Error SameEmail =
         new("Auth.SameEmail", "New email must be different from current email.");
+
+    public static readonly Error AccessDenied =
+        new("Auth.AccessDenied", "You do not have permission to perform this action.");
 }

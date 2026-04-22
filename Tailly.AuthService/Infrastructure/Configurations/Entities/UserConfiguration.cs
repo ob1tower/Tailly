@@ -32,6 +32,10 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
                .IsRequired()
                .HasDefaultValue(false);
 
+        builder.Property(x => x.BlockReason)
+               .HasMaxLength(500)
+               .IsRequired(false);
+
         builder.Property(x => x.IsPermanentBlock)
                .IsRequired()
                .HasDefaultValue(false);
@@ -46,6 +50,18 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
                .IsRequired(false);
 
         builder.Property(x => x.SpecialistSlug)
+               .HasMaxLength(100)
+               .IsRequired(false);
+
+        builder.Property(x => x.FirstName)
+               .HasMaxLength(100)
+               .IsRequired(false);
+
+        builder.Property(x => x.LastName)
+               .HasMaxLength(100)
+               .IsRequired(false);
+
+        builder.Property(x => x.MiddleName)
                .HasMaxLength(100)
                .IsRequired(false);
 

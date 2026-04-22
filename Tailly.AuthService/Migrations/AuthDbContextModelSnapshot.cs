@@ -22,6 +22,25 @@ namespace Tailly.AuthService.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Tailly.AuthService.Core.Entities.AccountDeletionTokenEntity", b =>
+                {
+                    b.Property<string>("Token")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Token");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AccountDeletionTokens");
+                });
+
             modelBuilder.Entity("Tailly.AuthService.Core.Entities.RefreshTokenEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -101,6 +120,10 @@ namespace Tailly.AuthService.Migrations
                     b.Property<Guid?>("AdminId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("BlockReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<DateTime?>("BlockedUntil")
                         .HasColumnType("timestamp with time zone");
 
@@ -117,6 +140,10 @@ namespace Tailly.AuthService.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<bool>("IsBlocked")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -126,6 +153,14 @@ namespace Tailly.AuthService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("MiddleName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -166,6 +201,17 @@ namespace Tailly.AuthService.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("Tailly.AuthService.Core.Entities.AccountDeletionTokenEntity", b =>
+                {
+                    b.HasOne("Tailly.AuthService.Core.Entities.UserEntity", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Tailly.AuthService.Core.Entities.RefreshTokenEntity", b =>

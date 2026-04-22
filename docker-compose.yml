@@ -12,6 +12,7 @@ services:
       - clientprofile
       - shop
       - posts
+      - specialist
 
   auth:
     build:
@@ -28,6 +29,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
+    dns:
+    - 8.8.8.8
+    - 1.1.1.1
 
   clientprofile:
     build:
@@ -63,6 +69,20 @@ services:
       dockerfile: Tailly.PostsService/Dockerfile
     ports:
       - "5004:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  specialist:
+    build:
+      context: .
+      dockerfile: Tailly.SpecialistService/Dockerfile
+    ports:
+      - "5005:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
     depends_on:

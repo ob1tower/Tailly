@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Eventing.Reader;
-using Tailly.ClientProfileService.Core.Enums;
+﻿using Tailly.ClientProfileService.Core.Enums;
 
 namespace Tailly.ClientProfileService.Core.Models;
 

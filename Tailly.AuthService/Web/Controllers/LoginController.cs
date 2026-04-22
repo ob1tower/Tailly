@@ -48,6 +48,7 @@ public class LoginController : ControllerBase
                 "Auth.AccountBlocked" => Unauthorized(result.Error),
                 "Auth.EmailNotConfirmed" => Unauthorized(result.Error),
                 "Auth.InvalidRole" => BadRequest(result.Error),
+                "Auth.AccessDenied" => BadRequest(result.Error),
                 _ => BadRequest(result.Error)
             };
         }

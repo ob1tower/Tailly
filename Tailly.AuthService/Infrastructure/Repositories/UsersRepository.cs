@@ -31,6 +31,10 @@ public class UsersRepository : IUsersRepository
             SoftDeletedAt = user.SoftDeletedAt,
             RestoreUntil = user.RestoreUntil,
             SpecialistSlug = user.SpecialistSlug,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            MiddleName = user.MiddleName,
+            BlockReason = user.BlockReason,
             SpecialistId = user.SpecialistId,
             AdminId = user.AdminId
         };
@@ -67,6 +71,9 @@ public class UsersRepository : IUsersRepository
             SoftDeletedAt = userEntity.SoftDeletedAt,
             RestoreUntil = userEntity.RestoreUntil,
             SpecialistSlug = userEntity.SpecialistSlug,
+            FirstName = userEntity.FirstName,
+            LastName = userEntity.LastName,
+            MiddleName = userEntity.MiddleName,
             SpecialistId = userEntity.SpecialistId,
             AdminId = userEntity.AdminId
         };
@@ -106,6 +113,10 @@ public class UsersRepository : IUsersRepository
             SoftDeletedAt = userEntity.SoftDeletedAt,
             RestoreUntil = userEntity.RestoreUntil,
             SpecialistSlug = userEntity.SpecialistSlug,
+            FirstName = userEntity.FirstName,
+            LastName = userEntity.LastName,
+            MiddleName = userEntity.MiddleName,
+            BlockReason = userEntity.BlockReason,
             SpecialistId = userEntity.SpecialistId,
             AdminId = userEntity.AdminId
         };
@@ -146,9 +157,57 @@ public class UsersRepository : IUsersRepository
         userEntity.SoftDeletedAt = user.SoftDeletedAt;
         userEntity.RestoreUntil = user.RestoreUntil;
         userEntity.SpecialistSlug = user.SpecialistSlug;
+        userEntity.BlockReason = user.BlockReason;
+        userEntity.FirstName = user.FirstName;
+        userEntity.LastName = user.LastName;
+        userEntity.MiddleName = user.MiddleName;
         userEntity.SpecialistId = user.SpecialistId;
         userEntity.AdminId = user.AdminId;
 
         await _authDbContext.SaveChangesAsync();
+    }
+
+    public async Task<List<User>> GetAllAsync()
+    {
+        var userEntities = await _authDbContext.Users
+            .Include(x => x.UserRoles)
+            .AsNoTracking()
+            .ToListAsync();
+
+        if (!userEntities.Any())
+            return [];
+
+        return userEntities.Select(userEntity => new User
+        {
+            Id = userEntity.Id,
+            Email = userEntity.Email,
+            PasswordHash = userEntity.PasswordHash,
+            CreatedAt = userEntity.CreatedAt,
+            EmailConfirmed = userEntity.EmailConfirmed,
+
+            Roles = userEntity.UserRoles
+                .Select(x => (RoleType)x.RoleId)
+                .ToList(),
+
+            IsBlocked = userEntity.IsBlocked,
+            IsPermanentBlock = userEntity.IsPermanentBlock,
+            BlockedUntil = userEntity.BlockedUntil,
+            SoftDeletedAt = userEntity.SoftDeletedAt,
+            RestoreUntil = userEntity.RestoreUntil,
+            SpecialistSlug = userEntity.SpecialistSlug,
+            FirstName = userEntity.FirstName,
+            LastName = userEntity.LastName,
+            MiddleName = userEntity.MiddleName,
+            BlockReason = userEntity.BlockReason,
+            SpecialistId = userEntity.SpecialistId,
+            AdminId = userEntity.AdminId
+        }).ToList();
+    }
+
+    public IQueryable<UserEntity> Query()
+    {
+        return _authDbContext.Users
+            .Include(x => x.UserRoles)
+            .AsNoTracking();
     }
 }

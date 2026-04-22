@@ -3,6 +3,7 @@ using MassTransit;
 using Tailly.AuthService.Application.Errors;
 using Tailly.AuthService.Application.Mappers;
 using Tailly.AuthService.Application.Service.Auth.Common;
+using Tailly.AuthService.Application.Service.Auth.Login;
 using Tailly.AuthService.Application.Service.Security.Interfaces;
 using Tailly.AuthService.Application.Service.Security.Otp;
 using Tailly.AuthService.Application.Service.Tokens.Interfaces;
@@ -25,6 +26,7 @@ public class RegistrationService : IRegistrationService
     private readonly IRefreshTokenService _refreshTokenService;
     private readonly IVerificationCodeService _verificationCodeService;
     private readonly IPendingRegistrationService _pendingRegistrationService;
+    private readonly ILoginService _loginService;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<RegistrationService> _logger;
 
@@ -35,6 +37,7 @@ public class RegistrationService : IRegistrationService
                                IRefreshTokenService refreshTokenService,
                                IVerificationCodeService verificationCodeService,
                                IPendingRegistrationService pendingRegistrationService,
+                               ILoginService loginService,
                                IPublishEndpoint publishEndpoint,
                                ILogger<RegistrationService> logger)
     {
@@ -45,10 +48,10 @@ public class RegistrationService : IRegistrationService
         _refreshTokenService = refreshTokenService;
         _verificationCodeService = verificationCodeService;
         _pendingRegistrationService = pendingRegistrationService;
+        _loginService  = loginService;
         _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
-
 
 
     public async Task<Result<string, Error>> StartRegisterAsync(string email, string password)
@@ -56,12 +59,18 @@ public class RegistrationService : IRegistrationService
         email = email?.Trim().ToLowerInvariant()
             ?? throw new ArgumentNullException(nameof(email));
 
-        var exists = await _usersRepository.ExistsAsync(email);
+        var existingUser = await _usersRepository.GetByEmailAsync(email);
 
-        if (exists)
+        if (existingUser != null)
         {
-            _logger.LogWarning("Registration failed. User already exists: {Email}", email);
-            return Result.Failure<string, Error>(AuthErrors.UserAlreadyExists);
+            if (existingUser.Roles.Contains(RoleType.Client))
+            {
+                _logger.LogWarning("Registration failed. User already exists as Client: {Email}", email);
+                return Result.Failure<string, Error>(AuthErrors.UserAlreadyExists);
+            }
+
+            
+            _logger.LogInformation("User {Email} already exists as Specialist. Allowing registration as Client.", email);
         }
 
         var passwordHash = _passwordHasher.HashPassword(password);
@@ -137,19 +146,51 @@ public class RegistrationService : IRegistrationService
         if (data == null)
             return Result.Failure<AuthResult, Error>(AuthErrors.RegistrationNotFound);
 
-        var (email, passwordHash) = data.Value;
+        var (email, _) = data.Value;        
 
-        var user = new User
+        var existingUser = await _usersRepository.GetByEmailAsync(email);
+
+        User user;
+
+        if (existingUser != null)
         {
-            Id = Guid.NewGuid(),
-            Email = email,
-            PasswordHash = passwordHash,
-            CreatedAt = DateTime.UtcNow,
-            EmailConfirmed = true
-        };
+            user = existingUser;
 
-        await _usersRepository.AddAsync(user);
-        await _usersRepository.AddRoleAsync(user.Id, (int)RoleType.Client);
+            user.FirstName = firstName;
+            user.LastName = lastName;
+            user.MiddleName = middleName;
+
+            if (!user.Roles.Contains(RoleType.Client))
+            {
+                await _usersRepository.AddRoleAsync(user.Id, (int)RoleType.Client);
+                _logger.LogInformation("Added Client role to existing Specialist {Email}. Password unchanged.", email);
+            }
+            else
+            {
+                _logger.LogInformation("User {Email} already has Client role.", email);
+            }
+        }
+        else
+        {
+            var (_, newPasswordHash) = data.Value;  
+
+            user = new User
+            {
+                Id = Guid.NewGuid(),
+                Email = email,
+                PasswordHash = newPasswordHash,
+                CreatedAt = DateTime.UtcNow,
+                EmailConfirmed = true,
+                FirstName = firstName,
+                LastName = lastName,
+                MiddleName = middleName
+            };
+
+            await _usersRepository.AddAsync(user);
+            await _usersRepository.AddRoleAsync(user.Id, (int)RoleType.Client);
+
+            _logger.LogInformation("Created new user as Client: {Email}", email);
+        }
 
         await _pendingRegistrationService.RemoveByTokenAsync(verificationToken);
 
@@ -184,7 +225,7 @@ public class RegistrationService : IRegistrationService
             User = AuthMapper.ToDto(user, RoleType.Client)
         };
 
-        _logger.LogInformation("User registered successfully: {UserId}", user.Id);
+        _logger.LogInformation("Registration completed successfully for {Email} as Client", user.Email);
 
         await _publishEndpoint.Publish(new UserRegisteredMessage
         {
