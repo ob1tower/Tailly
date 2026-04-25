@@ -184,7 +184,7 @@
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/api/AdminUsers/admin/users/{id}/block-status",
+      "DownstreamPathTemplate": "/api/AdminUsers/admin/users/{id}/roles/{role}/block-status",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -192,11 +192,23 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/admin/users/{id}/block-status",
+      "UpstreamPathTemplate": "/admin/users/{id}/roles/{role}/block-status",
+      "UpstreamHttpMethod": [ "PATCH" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AdminUsers/admin/users/{id}/roles/{role}/restore-from-deletion",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/users/{id}/roles/{role}/restore-from-deletion",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
-      "DownstreamPathTemplate": "/api/AdminUsers/admin/users/{id}/restore-from-deletion",
+      "DownstreamPathTemplate": "/api/AccountDeletion/account/deletion/request",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -204,8 +216,44 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/admin/users/{id}/restore-from-deletion",
+      "UpstreamPathTemplate": "/account/deletion/request",
       "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AccountDeletion/account/deletion/restore-preview",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/account/deletion/restore-preview",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AccountDeletion/account/deletion/restore",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/account/deletion/restore",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AdminUsers/admin/users/{id}/profile",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/users/{id}/profile",
+      "UpstreamHttpMethod": [ "PATCH" ]
     },
     // =============================================
     // ==================== SHOP SERVICE ====================
@@ -535,18 +583,6 @@
         }
       ],
       "UpstreamPathTemplate": "/banners",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
-      "DownstreamPathTemplate": "/api/Banner/banners/{placement}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "posts",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/banners/{placement}",
       "UpstreamHttpMethod": [ "GET" ]
     },
     {

@@ -16,15 +16,6 @@ public static class PostErrors
     public static readonly Error EmptyContent =
         new("Post.EmptyContent", "Content cannot be empty.");
 
-    public static readonly Error InvalidImage =
-        new("Post.Invalid.Image", "Invalid image file.");
-
-    public static readonly Error ImageTooLarge =
-        new("Post.Image.too.Large", "Image size exceeds limit.");
-
-    public static readonly Error UploadFailed =
-        new("Post.Upload.Failed", "Failed to upload image.");
-
     public static readonly Error InvalidSort =
         new("Post.InvalidSort", "Invalid sort value.");
 }

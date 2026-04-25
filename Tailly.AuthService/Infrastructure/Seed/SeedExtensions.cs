@@ -23,7 +23,7 @@ public static class SeedExtensions
 
         if (exists)
         {
-            logger.LogInformation("SuperAdmin already exists");
+            logger.LogInformation("SuperAdmin already exists.");
             return;
         }
 

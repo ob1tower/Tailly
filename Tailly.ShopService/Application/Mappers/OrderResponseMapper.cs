@@ -1,5 +1,6 @@
 ﻿using Tailly.ShopService.Application.Dtos.Responses.Order;
 using Tailly.ShopService.Application.Dtos.Responses.Product;
+using Tailly.ShopService.Application.Helpers;
 using Tailly.ShopService.Core.Enums;
 using Tailly.ShopService.Core.Models.Order;
 using Tailly.ShopService.Core.Models.Order.Checkout;
@@ -10,11 +11,18 @@ public static class OrderResponseMapper
 {
     public static OrderResponse ToResponse(Order order)
     {
+        var calculatedStatus = OrderStatusCalculator.Calculate(order.CreatedAt, order.Status == OrderStatus.Cancelled);
+
         return new OrderResponse
         {
             Id = order.Id.ToString(),
             Number = order.Number,
-            Status = ShopMapper.MapOrderStatus(order.Status),
+            Status = ShopMapper.MapOrderStatus(calculatedStatus),
+
+            CanCancel = calculatedStatus != OrderStatus.Shipped
+            && calculatedStatus != OrderStatus.Completed
+            && calculatedStatus != OrderStatus.Cancelled,
+
             CreatedAt = order.CreatedAt,
             Price = order.TotalPrice,
             Currency = "RUB",
@@ -65,15 +73,11 @@ public static class OrderResponseMapper
                 } : null,
                 PickupPointLabel = order.PickupPoint?.Title,
                 ExpectedAt = order.EstimatedDeliveryDate,
-                TrackingNumber = order.TrackingNumber
             },
 
             Payment = new OrderPaymentResponse
             {
-                Method = ShopMapper.MapPaymentMethod(order.PaymentMethod),
-                Status = (order.Status == OrderStatus.Paid || order.Status == OrderStatus.Completed)
-                ? "paid"
-                : "pending"
+                Method = ShopMapper.MapPaymentMethod(order.PaymentMethod)
             }
         };
     }

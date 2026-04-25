@@ -30,8 +30,8 @@ public class CreateOrderRequestValidator : AbstractValidator<CreateOrderRequest>
 
             RuleFor(x => x.Form.PaymentMethod)
                 .NotEmpty().WithMessage("Payment method is required.")
-                .Must(method => method?.ToLowerInvariant() is "card" or "sbp" or "cash")
-                .WithMessage("Invalid payment method. Allowed values: card, sbp, cash.");
+                .Must(method => method?.ToLowerInvariant() is "card" or "sbp" or "cash" or "card-on-delivery")
+                .WithMessage("Invalid payment method. Allowed values: card, sbp, cash, card-on-delivery.");
 
             When(x => x.Form.DeliveryMethod?.ToLowerInvariant() == "courier", () =>
             {

@@ -7,36 +7,6 @@ namespace Tailly.PostsService.Application.Mappers;
 
 public static class PostMapper
 {
-    public static string MapStatus(PostStatus status) => status switch
-    {
-        PostStatus.Draft => "draft",
-        PostStatus.Published => "published",
-        PostStatus.Archived => "archived",
-        _ => "draft"
-    };
-
-    public static bool TryParseStatus(string? value, out PostStatus status)
-    {
-        switch (value?.Trim().ToLowerInvariant())
-        {
-            case "draft":
-                status = PostStatus.Draft;
-                return true;
-
-            case "published":
-                status = PostStatus.Published;
-                return true;
-
-            case "archived":
-                status = PostStatus.Archived;
-                return true;
-
-            default:
-                status = default;
-                return false;
-        }
-    }
-
     public static PostResponse ToResponse(Post post)
     {
         return new PostResponse
@@ -47,7 +17,6 @@ public static class PostMapper
             CoverImageUrl = post.CoverImageUrl,
             ImageUrls = post.ImageUrls,
             Tags = post.Tags,
-            Status = MapStatus(post.Status),
             CreatedAt = post.CreatedAt,
             UpdatedAt = post.UpdatedAt,
             PublishedAt = post.PublishedAt
@@ -75,8 +44,7 @@ public static class PostMapper
 
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            CreatedBy = userId,
-            Status = PostStatus.Draft
+            CreatedBy = userId
         };
     }
 
@@ -134,12 +102,12 @@ public static class PostMapper
     {
         switch (value?.Trim().ToLowerInvariant())
         {
-            case "updated_desc":
-                sort = PostAdminSort.UpdatedDesc;
+            case "newest":
+                sort = PostAdminSort.Newest;
                 return true;
 
-            case "updated_asc":
-                sort = PostAdminSort.UpdatedAsc;
+            case "oldest":
+                sort = PostAdminSort.Oldest;
                 return true;
 
             case "title_asc":
@@ -148,10 +116,6 @@ public static class PostMapper
 
             case "title_desc":
                 sort = PostAdminSort.TitleDesc;
-                return true;
-
-            case "published_desc":
-                sort = PostAdminSort.PublishedDesc;
                 return true;
 
             default:

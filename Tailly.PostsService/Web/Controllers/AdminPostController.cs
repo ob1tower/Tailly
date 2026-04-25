@@ -34,21 +34,15 @@ public class AdminPostController : ControllerBase
     /// </summary>
     /// <param name="page">Page number (default: 1).</param>
     /// <param name="pageSize">Number of items per page (default: 10).</param>
-    /// <param name="search">Search query for title/content.</param>
-    /// <param name="status">Filter by status: draft, published, archived.</param>
-    /// <param name="sort">Sorting mode: updated_desc, updated_asc, title_asc, title_desc, published_desc.</param>
+    /// <param name="search">Search query for title.</param>
+    /// <param name="sort">Sort: newest, oldest, title_asc, title_desc.</param>
     /// <returns>Paginated list of posts.</returns>
     [HttpGet("admin/content/posts")]
-    public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, [FromQuery] string? status = null, [FromQuery] string? sort = null)
+    public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, [FromQuery] string? sort = null)
     {
         var pagination = new PaginationValidator(page, pageSize);
 
-        var result = await _service.GetAdminListAsync(
-            pagination.PageNumber,
-            pagination.PageSize,
-            search,
-            status,
-            sort);
+        var result = await _service.GetAdminListAsync(pagination.PageNumber, pagination.PageSize, search, sort);
 
         if (result.IsFailure)
             return BadRequest(result.Error);
@@ -77,15 +71,11 @@ public class AdminPostController : ControllerBase
         if (!validation.IsValid)
             return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
 
-        if (!PostMapper.TryParseStatus(request.Status, out var status))
-            return BadRequest(PostErrors.InvalidPost);
-
         var userId = User.GetUserId();
         if (userId == null)
             return Unauthorized();
 
         var model = PostMapper.ToModel(request, userId.Value);
-        model.Status = status;
 
         var result = await _service.CreateAsync(model);
 
@@ -109,15 +99,11 @@ public class AdminPostController : ControllerBase
         if (!validation.IsValid)
             return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
 
-        if (!PostMapper.TryParseStatus(request.Status, out var status))
-            return BadRequest(PostErrors.InvalidPost);
-
         var userId = User.GetUserId();
         if (userId == null)
             return Unauthorized();
 
         var model = PostMapper.ToModel(request, id, userId.Value);
-        model.Status = status;
 
         var result = await _service.UpdateAsync(model);
 

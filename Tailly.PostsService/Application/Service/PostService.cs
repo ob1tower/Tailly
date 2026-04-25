@@ -32,7 +32,7 @@ public class PostService : IPostService
 
         if (post == null)
         {
-            _logger.LogWarning("Post not found or not published. Id: {PostId}", id);
+            _logger.LogWarning("Post not found. Id: {PostId}", id);
             return Result.Failure<Post, Error>(PostErrors.PostNotFound);
         }
 
@@ -58,7 +58,7 @@ public class PostService : IPostService
             if (!PostMapper.TryParsePublicSort(sort, out var sortValue))
             {
                 _logger.LogWarning("GetListAsync failed. Invalid sort: {Sort}", sort);
-                return Result.Failure<(List<Post>, int, List<string>), Error>(PostErrors.InvalidPost);
+                return Result.Failure<(List<Post>, int, List<string>), Error>(PostErrors.InvalidSort);
             }
 
             parsedSort = sortValue;
@@ -114,18 +114,11 @@ public class PostService : IPostService
 
         post.CreatedAt = DateTime.UtcNow;
         post.UpdatedAt = DateTime.UtcNow;
-
-        if (post.Status == PostStatus.Published)
-            post.PublishedAt ??= DateTime.UtcNow;
-        else
-            post.PublishedAt = null;
+        post.PublishedAt = DateTime.UtcNow;
 
         await _repository.AddAsync(post);
 
-        _logger.LogInformation(
-            "Post created successfully. Id: {PostId}, Status: {Status}",
-            post.Id,
-            post.Status);
+        _logger.LogInformation("Post created successfully. Id: {PostId}", post.Id);
 
         return Result.Success<Post, Error>(post);
     }
@@ -159,23 +152,16 @@ public class PostService : IPostService
         }
 
         post.UpdatedAt = DateTime.UtcNow;
-
-        if (post.Status == PostStatus.Published)
-            post.PublishedAt ??= existing.PublishedAt ?? DateTime.UtcNow;
-        else
-            post.PublishedAt = null;
+        post.PublishedAt ??= existing.PublishedAt ?? DateTime.UtcNow;
 
         await _repository.UpdateAsync(post);
 
-        _logger.LogInformation(
-            "Post updated successfully. Id: {PostId}, Status: {Status}",
-            post.Id,
-            post.Status);
+        _logger.LogInformation("Post updated successfully. Id: {PostId}", post.Id);
 
         return Result.Success<Post, Error>(post);
     }
 
-    public async Task<Result<(List<Post>, int), Error>> GetAdminListAsync(int page, int limit, string? search, string? status, string? sort)
+    public async Task<Result<(List<Post>, int), Error>> GetAdminListAsync(int page, int limit, string? search, string? sort)
     {
         PostAdminSort? parsedSort = null;
 
@@ -184,36 +170,15 @@ public class PostService : IPostService
             if (!PostMapper.TryParseAdminSort(sort, out var sortValue))
             {
                 _logger.LogWarning("GetAdminListAsync failed. Invalid sort: {Sort}", sort);
-                return Result.Failure<(List<Post>, int), Error>(PostErrors.InvalidPost);
+                return Result.Failure<(List<Post>, int), Error>(PostErrors.InvalidSort);
             }
 
             parsedSort = sortValue;
         }
 
-        PostStatus? parsedStatus = null;
+        var (posts, total) = await _repository.GetAdminListAsync(page, limit, search, parsedSort);
 
-        if (!string.IsNullOrWhiteSpace(status))
-        {
-            if (!Enum.TryParse<PostStatus>(status, true, out var statusValue))
-            {
-                _logger.LogWarning("GetAdminListAsync failed. Invalid status: {Status}", status);
-                return Result.Failure<(List<Post>, int), Error>(PostErrors.InvalidPost);
-            }
-
-            parsedStatus = statusValue;
-        }
-
-        var (posts, total) = await _repository.GetAdminListAsync(
-            page,
-            limit,
-            search,
-            parsedStatus,
-            parsedSort);
-
-        _logger.LogInformation(
-            "Retrieved {Count} posts (admin list). Page: {Page}",
-            posts.Count,
-            page);
+        _logger.LogInformation("Retrieved {Count} posts (admin list). Page: {Page}", posts.Count, page);
 
         return Result.Success<(List<Post>, int), Error>((posts, total));
     }

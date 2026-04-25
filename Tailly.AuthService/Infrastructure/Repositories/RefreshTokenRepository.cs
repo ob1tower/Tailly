@@ -24,7 +24,8 @@ public class RefreshTokenRepository : IRefreshTokenRepository
             Created = token.Created,
             Expires = token.Expires,
             Revoked = token.Revoked,
-            UserId = token.UserId
+            UserId = token.UserId,
+            RoleId = token.RoleId
         };
 
         await _authDbContext.RefreshTokens.AddAsync(tokenEntity);
@@ -47,7 +48,8 @@ public class RefreshTokenRepository : IRefreshTokenRepository
             Created = tokenEntity.Created,
             Expires = tokenEntity.Expires,
             Revoked = tokenEntity.Revoked,
-            UserId = tokenEntity.UserId
+            UserId = tokenEntity.UserId,
+            RoleId = tokenEntity.RoleId
         };
     }
 
@@ -75,6 +77,25 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     {
         var tokens = await _authDbContext.RefreshTokens
             .Where(x => x.UserId == userId && x.Revoked == null)
+            .ToListAsync();
+
+        if (!tokens.Any())
+            return;
+
+        var now = DateTime.UtcNow;
+
+        foreach (var token in tokens)
+        {
+            token.Revoked = now;
+        }
+
+        await _authDbContext.SaveChangesAsync();
+    }
+
+    public async Task InvalidateAllForUserAndRoleAsync(Guid userId, int roleId)
+    {
+        var tokens = await _authDbContext.RefreshTokens
+            .Where(x => x.UserId == userId && x.RoleId == roleId && x.Revoked == null)
             .ToListAsync();
 
         if (!tokens.Any())

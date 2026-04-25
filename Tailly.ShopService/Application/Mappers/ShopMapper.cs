@@ -55,6 +55,7 @@ public static class ShopMapper
         PaymentMethod.Card => "card",
         PaymentMethod.Sbp => "sbp",
         PaymentMethod.Cash => "cash",
+        PaymentMethod.CardOnDelivery => "card-on-delivery",
         _ => "card"
     };
 
@@ -68,6 +69,7 @@ public static class ShopMapper
             "card" => PaymentMethod.Card,
             "sbp" => PaymentMethod.Sbp,
             "cash" => PaymentMethod.Cash,
+            "card-on-delivery" => PaymentMethod.CardOnDelivery,
             _ => PaymentMethod.Card
         };
     }
@@ -75,10 +77,8 @@ public static class ShopMapper
     public static string MapOrderStatus(OrderStatus status) => status switch
     {
         OrderStatus.Created => "created",
-        OrderStatus.Paid => "paid",
-        OrderStatus.Processing => "processing",
-        OrderStatus.Delivering => "delivering",
-        OrderStatus.ReadyForPickup => "ready-for-pickup",
+        OrderStatus.Assembled => "assembled",
+        OrderStatus.Shipped => "shipped",
         OrderStatus.Completed => "completed",
         OrderStatus.Cancelled => "cancelled",
         _ => "created"

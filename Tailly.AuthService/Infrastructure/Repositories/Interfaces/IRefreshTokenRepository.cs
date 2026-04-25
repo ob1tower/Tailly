@@ -9,4 +9,5 @@ public interface IRefreshTokenRepository
     Task InvalidateAsync(string token);
     Task<int> RemoveExpiredTokensAsync();
     Task InvalidateAllAsync(Guid userId);
+    Task InvalidateAllForUserAndRoleAsync(Guid userId, int roleId);
 }

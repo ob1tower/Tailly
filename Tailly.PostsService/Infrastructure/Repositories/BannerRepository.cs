@@ -36,9 +36,6 @@ public class BannerRepository : IBannerRepository
         entity.Description = banner.Description;
         entity.ImageUrl = banner.ImageUrl;
         entity.LinkUrl = banner.LinkUrl;
-        entity.LinkTarget = banner.LinkTarget;
-        entity.Placement = banner.Placement;
-        entity.Status = banner.Status;
         entity.StartsAt = banner.StartsAt;
         entity.EndsAt = banner.EndsAt;
         entity.UpdatedAt = DateTime.UtcNow;
@@ -81,26 +78,15 @@ public class BannerRepository : IBannerRepository
             .ToList();
     }
 
-    public async Task<(List<Banner> banners, int total)> GetListAsync(
-        int page,
-        int limit,
-        string? status,
-        string? placement,
-        BannerSort? sort)
+    public async Task<(List<Banner> banners, int total)> GetListAsync(int page, int limit, string? search, BannerSort? sort)
     {
         var query = _context.Banners
             .AsNoTracking();
 
-        if (!string.IsNullOrWhiteSpace(status) &&
-            Enum.TryParse<BannerStatus>(status, true, out var parsedStatus))
+        if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(x => x.Status == parsedStatus);
-        }
-
-        if (!string.IsNullOrWhiteSpace(placement) &&
-            Enum.TryParse<BannerPlacement>(placement, true, out var parsedPlacement))
-        {
-            query = query.Where(x => x.Placement == parsedPlacement);
+            query = query.Where(x =>
+                EF.Functions.ILike(x.Title, $"%{search}%"));
         }
 
         query = sort switch
@@ -108,8 +94,6 @@ public class BannerRepository : IBannerRepository
             BannerSort.Oldest => query.OrderBy(x => x.CreatedAt),
             BannerSort.TitleAsc => query.OrderBy(x => x.Title),
             BannerSort.TitleDesc => query.OrderByDescending(x => x.Title),
-            BannerSort.StartsAtAsc => query.OrderBy(x => x.StartsAt ?? DateTime.MaxValue),
-            BannerSort.StartsAtDesc => query.OrderByDescending(x => x.StartsAt ?? DateTime.MinValue),
             _ => query.OrderByDescending(x => x.CreatedAt)
         };
 
@@ -120,10 +104,7 @@ public class BannerRepository : IBannerRepository
             .Take(limit)
             .ToListAsync();
 
-        return (
-            entities.Select(BannerEntityMapper.ToDomain).ToList(),
-            total
-        );
+        return (entities.Select(BannerEntityMapper.ToDomain).ToList(), total);
     }
 
     public async Task<List<Banner>> GetActiveBannersAsync(DateTime now)
@@ -131,26 +112,8 @@ public class BannerRepository : IBannerRepository
         var entities = await _context.Banners
             .AsNoTracking()
             .Where(x =>
-                x.Status == BannerStatus.Published &&
-                (x.StartsAt == null || x.StartsAt <= now) &&
-                (x.EndsAt == null || x.EndsAt >= now))
-            .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync();
-
-        return entities
-            .Select(BannerEntityMapper.ToDomain)
-            .ToList();
-    }
-
-    public async Task<List<Banner>> GetBannersByPlacementAsync(BannerPlacement placement, DateTime now)
-    {
-        var entities = await _context.Banners
-            .AsNoTracking()
-            .Where(x =>
-                x.Status == BannerStatus.Published &&
-                (x.StartsAt == null || x.StartsAt <= now) &&
-                (x.EndsAt == null || x.EndsAt >= now) &&
-                x.Placement == placement)
+            (x.StartsAt == null || x.StartsAt <= now) &&
+            (x.EndsAt == null || x.EndsAt >= now))
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync();
 

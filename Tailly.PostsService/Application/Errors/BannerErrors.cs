@@ -16,9 +16,6 @@ public static class BannerErrors
     public static readonly Error EmptyDescription =
         new("Banner.EmptyDescription", "Description cannot be empty.");
 
-    public static readonly Error InvalidPlacement = 
-        new("Banner.InvalidPlacement", "Invalid banner placement.");
-
     public static readonly Error InvalidSort =
         new("Banner.InvalidSort", "Invalid sort value.");
 }

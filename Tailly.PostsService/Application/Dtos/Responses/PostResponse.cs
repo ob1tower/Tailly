@@ -8,7 +8,6 @@ public sealed class PostResponse
     public string? CoverImageUrl { get; set; }
     public List<string> ImageUrls { get; set; } = [];
     public List<string> Tags { get; set; } = [];
-    public string Status { get; set; } = default!;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public DateTime? PublishedAt { get; set; }

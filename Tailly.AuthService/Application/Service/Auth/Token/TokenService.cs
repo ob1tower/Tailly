@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using Tailly.AuthService.Application.Errors;
+using Tailly.AuthService.Application.Helpers;
 using Tailly.AuthService.Application.Service.Tokens.Interfaces;
 using Tailly.AuthService.Core.Common;
 using Tailly.AuthService.Core.Entities;
@@ -44,35 +45,56 @@ public class TokenService : ITokenService
         {
             if (storedToken.Revoked != null)
             {
-                _logger.LogWarning("Refresh token reuse detected for user {UserId}. All tokens invalidated.",
-                    storedToken.UserId);
-
+                _logger.LogWarning("Token reuse detected. Invalidating all tokens for user {UserId}", storedToken.UserId);
                 await _refreshTokenRepository.InvalidateAllAsync(storedToken.UserId);
             }
             else
             {
                 _logger.LogWarning("Refresh failed. Token expired for user {UserId}", storedToken.UserId);
             }
-
             return Result.Failure<AuthResult, Error>(AuthErrors.InvalidRefreshToken);
         }
 
         var user = await _usersRepository.GetByIdAsync(storedToken.UserId);
         if (user == null)
         {
-            _logger.LogWarning("Refresh failed. User not found for token.");
+            _logger.LogWarning("Refresh failed. User not found for token {UserId}", storedToken.UserId);
             return Result.Failure<AuthResult, Error>(AuthErrors.InvalidRefreshToken);
+        }
+
+        if (!SessionRole.TryResolveSessionRole(storedToken, user, out var sessionRole))
+        {
+            _logger.LogWarning("Refresh failed. Cannot resolve role for user {UserId}", user.Id);
+            return Result.Failure<AuthResult, Error>(AuthErrors.InvalidRefreshToken);
+        }
+
+        var roleEntity = user.GetRole(sessionRole); 
+        if (roleEntity == null)
+        {
+            _logger.LogWarning("Refresh failed. Role {Role} not found for user {UserId}", sessionRole, user.Id);
+            return Result.Failure<AuthResult, Error>(AuthErrors.InvalidRefreshToken);
+        }
+
+        if (roleEntity.IsPendingDeletion)
+        {
+            _logger.LogWarning("Refresh failed. Role is pending deletion for user {UserId}", user.Id);
+            return Result.Failure<AuthResult, Error>(AuthErrors.AccountPendingDeletion); // или InvalidRefreshToken
+        }
+
+        if (roleEntity.IsEffectivelyBlocked)
+        {
+            _logger.LogWarning("Refresh failed. Role is blocked for user {UserId}", user.Id);
+            return Result.Failure<AuthResult, Error>(AuthErrors.AccountBlocked);
         }
 
         var (accessToken, accessExpires) = await _jwtService.CreateAccessTokenAsync(new UserEntity
         {
             Id = user.Id,
             Email = user.Email,
-            UserRoles = user.Roles.Select(r => new UserRoleEntity
+            UserRoles = new List<UserRoleEntity>
             {
-                UserId = user.Id,
-                RoleId = (int)r
-            }).ToList()
+                new UserRoleEntity { UserId = user.Id, RoleId = (int)sessionRole }
+            }
         });
 
         var (rawRefreshToken, hashedRefreshToken) = _refreshTokenService.GenerateToken();
@@ -86,45 +108,36 @@ public class TokenService : ITokenService
             TokenHash = hashedRefreshToken,
             UserId = user.Id,
             Created = DateTime.UtcNow,
-            Expires = refreshExpires
+            Expires = refreshExpires,
+            RoleId = (int)sessionRole
         };
 
         await _refreshTokenRepository.AddAsync(newRefreshToken);
 
-        var result = new AuthResult
+        _logger.LogInformation("Token refreshed successfully for user {UserId} with role {Role}", user.Id, sessionRole);
+
+        return Result.Success<AuthResult, Error>(new AuthResult
         {
             AccessToken = accessToken,
             AccessTokenExpires = accessExpires,
             RefreshToken = rawRefreshToken,
             RefreshTokenExpires = newRefreshToken.Expires
-        };
-
-        _logger.LogInformation("Token refreshed successfully for user {UserId}", user.Id);
-
-        return Result.Success<AuthResult, Error>(result);
+        });
     }
 
     public async Task<Result> LogoutAsync(string refreshToken)
     {
         var hashedToken = _refreshTokenService.HashToken(refreshToken);
-
         var storedToken = await _refreshTokenRepository.GetByTokenAsync(hashedToken);
 
-        if (storedToken == null)
+        if (storedToken == null || !storedToken.IsActive)
         {
-            _logger.LogWarning("Logout failed. Token not found.");
-            return Result.Failure(AuthErrors.InvalidRefreshToken.Description);
-        }
-
-        if (!storedToken.IsActive)
-        {
-            _logger.LogWarning("Logout failed. Token already revoked or expired.");
+            _logger.LogWarning("Logout failed. Token not found or already invalid.");
             return Result.Failure(AuthErrors.InvalidRefreshToken.Description);
         }
 
         await _refreshTokenRepository.InvalidateAsync(hashedToken);
-
-        _logger.LogInformation("User logged out. Token revoked.");
+        _logger.LogInformation("User logged out successfully.");
 
         return Result.Success();
     }

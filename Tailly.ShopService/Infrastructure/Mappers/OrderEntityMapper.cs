@@ -19,13 +19,11 @@ public static class OrderEntityMapper
             PaymentMethod = order.PaymentMethod,
             EstimatedDeliveryDate = order.EstimatedDeliveryDate,
             CreatedAt = order.CreatedAt,
-            CanBeCancelled = order.CanBeCancelled,
 
             RecipientFirstName = order.RecipientFirstName,
             RecipientLastName = order.RecipientLastName,
             RecipientPhone = order.RecipientPhone,
-            RecipientEmail = order.RecipientEmail,
-            TrackingNumber = order.TrackingNumber
+            RecipientEmail = order.RecipientEmail
         };
 
         if (order.Address != null)
@@ -72,13 +70,11 @@ public static class OrderEntityMapper
             PaymentMethod = entity.PaymentMethod,
             EstimatedDeliveryDate = entity.EstimatedDeliveryDate,
             CreatedAt = entity.CreatedAt,
-            CanBeCancelled = entity.CanBeCancelled,
 
             RecipientFirstName = entity.RecipientFirstName,
             RecipientLastName = entity.RecipientLastName,
             RecipientPhone = entity.RecipientPhone,
             RecipientEmail = entity.RecipientEmail,
-            TrackingNumber = entity.TrackingNumber,
 
             PickupPoint = entity.PickupPoint != null ? new PickupPoint
             {

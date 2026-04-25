@@ -1,6 +1,6 @@
 ﻿namespace Tailly.AuthService.Application.Dtos.Requests.EmailChange;
 
-public sealed class RequestEmailChangeRequest
+public sealed class EmailChangeRequest
 {
     public string NewEmail { get; set; } = default!;
 }

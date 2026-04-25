@@ -1,9 +1,13 @@
 ﻿using CSharpFunctionalExtensions;
 using MassTransit;
+using Microsoft.Extensions.Options;
 using Tailly.AuthService.Application.Errors;
+using Tailly.AuthService.Application.Mappers;
 using Tailly.AuthService.Application.Service.Security.Cryptography;
 using Tailly.AuthService.Application.Service.Security.Interfaces;
+using Tailly.AuthService.Core.Enums;
 using Tailly.AuthService.Core.Models;
+using Tailly.AuthService.Infrastructure.Configurations.Options;
 using Tailly.AuthService.Infrastructure.Messaging.Messages;
 using Tailly.AuthService.Infrastructure.Repositories.Interfaces;
 
@@ -16,6 +20,7 @@ public class AccountDeletionService : IAccountDeletionService
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IAccountDeletionTokenRepository _tokenRepository;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly FrontendOptions _frontend;
 
     private const int RestoreDays = 7;
 
@@ -23,21 +28,35 @@ public class AccountDeletionService : IAccountDeletionService
                                   IPasswordHashingService passwordHasher,
                                   IRefreshTokenRepository refreshTokenRepository,
                                   IAccountDeletionTokenRepository tokenRepository,
-                                  IPublishEndpoint publishEndpoint)
+                                  IPublishEndpoint publishEndpoint,
+                                  IOptions<FrontendOptions> options)
     {
         _usersRepository = usersRepository;
         _passwordHasher = passwordHasher;
         _refreshTokenRepository = refreshTokenRepository;
         _tokenRepository = tokenRepository;
         _publishEndpoint = publishEndpoint;
+        _frontend = options.Value;
     }
 
-    public async Task<Result<DateTime>> RequestDeletionAsync(Guid userId, string password)
+    public async Task<Result<DateTime>> RequestDeletionAsync(Guid userId, string password, RoleType role)
     {
-        var user = await _usersRepository.GetByIdAsync(userId);
+        if (role != RoleType.Client && role != RoleType.Specialist)
+            return Result.Failure<DateTime>(AuthErrors.InvalidRole.Description);
 
+        var user = await _usersRepository.GetByIdAsync(userId);
         if (user == null)
-            return Result.Failure<DateTime>(AuthErrors.InvalidCredentials.Description);
+            return Result.Failure<DateTime>(AuthErrors.UserNotFound.Description); 
+
+        var userRole = user.GetRole(role);  
+        if (userRole == null)
+            return Result.Failure<DateTime>(AuthErrors.InvalidRole.Description);
+
+        if (userRole.IsEffectivelyBlocked)
+            return Result.Failure<DateTime>(AuthErrors.AccountBlocked.Description);
+
+        if (userRole.IsPendingDeletion)
+            return Result.Failure<DateTime>(AuthErrors.AccountPendingDeletion.Description);
 
         if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
             return Result.Failure<DateTime>(AuthErrors.InvalidPassword.Description);
@@ -45,12 +64,12 @@ public class AccountDeletionService : IAccountDeletionService
         var now = DateTime.UtcNow;
         var restoreUntil = now.AddDays(RestoreDays);
 
-        user.SoftDeletedAt = now;
-        user.RestoreUntil = restoreUntil;
+        var updated = await _usersRepository.PatchUserRoleSoftDeleteAsync(userId, role, now, restoreUntil);
 
-        await _usersRepository.UpdateAsync(user);
+        if (updated == 0)
+            return Result.Failure<DateTime>(AuthErrors.DeletionUpdateFailed.Description);
 
-        await _refreshTokenRepository.InvalidateAllAsync(user.Id);
+        await _refreshTokenRepository.InvalidateAllForUserAndRoleAsync(userId, (int)role);
 
         var token = TokenGenerator.Generate();
 
@@ -58,52 +77,60 @@ public class AccountDeletionService : IAccountDeletionService
         {
             Token = token,
             UserId = user.Id,
+            RoleId = (int)role,
             ExpiresAt = restoreUntil
         });
+
+        var roleStr = AuthMapper.MapRole(role);
 
         await _publishEndpoint.Publish(new SendEmailMessage
         {
             To = user.Email,
-            Subject = "Account deletion",
-            Body = $"Restore your account: https://frontend/restore?token={token}"
+            Subject = "Account scheduled for deletion",
+            Body = $"""
+            <h2>Account scheduled for deletion</h2>
+            <p>Your {roleStr} account will be deleted in {RestoreDays} days.</p>
+            <p>If this was a mistake, restore it:</p>
+            <a href="{_frontend.BaseUrl}/restore?token={token}">Restore account</a>
+            """,
+            Purpose = "account-deletion"
         });
 
-        return Result.Success((restoreUntil));
+        return Result.Success(restoreUntil);
     }
 
     public async Task<Result<(string email, string role, DateTime restoreUntil)>> GetRestorePreviewAsync(string token)
     {
         var tokenModel = await _tokenRepository.GetAsync(token);
-
         if (tokenModel == null || tokenModel.ExpiresAt < DateTime.UtcNow)
             return Result.Failure<(string, string, DateTime)>(AuthErrors.InvalidVerificationToken.Description);
 
         var user = await _usersRepository.GetByIdAsync(tokenModel.UserId);
-
         if (user == null)
-            return Result.Failure<(string, string, DateTime)>(AuthErrors.InvalidCredentials.Description);
+            return Result.Failure<(string, string, DateTime)>(AuthErrors.UserNotFound.Description);
 
-        var role = user.Roles.First().ToString().ToLower();
+        var roleType = (RoleType)tokenModel.RoleId;
+        var roleStr = AuthMapper.MapRole(roleType);
 
-        return Result.Success((user.Email, role, tokenModel.ExpiresAt));
+        return Result.Success((user.Email, roleStr, tokenModel.ExpiresAt));
     }
 
     public async Task<Result> RestoreAsync(string token)
     {
         var tokenModel = await _tokenRepository.GetAsync(token);
-
         if (tokenModel == null || tokenModel.ExpiresAt < DateTime.UtcNow)
             return Result.Failure(AuthErrors.InvalidVerificationToken.Description);
 
         var user = await _usersRepository.GetByIdAsync(tokenModel.UserId);
-
         if (user == null)
-            return Result.Failure(AuthErrors.InvalidCredentials.Description);
+            return Result.Failure(AuthErrors.UserNotFound.Description);
 
-        user.SoftDeletedAt = null;
-        user.RestoreUntil = null;
+        var role = (RoleType)tokenModel.RoleId;
 
-        await _usersRepository.UpdateAsync(user);
+        var restored = await _usersRepository.PatchUserRoleSoftDeleteAsync(user.Id, role, null, null);
+
+        if (restored == 0)
+            return Result.Failure(AuthErrors.DeletionUpdateFailed.Description);
 
         await _tokenRepository.RemoveAsync(token);
 

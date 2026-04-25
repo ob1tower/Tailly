@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using MassTransit;
 using Tailly.AuthService.Application.Errors;
+using Tailly.AuthService.Application.Helpers;
 using Tailly.AuthService.Application.Service.Security.Interfaces;
 using Tailly.AuthService.Application.Service.Security.Otp;
 using Tailly.AuthService.Core.Enums;
@@ -36,42 +37,38 @@ public class PasswordRecoveryService : IPasswordRecoveryService
 
     public async Task<Result<PasswordRecoveryResult>> StartPasswordRecoveryAsync(string email)
     {
-        email = email?.Trim().ToLowerInvariant()
-            ?? throw new ArgumentNullException(nameof(email));
+        email = email?.Trim().ToLowerInvariant() ?? 
+            throw new ArgumentNullException(nameof(email));
 
         var user = await _usersRepository.GetByEmailAsync(email);
 
         var flow = "default";
         if (user != null)
         {
-            flow = (user.Roles.Contains(RoleType.Admin) ||
-                    user.Roles.Contains(RoleType.SuperAdmin))
-                   ? "admin"
-                   : "default";
+            flow = user.UserRoles.Any(x =>
+                x.SoftDeletedAt == null &&
+                (x.Role == RoleType.Admin || x.Role == RoleType.SuperAdmin))
+                ? "admin"
+                : "default";
         }
 
         _logger.LogInformation("Password recovery started for {Email} with flow {Flow}", email, flow);
-
         return Result.Success(new PasswordRecoveryResult { Flow = flow });
     }
 
     public async Task<Result> SendRecoveryCodeAsync(string email)
     {
-        email = email?.Trim().ToLowerInvariant()
-            ?? throw new ArgumentNullException(nameof(email));
+        email = email?.Trim().ToLowerInvariant() ?? throw new ArgumentNullException(nameof(email));
 
         var user = await _usersRepository.GetByEmailAsync(email);
-
         if (user == null)
         {
             _logger.LogInformation("Recovery code requested for non-existent email: {Email}", email);
             return Result.Success();
         }
 
-        if (user.IsBlocked || (user.BlockedUntil != null && user.BlockedUntil > DateTime.UtcNow))
-        {
+        if (UserRules.IsPasswordRecoveryBlockedForAllRoles(user))
             return Result.Failure(AuthErrors.AccountBlocked.Description);
-        }
 
         var code = VerificationCodeGenerator.GenerateCode();
 
@@ -96,8 +93,8 @@ public class PasswordRecoveryService : IPasswordRecoveryService
 
     public async Task<Result> VerifyRecoveryCodeAsync(string email, string code)
     {
-        email = email?.Trim().ToLowerInvariant()
-            ?? throw new ArgumentNullException(nameof(email));
+        email = email?.Trim().ToLowerInvariant() ?? 
+            throw new ArgumentNullException(nameof(email));
 
         var result = await _verificationCodeService.VerifyCodeAsync(email, code, "password-recovery", deleteAfterVerify: false);
 
@@ -113,33 +110,24 @@ public class PasswordRecoveryService : IPasswordRecoveryService
 
     public async Task<Result> ResetPasswordAsync(string email, string code, string newPassword)
     {
-        email = email?.Trim().ToLowerInvariant()
-            ?? throw new ArgumentNullException(nameof(email));
+        email = email?.Trim().ToLowerInvariant() ?? 
+            throw new ArgumentNullException(nameof(email));
 
         var user = await _usersRepository.GetByEmailAsync(email);
         if (user == null)
-        {
             return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
-        }
 
-        if (user.IsBlocked || (user.BlockedUntil != null && user.BlockedUntil > DateTime.UtcNow))
-        {
+        if (UserRules.IsPasswordRecoveryBlockedForAllRoles(user))
             return Result.Failure(AuthErrors.AccountBlocked.Description);
-        }
 
         if (_passwordHasher.VerifyPassword(newPassword, user.PasswordHash))
-        {
             return Result.Failure(AuthErrors.SamePassword.Description);
-        }
 
         var codeResult = await _verificationCodeService.VerifyCodeAsync(email, code, "password-recovery");
         if (!codeResult.Success)
-        {
             return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
-        }
 
-        var newHash = _passwordHasher.HashPassword(newPassword);
-        user.PasswordHash = newHash;
+        user.PasswordHash = _passwordHasher.HashPassword(newPassword);
 
         await _usersRepository.UpdateAsync(user);
         await _refreshTokenRepository.InvalidateAllAsync(user.Id);

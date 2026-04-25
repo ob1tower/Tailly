@@ -7,7 +7,7 @@ public class RefreshTokenEntity
     public DateTime Created { get; set; } = DateTime.UtcNow;
     public DateTime Expires { get; set; }
     public DateTime? Revoked { get; set; }
-
     public Guid UserId { get; set; }
     public UserEntity User { get; set; } = default!;
+    public int? RoleId { get; set; }
 }

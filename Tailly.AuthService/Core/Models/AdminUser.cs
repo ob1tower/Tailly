@@ -8,9 +8,9 @@ public class AdminUser
     public bool IsBlocked { get; set; }
     public bool IsPermanentBlock { get; set; }
     public DateTime? BlockedUntil { get; set; }
+    public string? BlockReason { get; set; }
     public DateTime? SoftDeletedAt { get; set; }
     public DateTime? RestoreUntil { get; set; }
-    public string? BlockReason { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? MiddleName { get; set; }

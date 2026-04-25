@@ -12,24 +12,27 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshTokenEn
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.TokenHash)
-            .HasMaxLength(64)
-            .IsRequired();
+               .HasMaxLength(64)
+               .IsRequired();
 
         builder.Property(x => x.Created)
-            .IsRequired();
+               .IsRequired();
 
         builder.Property(x => x.Expires)
-            .IsRequired();
+               .IsRequired();
 
         builder.Property(x => x.Revoked)
-            .IsRequired(false);
+               .IsRequired(false);
 
         builder.Property(x => x.UserId)
-            .IsRequired();
+               .IsRequired();
+
+        builder.Property(x => x.RoleId)
+               .IsRequired(false);
 
         builder.HasOne(x => x.User)
-            .WithMany(x => x.RefreshTokens)
-            .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+               .WithMany(x => x.RefreshTokens)
+               .HasForeignKey(x => x.UserId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }

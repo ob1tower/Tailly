@@ -14,12 +14,10 @@ public class OrderEntity
     public PaymentMethod PaymentMethod { get; set; }
     public DateTime? EstimatedDeliveryDate { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public bool CanBeCancelled { get; set; } = true;
     public string RecipientFirstName { get; set; } = string.Empty;
     public string RecipientLastName { get; set; } = string.Empty;
     public string RecipientPhone { get; set; } = string.Empty;
     public string RecipientEmail { get; set; } = string.Empty;
-    public string? TrackingNumber { get; set; }
     public PickupPointEntity? PickupPoint { get; set; }
     public ICollection<OrderItemEntity> Items { get; set; } = [];
     public OrderAddressEntity? Address { get; set; }

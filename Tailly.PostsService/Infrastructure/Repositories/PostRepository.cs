@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CSharpFunctionalExtensions;
+using Microsoft.EntityFrameworkCore;
 using Tailly.PostsService.Core.Entities;
 using Tailly.PostsService.Core.Enums;
 using Tailly.PostsService.Core.Models;
@@ -64,7 +65,7 @@ public class PostRepository : IPostRepository
             .Include(x => x.Tags)
             .ThenInclude(x => x.Tag)
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == id && x.Status == PostStatus.Published);
+            .FirstOrDefaultAsync(x => x.Id == id);
 
         return entity == null ? null : PostEntityMapper.ToDomain(entity);
     }
@@ -89,8 +90,7 @@ public class PostRepository : IPostRepository
             .Include(x => x.Tags)
             .ThenInclude(x => x.Tag)
             .AsSplitQuery()
-            .AsNoTracking()
-            .Where(x => x.Status == PostStatus.Published);
+            .AsNoTracking();
 
         search = search?.Trim();
 
@@ -136,7 +136,6 @@ public class PostRepository : IPostRepository
         limit = Math.Clamp(limit, 1, 20);
 
         var entities = await _context.Posts
-            .Where(p => p.Status == PostStatus.Published)
             .Include(p => p.Images)
             .Include(p => p.Tags)
             .ThenInclude(t => t.Tag)
@@ -163,9 +162,8 @@ public class PostRepository : IPostRepository
 
         entity.Title = post.Title;
         entity.Content = post.Content;
-        entity.Status = post.Status;
         entity.UpdatedAt = DateTime.UtcNow;
-        entity.PublishedAt = post.PublishedAt;
+        entity.PublishedAt ??= DateTime.UtcNow;
 
         _context.PostImages.RemoveRange(entity.Images);
 
@@ -242,13 +240,12 @@ public class PostRepository : IPostRepository
     public async Task<List<string>> GetAllTagsAsync()
     {
         return await _context.Posts
-            .Where(p => p.Status == PostStatus.Published)
             .SelectMany(p => p.Tags.Select(t => t.Tag!.Name))
             .Distinct()
             .ToListAsync();
     }
 
-    public async Task<(List<Post> posts, int total)> GetAdminListAsync(int page, int limit, string? search, PostStatus? status, PostAdminSort? sort)
+    public async Task<(List<Post> posts, int total)> GetAdminListAsync(int page, int limit, string? search, PostAdminSort? sort)
     {
         var query = _context.Posts
             .Include(x => x.Images)
@@ -262,23 +259,14 @@ public class PostRepository : IPostRepository
         if (!string.IsNullOrWhiteSpace(search))
         {
             query = query.Where(x =>
-                EF.Functions.ILike(x.Title, $"%{search}%") ||
-                EF.Functions.ILike(x.Content, $"%{search}%"));
-        }
-
-        if (status.HasValue)
-        {
-            query = query.Where(x => x.Status == status.Value);
+                EF.Functions.ILike(x.Title, $"%{search}%"));
         }
 
         query = sort switch
         {
-            PostAdminSort.UpdatedDesc => query.OrderByDescending(x => x.UpdatedAt),
-            PostAdminSort.UpdatedAsc => query.OrderBy(x => x.UpdatedAt),
+            PostAdminSort.Oldest => query.OrderBy(x => x.CreatedAt),
             PostAdminSort.TitleAsc => query.OrderBy(x => x.Title),
             PostAdminSort.TitleDesc => query.OrderByDescending(x => x.Title),
-            PostAdminSort.PublishedDesc => query.OrderByDescending(x => x.PublishedAt ?? x.CreatedAt),
-
             _ => query.OrderByDescending(x => x.CreatedAt)
         };
 

@@ -52,6 +52,9 @@ public static class ShopErrors
     public static readonly Error OrderAlreadyPaid = 
         new("Order.AlreadyPaid", "This order is already paid.");
 
+    public static readonly Error OrderAlreadyCancelled =
+        new("Order.AlreadyCancelled", "This order has already been cancelled.");
+
     public static readonly Error PaymentFailed = 
         new("Payment.Failed", "Payment processing failed.");
 

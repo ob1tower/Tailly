@@ -11,18 +11,22 @@ public class AccountDeletionTokenConfiguration : IEntityTypeConfiguration<Accoun
         builder.HasKey(x => x.Token);
 
         builder.Property(x => x.Token)
-            .HasMaxLength(128)
-            .IsRequired();
+               .HasMaxLength(128)
+               .IsRequired();
 
         builder.Property(x => x.UserId)
-            .IsRequired();
+               .IsRequired();
 
         builder.Property(x => x.ExpiresAt)
-            .IsRequired();
+               .IsRequired();
+
+
+        builder.Property(x => x.RoleId)
+               .IsRequired();
 
         builder.HasOne(x => x.User)
-            .WithMany()
-            .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+               .WithMany()
+               .HasForeignKey(x => x.UserId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }

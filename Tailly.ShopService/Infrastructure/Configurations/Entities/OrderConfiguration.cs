@@ -46,9 +46,6 @@ public class OrderConfiguration : IEntityTypeConfiguration<OrderEntity>
                .HasMaxLength(256)
                .IsRequired();
 
-        builder.Property(x => x.TrackingNumber)
-               .HasMaxLength(100);
-
         builder.HasMany(x => x.Items)
                .WithOne(x => x.Order)
                .HasForeignKey(x => x.OrderId)

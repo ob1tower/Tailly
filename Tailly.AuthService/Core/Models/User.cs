@@ -9,12 +9,6 @@ public class User
     public string PasswordHash { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool EmailConfirmed { get; set; }
-    public bool IsBlocked { get; set; }
-    public bool IsPermanentBlock { get; set; }
-    public DateTime? BlockedUntil { get; set; }
-    public DateTime? SoftDeletedAt { get; set; }
-    public DateTime? RestoreUntil { get; set; }
-    public string? BlockReason { get; set; }
     public string? SpecialistSlug { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
@@ -22,4 +16,8 @@ public class User
     public Guid? SpecialistId { get; set; } = null;
     public Guid? AdminId { get; set; } = null;
     public List<RoleType> Roles { get; set; } = [];
+    public List<UserRole> UserRoles { get; set; } = [];
+
+    public UserRole? GetRole(RoleType role) =>
+        UserRoles.FirstOrDefault(x => x.Role == role);
 }

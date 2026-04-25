@@ -1,12 +1,5 @@
 ﻿namespace Tailly.PostsService.Core.Enums;
 
-public enum PostStatus
-{
-    Draft = 1,
-    Published,
-    Archived
-}
-
 public enum PostPublicSort
 {
     Newest = 1,
@@ -17,9 +10,8 @@ public enum PostPublicSort
 
 public enum PostAdminSort
 {
-    UpdatedDesc,
-    UpdatedAsc,
+    Newest = 1,
+    Oldest,
     TitleAsc,
-    TitleDesc,
-    PublishedDesc
+    TitleDesc
 }

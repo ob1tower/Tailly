@@ -24,15 +24,6 @@ public class BannerConfiguration : IEntityTypeConfiguration<BannerEntity>
         builder.Property(x => x.LinkUrl)
                .HasMaxLength(1000);
 
-        builder.Property(x => x.LinkTarget)
-               .IsRequired();
-
-        builder.Property(x => x.Placement)
-               .IsRequired();
-
-        builder.Property(x => x.Status)
-               .IsRequired();
-
         builder.Property(x => x.StartsAt)
                .IsRequired(false);
 

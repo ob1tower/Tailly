@@ -14,5 +14,5 @@ public interface IPostRepository
     Task<List<string>> GetAllTagsAsync();
     Task<List<Post>> GetAllAsync();
     Task<Post?> GetByIdForAdminAsync(Guid id);
-    Task<(List<Post> posts, int total)> GetAdminListAsync(int page, int limit, string? search, PostStatus? status, PostAdminSort? sort);
+    Task<(List<Post> posts, int total)> GetAdminListAsync(int page, int limit, string? search, PostAdminSort? sort);
 }

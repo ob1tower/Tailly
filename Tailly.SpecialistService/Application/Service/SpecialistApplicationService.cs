@@ -68,7 +68,7 @@ public class SpecialistApplicationService : ISpecialistApplicationService
     public async Task<Result<(List<SpecialistApplication> items, int total), Error>> GetAllAsync(
         int page, int limit, SpecialistApplicationStatus? status = null)
     {
-        var (items, total) = await _applicationRepository.GetAllAsync(page, limit, status);
+        var (items, total) = await _applicationRepository.GetAllAsync(page, limit);
 
         _logger.LogInformation("Retrieved {Count} specialist applications (page {Page})", items.Count, page);
 
