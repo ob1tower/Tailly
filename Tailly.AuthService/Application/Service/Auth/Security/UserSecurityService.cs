@@ -44,6 +44,19 @@ public class UserSecurityService : IUserSecurityService
             return Result.Failure(AuthErrors.InvalidCredentials.Description);
         }
 
+        var activeRoles = user.UserRoles.Where(r => r.SoftDeletedAt == null).ToList();
+        if (activeRoles.Count == 0)
+        {
+            _logger.LogWarning("ChangePassword failed. No active roles for user: {UserId}", userId);
+            return Result.Failure(AuthErrors.AccountPendingDeletion.Description);
+        }
+
+        if (activeRoles.All(r => r.IsEffectivelyBlocked))
+        {
+            _logger.LogWarning("ChangePassword failed. All roles are blocked for user: {UserId}", userId);
+            return Result.Failure(AuthErrors.AccountBlocked.Description);
+        }
+
         if (!_passwordHasher.VerifyPassword(currentPassword, user.PasswordHash))
         {
             _logger.LogWarning("ChangePassword failed. Invalid current password for user: {UserId}", userId);
@@ -58,8 +71,8 @@ public class UserSecurityService : IUserSecurityService
 
         var newHash = _passwordHasher.HashPassword(newPassword);
         user.PasswordHash = newHash;
-        await _usersRepository.UpdateAsync(user);
 
+        await _usersRepository.UpdateAsync(user);
         await _refreshTokenRepository.InvalidateAllAsync(userId);
 
         _logger.LogInformation("Password changed successfully for user: {UserId}", userId);
@@ -77,6 +90,13 @@ public class UserSecurityService : IUserSecurityService
             _logger.LogWarning("RequestEmailChange failed. User not found: {UserId}", userId);
             return Result.Failure<EmailChangeResult, Error>(AuthErrors.InvalidCredentials);
         }
+
+        var activeRoles = user.UserRoles.Where(r => r.SoftDeletedAt == null).ToList();
+        if (activeRoles.Count == 0)
+            return Result.Failure<EmailChangeResult, Error>(AuthErrors.AccountPendingDeletion);
+
+        if (activeRoles.All(r => r.IsEffectivelyBlocked))
+            return Result.Failure<EmailChangeResult, Error>(AuthErrors.AccountBlocked);
 
         if (user.Email.Equals(newEmail, StringComparison.OrdinalIgnoreCase))
         {
@@ -113,13 +133,11 @@ public class UserSecurityService : IUserSecurityService
         _logger.LogInformation("Email change requested for user {UserId} → {NewEmail} (RequestId: {RequestId})",
             userId, newEmail, requestId);
 
-        var emailChangeResult = new EmailChangeResult
+        return Result.Success<EmailChangeResult, Error>(new EmailChangeResult
         {
             RequestId = requestId,
             MaskedOldEmail = maskedOldEmail
-        };
-
-        return Result.Success<EmailChangeResult, Error>(emailChangeResult);
+        });
     }
 
     public async Task<Result> ConfirmEmailChangeAsync(Guid userId, string requestId, string newEmail, string code)
@@ -133,6 +151,13 @@ public class UserSecurityService : IUserSecurityService
             _logger.LogWarning("ConfirmEmailChange failed. User not found: {UserId}", userId);
             return Result.Failure(AuthErrors.InvalidCredentials.Description);
         }
+
+        var activeRoles = user.UserRoles.Where(r => r.SoftDeletedAt == null).ToList();
+        if (activeRoles.Count == 0)
+            return Result.Failure(AuthErrors.AccountPendingDeletion.Description);
+
+        if (activeRoles.All(r => r.IsEffectivelyBlocked))
+            return Result.Failure(AuthErrors.AccountBlocked.Description);
 
         var verifyResult = await _verificationCodeService.VerifyCodeAsync(newEmail, code, "change-email");
         if (!verifyResult.Success)

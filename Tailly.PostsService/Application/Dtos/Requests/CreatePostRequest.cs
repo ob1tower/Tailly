@@ -7,5 +7,4 @@ public sealed class CreatePostRequest
     public string? CoverImageUrl { get; set; }
     public List<string> ImageUrls { get; set; } = [];
     public List<string> Tags { get; set; } = [];
-    public string Status { get; set; } = default!;
 }

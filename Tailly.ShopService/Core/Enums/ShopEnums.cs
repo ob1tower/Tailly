@@ -11,17 +11,15 @@ public enum PaymentMethod
 {
     Card = 1,
     Sbp,
-    Cash
+    Cash,
+    CardOnDelivery
 }
 
 public enum OrderStatus
 {
     Created = 1,
-    PendingPayment,
-    Paid,
-    Processing,
-    Delivering,
-    ReadyForPickup,
+    Assembled,
+    Shipped,
     Completed,
     Cancelled
 }

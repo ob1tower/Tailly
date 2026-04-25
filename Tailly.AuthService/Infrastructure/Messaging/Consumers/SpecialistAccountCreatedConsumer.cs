@@ -41,9 +41,19 @@ public class SpecialistAccountCreatedConsumer : IConsumer<SpecialistAccountCreat
             {
                 _logger.LogInformation("User already exists. Adding Specialist role and updating links.");
 
-                if (!existingUser.Roles.Contains(RoleType.Specialist))
+                if (!existingUser.UserRoles.Any(x => x.Role == RoleType.Specialist && x.SoftDeletedAt == null))
                 {
                     await _usersRepository.AddRoleAsync(existingUser.Id, (int)RoleType.Specialist);
+                    
+                    existingUser.UserRoles.Add(new UserRole
+                    {
+                        Role = RoleType.Specialist,
+                        IsBlocked = false,
+                        IsPermanentBlock = false,
+                        SoftDeletedAt = null,
+                        RestoreUntil = null
+                    });
+
                     _logger.LogInformation("Added Specialist role to existing user {Email}", message.Email);
                 }
 
@@ -56,6 +66,18 @@ public class SpecialistAccountCreatedConsumer : IConsumer<SpecialistAccountCreat
                 await _usersRepository.UpdateAsync(existingUser);
 
                 _logger.LogInformation("Successfully linked Specialist to existing user {Email}", message.Email);
+
+                var emailBody = $@"
+                    <h2>You are now a Specialist on Tailly!</h2>
+                    <p>Hello, {message.FirstName}!</p>
+                    <p>Your account has been successfully updated — you now have specialist access.</p>
+                    <p>You can continue using your current password.</p>
+                    <p>Good luck with your work!</p>";
+
+                await _emailSender.SendEmailAsync(
+                    message.Email,
+                    "You are now a Specialist — Tailly",
+                    emailBody);
 
                 await context.Publish(new SpecialistUserLinked
                 {

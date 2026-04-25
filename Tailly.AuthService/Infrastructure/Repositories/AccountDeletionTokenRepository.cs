@@ -21,7 +21,8 @@ public class AccountDeletionTokenRepository : IAccountDeletionTokenRepository
         {
             Token = model.Token,
             UserId = model.UserId,
-            ExpiresAt = model.ExpiresAt
+            ExpiresAt = model.ExpiresAt,
+            RoleId = model.RoleId
         };
 
         await _context.AccountDeletionTokens.AddAsync(entity);
@@ -41,7 +42,8 @@ public class AccountDeletionTokenRepository : IAccountDeletionTokenRepository
         {
             Token = entity.Token,
             UserId = entity.UserId,
-            ExpiresAt = entity.ExpiresAt
+            ExpiresAt = entity.ExpiresAt,
+            RoleId = entity.RoleId
         };
     }
 
@@ -62,5 +64,14 @@ public class AccountDeletionTokenRepository : IAccountDeletionTokenRepository
         await _context.AccountDeletionTokens
             .Where(x => x.ExpiresAt < DateTime.UtcNow)
             .ExecuteDeleteAsync();
+    }
+
+    public async Task<int> RemoveExpiredCountAsync()
+    {
+        var deletedCount = await _context.AccountDeletionTokens
+            .Where(x => x.ExpiresAt < DateTime.UtcNow)
+            .ExecuteDeleteAsync();
+
+        return deletedCount;
     }
 }

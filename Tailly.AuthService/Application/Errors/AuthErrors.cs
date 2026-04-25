@@ -45,4 +45,13 @@ public static class AuthErrors
 
     public static readonly Error AccessDenied =
         new("Auth.AccessDenied", "You do not have permission to perform this action.");
+
+    public static readonly Error UserNotFound =
+        new("Auth.UserNotFound", "User not found.");
+
+    public static readonly Error RoleNotFoundForUser =
+        new("Auth.RoleNotFoundForUser", "Specified role not found for this user.");
+
+    public static readonly Error DeletionUpdateFailed =
+        new("Auth.DeletionUpdateFailed", "Failed to update deletion status.");
 }

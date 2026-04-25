@@ -9,8 +9,7 @@ public interface IBannerRepository
     Task DeleteAsync(Guid id);
     Task<List<Banner>> GetAllAsync();
     Task<Banner?> GetByIdAsync(Guid id);
-    Task<(List<Banner> banners, int total)> GetListAsync(int page, int limit, string? status, string? placement, BannerSort? sort);
+    Task<(List<Banner> banners, int total)> GetListAsync(int page, int limit, string? search, BannerSort? sort);
     Task UpdateAsync(Banner banner);
     Task<List<Banner>> GetActiveBannersAsync(DateTime now);
-    Task<List<Banner>> GetBannersByPlacementAsync(BannerPlacement placement, DateTime now);
 }

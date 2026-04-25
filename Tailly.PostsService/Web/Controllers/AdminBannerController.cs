@@ -27,21 +27,15 @@ public class AdminBannerController : ControllerBase
     /// </summary>
     /// <param name="page">Page number (default: 1).</param>
     /// <param name="pageSize">Number of items per page (default: 10).</param>
-    /// <param name="status">Filter by status: draft, published, archived.</param>
-    /// <param name="placement">Filter by placement: home_hero, posts, specialists, shop.</param>
-    /// <param name="sort">Sorting mode: newest, oldest, title_asc, title_desc, starts_at_asc, starts_at_desc.</param>
+    /// <param name="search">Search query for title.</param>
+    /// <param name="sort">Sort: newest, oldest, title_asc, title_desc.</param>
     /// <returns>Paginated list of banners.</returns>
     [HttpGet("admin/content/banners")]
-    public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? status = null, [FromQuery] string? placement = null, [FromQuery] string? sort = null)
+    public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, [FromQuery] string? sort = null)
     {
         var pagination = new PaginationValidator(page, pageSize);
 
-        var result = await _service.GetListAsync(
-            pagination.PageNumber,
-            pagination.PageSize,
-            status,
-            placement,
-            sort);
+        var result = await _service.GetListAsync(pagination.PageNumber, pagination.PageSize, search, sort);
 
         if (result.IsFailure)
             return BadRequest(result.Error);

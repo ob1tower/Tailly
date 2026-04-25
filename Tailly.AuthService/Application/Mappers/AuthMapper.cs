@@ -47,12 +47,12 @@ public static class AuthMapper
         }
     }
 
-    private static string MapRole(RoleType role) => role switch
+    public static string MapRole(RoleType role) => role switch
     {
         RoleType.Client => "client",
         RoleType.Specialist => "specialist",
         RoleType.Admin => "admin",
         RoleType.SuperAdmin => "super_admin",
-        _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
+        _ => role.ToString().ToLowerInvariant()
     };
 }

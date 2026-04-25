@@ -8,6 +8,5 @@ public class AuthResult
     public string RefreshToken { get; set; } = string.Empty;
     public DateTime AccessTokenExpires { get; set; }
     public DateTime RefreshTokenExpires { get; set; }
-
     public AuthUserDto User { get; set; } = null!;
 }

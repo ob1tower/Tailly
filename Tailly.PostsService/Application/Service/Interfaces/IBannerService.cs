@@ -12,6 +12,5 @@ public interface IBannerService
     Task<Result<Banner, Error>> GetByIdAsync(Guid id);
     Task<Result<Banner, Error>> UpdateAsync(Banner banner);
     Task<Result<List<Banner>, Error>> GetActiveBannersAsync();
-    Task<Result<(List<Banner>, int), Error>> GetListAsync(int page, int limit, string? status, string? placement, string? sort);
-    Task<Result<List<Banner>, Error>> GetBannersByPlacementAsync(string placement);
+    Task<Result<(List<Banner>, int), Error>> GetListAsync(int page, int limit, string? search, string? sort);
 }

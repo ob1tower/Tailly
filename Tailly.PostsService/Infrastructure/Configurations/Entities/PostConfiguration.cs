@@ -17,9 +17,6 @@ public class PostConfiguration : IEntityTypeConfiguration<PostEntity>
         builder.Property(x => x.Content)
                .IsRequired();
 
-        builder.Property(x => x.Status)
-               .IsRequired();
-
         builder.Property(x => x.CreatedAt)
                .IsRequired();
 

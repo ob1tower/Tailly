@@ -12,7 +12,7 @@ using Tailly.ShopService.Infrastructure.DataAccess;
 namespace Tailly.ShopService.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    [Migration("20260417112553_InitialCreate")]
+    [Migration("20260423191857_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -149,9 +149,6 @@ namespace Tailly.ShopService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("CanBeCancelled")
-                        .HasColumnType("boolean");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -200,10 +197,6 @@ namespace Tailly.ShopService.Migrations
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("TrackingNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -288,121 +281,121 @@ namespace Tailly.ShopService.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("965f6af3-1f62-442a-bfa6-c3a0788d71f3"),
+                            Id = new Guid("ba898688-8898-4c81-acc8-a93d4728a19b"),
                             Address = "Москва, ул. Тверская, 12, стр. 1",
-                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4511),
+                            EstimatedDate = new DateTime(2026, 4, 24, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3385),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Тверской"
                         },
                         new
                         {
-                            Id = new Guid("5908e866-c82b-4cef-be77-a7825f8b66d3"),
+                            Id = new Guid("ca13495b-b993-4e84-a5ec-d4762b7eeeed"),
                             Address = "Москва, ул. Братиславская, 21, корп. 2",
-                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4517),
+                            EstimatedDate = new DateTime(2026, 4, 24, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3390),
                             Provider = 1,
                             Title = "ПВЗ СДЭК в Марьино"
                         },
                         new
                         {
-                            Id = new Guid("45b7336a-bbd1-4631-89c7-a70a14c07c0e"),
+                            Id = new Guid("255d1b87-5508-4edd-81f0-1df5d625ae64"),
                             Address = "Москва, Ленинский проспект, 45",
-                            EstimatedDate = new DateTime(2026, 4, 19, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4518),
+                            EstimatedDate = new DateTime(2026, 4, 25, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3399),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Ленинском проспекте"
                         },
                         new
                         {
-                            Id = new Guid("d4622018-e132-4c66-89b4-2fe77ec52596"),
+                            Id = new Guid("15d21bd4-f087-4967-baea-3a6ce21b924c"),
                             Address = "Москва, г. Химки, ул. Ленинградская, 29",
-                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4520),
+                            EstimatedDate = new DateTime(2026, 4, 24, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3400),
                             Provider = 1,
                             Title = "ПВЗ СДЭК в Химках"
                         },
                         new
                         {
-                            Id = new Guid("f94c8281-a2b7-4d1b-a0df-21d96082b499"),
+                            Id = new Guid("e9f7d0f4-e056-4f73-ba79-12db4da42305"),
                             Address = "Москва, проспект Мира, 119, стр. 23",
-                            EstimatedDate = new DateTime(2026, 4, 19, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4521),
+                            EstimatedDate = new DateTime(2026, 4, 25, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3402),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на ВДНХ"
                         },
                         new
                         {
-                            Id = new Guid("72efe398-a289-4b3e-ba8f-c7aba435a796"),
+                            Id = new Guid("ac82ba08-21c1-40ab-a149-bb032c58c2c9"),
                             Address = "Санкт-Петербург, Невский проспект, 56",
-                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4523),
+                            EstimatedDate = new DateTime(2026, 4, 24, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3404),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Невском"
                         },
                         new
                         {
-                            Id = new Guid("5d3db898-0f42-440c-b749-fcc78124463f"),
+                            Id = new Guid("11cd81c7-f29c-407f-9339-27b935190bb7"),
                             Address = "Санкт-Петербург, ул. Будапештская, 18",
-                            EstimatedDate = new DateTime(2026, 4, 19, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4525),
+                            EstimatedDate = new DateTime(2026, 4, 25, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3405),
                             Provider = 1,
                             Title = "ПВЗ СДЭК в Купчино"
                         },
                         new
                         {
-                            Id = new Guid("173a3489-b338-41c1-9638-9a7cd8e1ead0"),
+                            Id = new Guid("db7ef24f-be92-4094-90c7-59010320dac3"),
                             Address = "Санкт-Петербург, Московский проспект, 183",
-                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4528),
+                            EstimatedDate = new DateTime(2026, 4, 24, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3407),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Московском проспекте"
                         },
                         new
                         {
-                            Id = new Guid("08a146d1-5248-4b75-beb3-44746cca8774"),
+                            Id = new Guid("b1aa393b-e198-4128-bb9e-82aefc190549"),
                             Address = "Санкт-Петербург, пр. Испытателей, 15",
-                            EstimatedDate = new DateTime(2026, 4, 19, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4529),
+                            EstimatedDate = new DateTime(2026, 4, 25, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3408),
                             Provider = 1,
                             Title = "ПВЗ СДЭК у станции метро Пионерская"
                         },
                         new
                         {
-                            Id = new Guid("5c174312-07ce-4e79-b7b0-3dc88dbe406a"),
+                            Id = new Guid("3f339878-b053-40ea-95b8-1d8d5ab416f3"),
                             Address = "Екатеринбург, ул. Малышева, 51",
-                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4531),
+                            EstimatedDate = new DateTime(2026, 4, 24, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3410),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Малышева"
                         },
                         new
                         {
-                            Id = new Guid("0a450308-5a77-42db-a6fe-53dd00c7c13d"),
+                            Id = new Guid("65f27ef8-f63c-4df5-ac81-568addddeae8"),
                             Address = "Екатеринбург, ул. Космонавтов, 11/1",
-                            EstimatedDate = new DateTime(2026, 4, 19, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4533),
+                            EstimatedDate = new DateTime(2026, 4, 25, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3413),
                             Provider = 1,
                             Title = "ПВЗ СДЭК в Уралмаше"
                         },
                         new
                         {
-                            Id = new Guid("81a857a8-5a6e-48cb-868e-29c4e4e139c1"),
+                            Id = new Guid("f81b6aa7-0b95-4b67-a8cc-a2bde731648f"),
                             Address = "Новосибирск, Красный проспект, 52",
-                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4534),
+                            EstimatedDate = new DateTime(2026, 4, 24, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3415),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Красном проспекте"
                         },
                         new
                         {
-                            Id = new Guid("28c10112-47da-4ad0-8cb8-1d88df5556fb"),
+                            Id = new Guid("841f1b95-06fa-4a44-89cb-6ed22783a8da"),
                             Address = "Новосибирск, ул. Ильича, 10",
-                            EstimatedDate = new DateTime(2026, 4, 20, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4536),
+                            EstimatedDate = new DateTime(2026, 4, 26, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3416),
                             Provider = 1,
                             Title = "ПВЗ СДЭК в Академгородке"
                         },
                         new
                         {
-                            Id = new Guid("de5248b2-133c-4560-9d8f-78d216853be4"),
+                            Id = new Guid("001b20e9-da8e-4df3-9b13-1f9a66faa060"),
                             Address = "Казань, ул. Баумана, 27",
-                            EstimatedDate = new DateTime(2026, 4, 18, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4537),
+                            EstimatedDate = new DateTime(2026, 4, 24, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3418),
                             Provider = 1,
                             Title = "ПВЗ СДЭК на Баумана"
                         },
                         new
                         {
-                            Id = new Guid("8c56278c-8933-41f8-b443-ebbc4287ec3e"),
+                            Id = new Guid("d7030081-4195-4285-9bc9-c30fbaf4d29b"),
                             Address = "Казань, пр. Победы, 74",
-                            EstimatedDate = new DateTime(2026, 4, 19, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4539),
+                            EstimatedDate = new DateTime(2026, 4, 25, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3420),
                             Provider = 1,
                             Title = "ПВЗ СДЭК в Советском районе"
                         });
@@ -536,7 +529,7 @@ namespace Tailly.ShopService.Migrations
                         {
                             Id = new Guid("1b3647bc-92bd-483f-9aa4-d20130a619a9"),
                             CategoryId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4205),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3018),
                             Description = "Премиальный полнорационный корм для собак старше 1 года. Поддерживает иммунитет и здоровье пищеварения.",
                             IsAvailable = true,
                             OldPrice = 2790m,
@@ -547,13 +540,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "royal-canin-adult-dog",
                             StockQuantity = 87,
                             Title = "Royal Canin Adult Dog Food",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4206)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3019)
                         },
                         new
                         {
                             Id = new Guid("81acec04-ac74-4f06-861a-261b64eaae85"),
                             CategoryId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4209),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3023),
                             Description = "Нежные кусочки в соусе. Идеальный рацион для взрослых кошек.",
                             IsAvailable = true,
                             Price = 89m,
@@ -563,13 +556,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "whiskas-wet-chicken",
                             StockQuantity = 320,
                             Title = "Whiskas Wet Cat Food с курицей",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4210)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3023)
                         },
                         new
                         {
                             Id = new Guid("a9ebd856-d30c-4f8b-8ed2-3ec918a0f865"),
                             CategoryId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4213),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3028),
                             Description = "Сбалансированное питание для правильного роста и развития щенков.",
                             IsAvailable = true,
                             OldPrice = 2190m,
@@ -580,13 +573,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "pedigree-puppy",
                             StockQuantity = 64,
                             Title = "Pedigree Puppy для щенков",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4214)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3029)
                         },
                         new
                         {
                             Id = new Guid("d7a9090a-6d01-4a36-9e9d-2fd9fef935a4"),
                             CategoryId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4220),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3100),
                             Description = "Гипоаллергенный корм для собак с чувствительным пищеварением.",
                             IsAvailable = true,
                             Price = 3190m,
@@ -596,13 +589,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "brit-care-salmon",
                             StockQuantity = 45,
                             Title = "Brit Care Grain-Free Salmon",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4220)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3100)
                         },
                         new
                         {
                             Id = new Guid("f2539156-ab5d-4f0a-b542-dc9cc37c3239"),
                             CategoryId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4225),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3104),
                             Description = "Полезные косточки и палочки для поощрения.",
                             IsAvailable = true,
                             OldPrice = 590m,
@@ -613,13 +606,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "bosch-dog-treats",
                             StockQuantity = 210,
                             Title = "Лакомство для собак Bosch",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4225)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3104)
                         },
                         new
                         {
                             Id = new Guid("3461d3bf-6549-4049-beb0-4651ab3a4f62"),
                             CategoryId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4229),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3108),
                             Description = "Автоматический мячик с несколькими режимами движения.",
                             IsAvailable = true,
                             OldPrice = 1590m,
@@ -630,13 +623,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "interactive-dog-ball",
                             StockQuantity = 42,
                             Title = "Интерактивный мяч для собак",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4229)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3108)
                         },
                         new
                         {
                             Id = new Guid("c7b91735-1896-4dae-8b03-cfe3b90813f0"),
                             CategoryId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4232),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3111),
                             Description = "Лёгкая удочка с яркими перьями.",
                             IsAvailable = true,
                             Price = 490m,
@@ -646,13 +639,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "cat-feather-wand",
                             StockQuantity = 95,
                             Title = "Дразнилка с перьями для кошек",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4233)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3112)
                         },
                         new
                         {
                             Id = new Guid("cbc1ac00-2283-45d3-b33e-0a7f1373ae2c"),
                             CategoryId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4236),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3115),
                             Description = "Прочный плюш с пищалкой внутри.",
                             IsAvailable = true,
                             OldPrice = 1190m,
@@ -663,13 +656,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "squeaky-plush-bear",
                             StockQuantity = 67,
                             Title = "Пищащий плюшевый медведь",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4236)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3116)
                         },
                         new
                         {
                             Id = new Guid("9dac461d-d71a-4420-967f-dc397994f358"),
                             CategoryId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4238),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3119),
                             Description = "Классическая лазерная указка.",
                             IsAvailable = true,
                             Price = 390m,
@@ -679,13 +672,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "cat-laser-pointer",
                             StockQuantity = 180,
                             Title = "Лазерная указка для кошек",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4239)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3119)
                         },
                         new
                         {
                             Id = new Guid("538fe373-3572-4dd1-b068-f923543f77d9"),
                             CategoryId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4242),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3123),
                             Description = "Прочный канат для игр с собакой.",
                             IsAvailable = true,
                             OldPrice = 890m,
@@ -696,13 +689,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "rope-tug-toy",
                             StockQuantity = 53,
                             Title = "Канатная игрушка для перетягивания",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4242)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3123)
                         },
                         new
                         {
                             Id = new Guid("a3746572-16ff-4cf3-af67-0b8673bffcf7"),
                             CategoryId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4245),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3127),
                             Description = "Мягкая и удобная шлейка для средних и крупных собак.",
                             IsAvailable = true,
                             Price = 1690m,
@@ -712,13 +705,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "adjustable-dog-harness",
                             StockQuantity = 28,
                             Title = "Регулируемая шлейка для собак",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4245)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3127)
                         },
                         new
                         {
                             Id = new Guid("37083c6d-2711-44de-90a0-b0bf2684dcba"),
                             CategoryId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4248),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3131),
                             Description = "Надёжный нейлоновый поводок для крупных собак.",
                             IsAvailable = false,
                             OldPrice = 1490m,
@@ -729,13 +722,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "xl-nylon-leash",
                             StockQuantity = 33,
                             Title = "Поводок нейлоновый XL",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4248)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3131)
                         },
                         new
                         {
                             Id = new Guid("3080a42d-ab57-414e-8925-82775c1de349"),
                             CategoryId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4251),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3135),
                             Description = "Утеплённый комбинезон с капюшоном.",
                             IsAvailable = true,
                             OldPrice = 2590m,
@@ -746,13 +739,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "warm-dog-jumpsuit",
                             StockQuantity = 19,
                             Title = "Теплый комбинезон для собак",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4251)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3136)
                         },
                         new
                         {
                             Id = new Guid("ea88eab3-06a9-4614-80f9-dd8d457a498d"),
                             CategoryId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4254),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3139),
                             Description = "Керамическая миска с резиновым основанием.",
                             IsAvailable = true,
                             Price = 790m,
@@ -762,13 +755,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "ceramic-non-slip-bowl",
                             StockQuantity = 124,
                             Title = "Миска керамическая антискользящая",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4254)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3139)
                         },
                         new
                         {
                             Id = new Guid("23746c5a-0e90-4e6a-b902-445f92756b98"),
                             CategoryId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4258),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3143),
                             Description = "Ошейник с GPS и отслеживанием активности.",
                             IsAvailable = false,
                             OldPrice = 3990m,
@@ -779,13 +772,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "gps-pet-collar",
                             StockQuantity = 12,
                             Title = "Ошейник с GPS-трекером",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4258)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3144)
                         },
                         new
                         {
                             Id = new Guid("ba872d50-5c81-40d4-954e-0ecdb0916efb"),
                             CategoryId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4261),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3147),
                             Description = "Натуральный шампунь с экстрактом алоэ.",
                             IsAvailable = false,
                             OldPrice = 990m,
@@ -796,13 +789,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "dog-shampoo-aloe",
                             StockQuantity = 47,
                             Title = "Шампунь для собак с алоэ",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4262)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3148)
                         },
                         new
                         {
                             Id = new Guid("6b729cb8-c2dd-4ccf-89b3-05eed1d16c9b"),
                             CategoryId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4264),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3151),
                             Description = "Профессиональный когтерез с ограничителем.",
                             IsAvailable = true,
                             Price = 690m,
@@ -812,13 +805,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "pet-nail-clipper",
                             StockQuantity = 55,
                             Title = "Когтерез для животных",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4265)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3151)
                         },
                         new
                         {
                             Id = new Guid("3be4a5fa-fd45-453d-bbf9-1f314b747ff2"),
                             CategoryId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4267),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3155),
                             Description = "Удобная щётка для удаления выпавшей шерсти.",
                             IsAvailable = true,
                             OldPrice = 790m,
@@ -829,13 +822,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "self-cleaning-cat-brush",
                             StockQuantity = 68,
                             Title = "Самоочищающаяся щетка для кошек",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4268)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3155)
                         },
                         new
                         {
                             Id = new Guid("6d861eaf-a99e-4342-bbe2-c1529376bf06"),
                             CategoryId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4337),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3163),
                             Description = "Быстрое очищение шерсти без купания.",
                             IsAvailable = true,
                             Price = 890m,
@@ -845,13 +838,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "dry-dog-shampoo",
                             StockQuantity = 82,
                             Title = "Сухой шампунь для собак",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4338)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3163)
                         },
                         new
                         {
                             Id = new Guid("60a0315b-ebe9-46e4-b56e-acae29a356b6"),
                             CategoryId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4341),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3167),
                             Description = "Полный набор для ухода за зубами.",
                             IsAvailable = true,
                             OldPrice = 1490m,
@@ -862,13 +855,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "pet-dental-kit",
                             StockQuantity = 37,
                             Title = "Набор для чистки зубов питомцам",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4341)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3167)
                         },
                         new
                         {
                             Id = new Guid("065f9a01-157f-4c29-9743-c9b1a562562d"),
                             CategoryId = new Guid("55555555-5555-5555-5555-555555555555"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4344),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3171),
                             Description = "Комплекс для укрепления суставов и хрящей.",
                             IsAvailable = true,
                             OldPrice = 1790m,
@@ -879,13 +872,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "joint-supplement-dogs",
                             StockQuantity = 51,
                             Title = "Витамины для суставов собак",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4345)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3171)
                         },
                         new
                         {
                             Id = new Guid("73db2a59-d927-4060-ab4a-a71a4ebd7f80"),
                             CategoryId = new Guid("55555555-5555-5555-5555-555555555555"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4347),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3175),
                             Description = "Капли на холку от блох и клещей.",
                             IsAvailable = true,
                             Price = 890m,
@@ -895,13 +888,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "anti-parasite-drops-cats",
                             StockQuantity = 73,
                             Title = "Антипаразитарные капли для кошек",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4348)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3175)
                         },
                         new
                         {
                             Id = new Guid("6084749d-cc5a-4f5e-b83e-553b383c2091"),
                             CategoryId = new Guid("55555555-5555-5555-5555-555555555555"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4351),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3179),
                             Description = "Пробиотический комплекс для ЖКТ.",
                             IsAvailable = false,
                             OldPrice = 1390m,
@@ -912,13 +905,13 @@ namespace Tailly.ShopService.Migrations
                             Slug = "probiotics-pet",
                             StockQuantity = 29,
                             Title = "Пробиотики для пищеварения",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4352)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3179)
                         },
                         new
                         {
                             Id = new Guid("ee3b9279-da4b-421e-ac3e-b5b7ae287463"),
                             CategoryId = new Guid("55555555-5555-5555-5555-555555555555"),
-                            CreatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4355),
+                            CreatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3183),
                             Description = "Добавка для правильного формирования скелета.",
                             IsAvailable = true,
                             Price = 690m,
@@ -928,7 +921,7 @@ namespace Tailly.ShopService.Migrations
                             Slug = "calcium-vitamin-d",
                             StockQuantity = 95,
                             Title = "Кальций с витамином D для щенков",
-                            UpdatedAt = new DateTime(2026, 4, 17, 11, 25, 52, 845, DateTimeKind.Utc).AddTicks(4355)
+                            UpdatedAt = new DateTime(2026, 4, 23, 19, 18, 56, 772, DateTimeKind.Utc).AddTicks(3183)
                         });
                 });
 
@@ -960,168 +953,168 @@ namespace Tailly.ShopService.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("fa240dc3-ef4d-4522-94f4-aecdbf3c4134"),
+                            Id = new Guid("64e6056f-7ef7-4669-8bc2-4d13e452b224"),
                             Alt = "Royal Canin Adult Dog Food",
                             ProductId = new Guid("1b3647bc-92bd-483f-9aa4-d20130a619a9"),
                             Url = "https://picsum.photos/id/237/800/800"
                         },
                         new
                         {
-                            Id = new Guid("a6bbc854-e9da-419d-a902-0efd18856f45"),
+                            Id = new Guid("c4fef779-aa19-42d2-a577-d5a9b7bfce91"),
                             Alt = "Whiskas Wet Cat Food",
                             ProductId = new Guid("81acec04-ac74-4f06-861a-261b64eaae85"),
                             Url = "https://picsum.photos/id/1015/800/800"
                         },
                         new
                         {
-                            Id = new Guid("e938af59-ba8b-4215-8dd5-cacd851e6aa2"),
+                            Id = new Guid("ef596dac-71f7-4dfe-a688-54cad5f83050"),
                             Alt = "Pedigree Puppy Food",
                             ProductId = new Guid("a9ebd856-d30c-4f8b-8ed2-3ec918a0f865"),
                             Url = "https://picsum.photos/id/106/800/800"
                         },
                         new
                         {
-                            Id = new Guid("47565334-46cf-4f9b-bdce-9b0d5e2c96cc"),
+                            Id = new Guid("7ae01aaa-7f8b-4f9d-92d5-a557b499c17a"),
                             Alt = "Brit Care Grain-Free Salmon",
                             ProductId = new Guid("d7a9090a-6d01-4a36-9e9d-2fd9fef935a4"),
                             Url = "https://picsum.photos/id/201/800/800"
                         },
                         new
                         {
-                            Id = new Guid("888cc252-d288-476e-a141-5f446fb29b19"),
+                            Id = new Guid("a4d3ee01-4626-4c38-a9be-3b567e2e58c2"),
                             Alt = "Bosch Dog Treats",
                             ProductId = new Guid("f2539156-ab5d-4f0a-b542-dc9cc37c3239"),
                             Url = "https://picsum.photos/id/251/800/800"
                         },
                         new
                         {
-                            Id = new Guid("25450e32-2cf2-4926-b905-f20f70bab150"),
+                            Id = new Guid("3aa7f8c8-feee-47c7-80ef-3be3392d37c2"),
                             Alt = "Interactive Dog Ball",
                             ProductId = new Guid("3461d3bf-6549-4049-beb0-4651ab3a4f62"),
                             Url = "https://picsum.photos/id/180/800/800"
                         },
                         new
                         {
-                            Id = new Guid("29c4093a-e358-4979-bc55-5923dea984c3"),
+                            Id = new Guid("c69f1025-b12c-4d79-98ca-a3d6480e5527"),
                             Alt = "Cat Feather Wand Toy",
                             ProductId = new Guid("c7b91735-1896-4dae-8b03-cfe3b90813f0"),
                             Url = "https://picsum.photos/id/133/800/800"
                         },
                         new
                         {
-                            Id = new Guid("62340eb1-b10e-42bc-8d23-ca23c43356e3"),
+                            Id = new Guid("69f03536-596f-432f-8b9d-71fd0d463b55"),
                             Alt = "Squeaky Plush Bear",
                             ProductId = new Guid("cbc1ac00-2283-45d3-b33e-0a7f1373ae2c"),
                             Url = "https://picsum.photos/id/367/800/800"
                         },
                         new
                         {
-                            Id = new Guid("4fa2af20-bad5-4ef7-984b-ec24d4935bf7"),
+                            Id = new Guid("8bb4644f-e5a2-4af0-8fcf-d4c100bca07a"),
                             Alt = "Cat Laser Pointer",
                             ProductId = new Guid("9dac461d-d71a-4420-967f-dc397994f358"),
                             Url = "https://picsum.photos/id/433/800/800"
                         },
                         new
                         {
-                            Id = new Guid("2df3f347-4d7c-4671-bed5-04611ce4b28d"),
+                            Id = new Guid("4fbf99d2-fdf0-4ba0-8718-8a453b54e1d5"),
                             Alt = "Rope Tug Toy",
                             ProductId = new Guid("538fe373-3572-4dd1-b068-f923543f77d9"),
                             Url = "https://picsum.photos/id/201/800/800"
                         },
                         new
                         {
-                            Id = new Guid("9d1912bf-a143-4b4d-b63b-6ba3caec7fce"),
+                            Id = new Guid("20fa51f0-c6b3-4b00-8192-71dba1532d11"),
                             Alt = "Adjustable Dog Harness",
                             ProductId = new Guid("a3746572-16ff-4cf3-af67-0b8673bffcf7"),
                             Url = "https://picsum.photos/id/180/800/800"
                         },
                         new
                         {
-                            Id = new Guid("78102a63-d3e8-4c70-bc0b-7546b07f5017"),
+                            Id = new Guid("6d87e571-57c5-4202-90e9-125101b1320b"),
                             Alt = "XL Dog Leash",
                             ProductId = new Guid("37083c6d-2711-44de-90a0-b0bf2684dcba"),
                             Url = "https://picsum.photos/id/201/800/800"
                         },
                         new
                         {
-                            Id = new Guid("e4b61d80-ccd3-4a0b-87f3-f64ff414079e"),
+                            Id = new Guid("6a5742ce-f129-45cb-af68-694243f095b2"),
                             Alt = "Warm Dog Jumpsuit",
                             ProductId = new Guid("3080a42d-ab57-414e-8925-82775c1de349"),
                             Url = "https://picsum.photos/id/251/800/800"
                         },
                         new
                         {
-                            Id = new Guid("5e557d52-0132-4a24-8aef-3aeaeb902052"),
+                            Id = new Guid("031e4348-ad20-45c9-bf5e-69739db6c067"),
                             Alt = "Ceramic Non-Slip Bowl",
                             ProductId = new Guid("ea88eab3-06a9-4614-80f9-dd8d457a498d"),
                             Url = "https://picsum.photos/id/367/800/800"
                         },
                         new
                         {
-                            Id = new Guid("ebbfaf2f-c246-4fcd-9322-1bd075aaec45"),
+                            Id = new Guid("3bc21336-640e-47fd-9acf-cbf0fb9d6a67"),
                             Alt = "GPS Pet Collar",
                             ProductId = new Guid("23746c5a-0e90-4e6a-b902-445f92756b98"),
                             Url = "https://picsum.photos/id/433/800/800"
                         },
                         new
                         {
-                            Id = new Guid("41b81da5-d22f-4cb0-ac59-1f230be78428"),
+                            Id = new Guid("5e4e514e-cf87-4d19-a35f-01bb7eb4b722"),
                             Alt = "Dog Shampoo",
                             ProductId = new Guid("ba872d50-5c81-40d4-954e-0ecdb0916efb"),
                             Url = "https://picsum.photos/id/251/800/800"
                         },
                         new
                         {
-                            Id = new Guid("479b7385-9450-4511-87d8-fc9a929678fe"),
+                            Id = new Guid("6b871933-fb06-4429-97ba-5f5b20a34797"),
                             Alt = "Pet Nail Clipper",
                             ProductId = new Guid("6b729cb8-c2dd-4ccf-89b3-05eed1d16c9b"),
                             Url = "https://picsum.photos/id/367/800/800"
                         },
                         new
                         {
-                            Id = new Guid("ed671087-db3d-4384-9fb6-991956d6111f"),
+                            Id = new Guid("60e32ff9-1b6d-4e36-a62d-04cacab8ca00"),
                             Alt = "Self-Cleaning Cat Brush",
                             ProductId = new Guid("3be4a5fa-fd45-453d-bbf9-1f314b747ff2"),
                             Url = "https://picsum.photos/id/433/800/800"
                         },
                         new
                         {
-                            Id = new Guid("018f5dd2-420d-4fff-abb4-b3ed68197ca1"),
+                            Id = new Guid("59c25f23-d863-42c1-9edf-9f1a655ee665"),
                             Alt = "Dry Dog Shampoo",
                             ProductId = new Guid("6d861eaf-a99e-4342-bbe2-c1529376bf06"),
                             Url = "https://picsum.photos/id/180/800/800"
                         },
                         new
                         {
-                            Id = new Guid("1ca940b4-3895-4e32-b6ed-d375e88cdfca"),
+                            Id = new Guid("4258a8e8-1ec8-40cc-8091-4416060fca18"),
                             Alt = "Pet Dental Kit",
                             ProductId = new Guid("60a0315b-ebe9-46e4-b56e-acae29a356b6"),
                             Url = "https://picsum.photos/id/201/800/800"
                         },
                         new
                         {
-                            Id = new Guid("ff15ffeb-140a-4924-b1a7-f34eb0adf34f"),
+                            Id = new Guid("425c8922-ee0c-4616-beb4-320265e69d20"),
                             Alt = "Joint Supplement",
                             ProductId = new Guid("065f9a01-157f-4c29-9743-c9b1a562562d"),
                             Url = "https://picsum.photos/id/251/800/800"
                         },
                         new
                         {
-                            Id = new Guid("682a07bb-7425-490f-90d4-5c4639ce1806"),
+                            Id = new Guid("ebcf4838-22c4-4a48-92b9-b1222f0af04d"),
                             Alt = "Anti-Parasite Drops",
                             ProductId = new Guid("73db2a59-d927-4060-ab4a-a71a4ebd7f80"),
                             Url = "https://picsum.photos/id/367/800/800"
                         },
                         new
                         {
-                            Id = new Guid("3146c744-a4ce-4ac8-9578-078ba6084159"),
+                            Id = new Guid("37c2b67d-e2e2-4627-8acd-e3a27b4b520e"),
                             Alt = "Probiotics",
                             ProductId = new Guid("6084749d-cc5a-4f5e-b83e-553b383c2091"),
                             Url = "https://picsum.photos/id/433/800/800"
                         },
                         new
                         {
-                            Id = new Guid("1b497660-1eef-4dc6-89fa-6b5318cffe77"),
+                            Id = new Guid("7012ac2b-504e-4607-a59b-300f828be474"),
                             Alt = "Calcium with Vitamin D",
                             ProductId = new Guid("ee3b9279-da4b-421e-ac3e-b5b7ae287463"),
                             Url = "https://picsum.photos/id/180/800/800"

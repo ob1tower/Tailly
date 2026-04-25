@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using Tailly.PostsService.Application.Dtos.Requests;
-using Tailly.PostsService.Application.Mappers;
 
 namespace Tailly.PostsService.Application.Validators;
 
@@ -21,11 +20,6 @@ public class UpdatePostRequestValidator : AbstractValidator<UpdatePostRequest>
         RuleFor(x => x.Content)
             .NotEmpty().WithMessage("Content is required.")
             .MaximumLength(MAX_CONTENT_LENGTH).WithMessage($"Content must not exceed {MAX_CONTENT_LENGTH} characters.");
-
-        RuleFor(x => x.Status)
-            .NotEmpty().WithMessage("Status is required.")
-            .Must(status => PostMapper.TryParseStatus(status, out _))
-            .WithMessage("Status must be one of: draft, published, archived.");
 
         RuleFor(x => x.Tags)
             .Must(tags => tags == null || tags.Count <= MAX_TAGS_COUNT)

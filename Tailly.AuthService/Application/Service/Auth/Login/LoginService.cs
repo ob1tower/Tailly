@@ -41,23 +41,66 @@ public class LoginService : ILoginService
             ?? throw new ArgumentNullException(nameof(email));
 
         var user = await _usersRepository.GetByEmailAsync(email);
-
         if (user == null)
         {
             _logger.LogWarning("Login failed. User not found: {Email}", email);
             return Result.Failure<AuthResult, Error>(AuthErrors.InvalidCredentials);
         }
 
-        if (user.SoftDeletedAt != null && user.RestoreUntil > DateTime.UtcNow)
+        if (role == RoleType.Admin || role == RoleType.SuperAdmin)
         {
-            _logger.LogWarning("Login failed. Account pending deletion: {Email}", email);
-            return Result.Failure<AuthResult, Error>(AuthErrors.AccountPendingDeletion);
-        }
+            var adminRoles = user.UserRoles
+                .Where(r => (r.Role == RoleType.Admin || r.Role == RoleType.SuperAdmin)
+                         && r.SoftDeletedAt == null)
+                .ToList();
 
-        if (user.IsBlocked || (user.BlockedUntil != null && user.BlockedUntil > DateTime.UtcNow))
+            if (adminRoles.Count == 0)
+            {
+                _logger.LogWarning("Login failed. No admin role found for {Email}", email);
+                return Result.Failure<AuthResult, Error>(AuthErrors.InvalidRole);
+            }
+
+            if (adminRoles.Count > 1)
+            {
+                _logger.LogError("Invalid role configuration: User {UserId} has multiple admin roles", user.Id);
+                return Result.Failure<AuthResult, Error>(AuthErrors.AccessDenied);
+            }
+
+            var userRole = adminRoles.First();
+
+            if (userRole.Role != role)
+            {
+                _logger.LogWarning("Admin login with wrong role. Requested: {Requested}, Actual: {Actual}",
+                    role, userRole.Role);
+                return Result.Failure<AuthResult, Error>(AuthErrors.InvalidRole);
+            }
+
+            if (userRole.IsPendingDeletion || userRole.IsEffectivelyBlocked)
+            {
+                _logger.LogWarning("Login failed. Admin role is blocked or pending deletion: {Email}", email);
+                return Result.Failure<AuthResult, Error>(AuthErrors.AccountBlocked);
+            }
+        }
+        else
         {
-            _logger.LogWarning("Login failed. Account blocked: {Email}", email);
-            return Result.Failure<AuthResult, Error>(AuthErrors.AccountBlocked);
+            var userRole = user.GetRole(role);
+            if (userRole == null)
+            {
+                _logger.LogWarning("Login failed. Role {Role} not found for {Email}", role, email);
+                return Result.Failure<AuthResult, Error>(AuthErrors.InvalidRole);
+            }
+
+            if (userRole.IsPendingDeletion)
+            {
+                _logger.LogWarning("Login failed. Role is pending deletion: {Email} role {Role}", email, role);
+                return Result.Failure<AuthResult, Error>(AuthErrors.AccountPendingDeletion);
+            }
+
+            if (userRole.IsEffectivelyBlocked)
+            {
+                _logger.LogWarning("Login failed. Role is blocked: {Email} role {Role}", email, role);
+                return Result.Failure<AuthResult, Error>(AuthErrors.AccountBlocked);
+            }
         }
 
         if (!user.EmailConfirmed)
@@ -66,37 +109,22 @@ public class LoginService : ILoginService
             return Result.Failure<AuthResult, Error>(AuthErrors.EmailNotConfirmed);
         }
 
-        var validPassword = _passwordHasher.VerifyPassword(password, user.PasswordHash);
-
-        if (!validPassword)
+        if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
         {
             _logger.LogWarning("Login failed. Invalid password for {Email}", email);
             return Result.Failure<AuthResult, Error>(AuthErrors.InvalidCredentials);
         }
 
-        if (user.Roles.Contains(RoleType.Admin) || user.Roles.Contains(RoleType.SuperAdmin))
+        var userRoleForUpdate = user.GetRole(role);
+        if (userRoleForUpdate != null &&
+            userRoleForUpdate.IsBlocked &&
+            !userRoleForUpdate.IsPermanentBlock &&
+            userRoleForUpdate.BlockedUntil <= DateTime.UtcNow)
         {
-            if (user.Roles.Count > 1)
-            {
-                _logger.LogError("Invalid role configuration for admin user {UserId}", user.Id);
-                return Result.Failure<AuthResult, Error>(AuthErrors.AccessDenied);
-            }
-
-            var actualRole = user.Roles.First();
-
-            if (role != actualRole)
-            {
-                _logger.LogWarning("Admin login with wrong role. Requested: {Requested}, Actual: {Actual}", role, actualRole);
-                return Result.Failure<AuthResult, Error>(AuthErrors.InvalidRole);
-            }
-        }
-        else
-        {
-            if (!user.Roles.Contains(role))
-            {
-                _logger.LogWarning("Login failed. Invalid role {Role} for {Email}", role, email);
-                return Result.Failure<AuthResult, Error>(AuthErrors.InvalidRole);
-            }
+            userRoleForUpdate.IsBlocked = false;
+            userRoleForUpdate.BlockedUntil = null;
+            userRoleForUpdate.BlockReason = null;
+            await _usersRepository.UpdateAsync(user);
         }
 
         var (accessToken, accessExpires) = await _jwtService.CreateAccessTokenAsync(new UserEntity
@@ -104,13 +132,9 @@ public class LoginService : ILoginService
             Id = user.Id,
             Email = user.Email,
             UserRoles = new List<UserRoleEntity>
-        {
-            new UserRoleEntity
             {
-                UserId = user.Id,
-                RoleId = (int)role
+                new UserRoleEntity { UserId = user.Id, RoleId = (int)role }
             }
-        }
         });
 
         var (rawRefreshToken, hashedRefreshToken) = _refreshTokenService.GenerateToken();
@@ -121,6 +145,7 @@ public class LoginService : ILoginService
             Id = Guid.NewGuid(),
             TokenHash = hashedRefreshToken,
             UserId = user.Id,
+            RoleId = (int)role,
             Created = DateTime.UtcNow,
             Expires = refreshExpires
         });

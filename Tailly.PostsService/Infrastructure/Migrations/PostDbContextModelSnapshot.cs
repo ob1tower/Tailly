@@ -43,21 +43,12 @@ namespace Tailly.PostsService.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
-                    b.Property<int>("LinkTarget")
-                        .HasColumnType("integer");
-
                     b.Property<string>("LinkUrl")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
-                    b.Property<int>("Placement")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime?>("StartsAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -90,9 +81,6 @@ namespace Tailly.PostsService.Migrations
 
                     b.Property<DateTime?>("PublishedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()

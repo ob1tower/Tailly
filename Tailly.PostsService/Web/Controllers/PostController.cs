@@ -24,12 +24,11 @@ public class PostController : ControllerBase
     /// <param name="pageSize">Number of items per page (default: 10).</param>
     /// <param name="search">Search query for title/content.</param>
     /// <param name="tag">Filter posts by tag.</param>
-    /// <param name="sort">Sorting mode: newest, oldest, title_asc, title_desc.</param>
+    /// <param name="sort">Sort: newest, oldest, title_asc, title_desc.</param>
     /// <returns>Paginated list of posts.</returns>
     [HttpGet("posts")]
     [EnableRateLimiting("public")]
-    public async Task<IActionResult> GetList([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, [FromQuery] string? tag = null,
-    [FromQuery] string? sort = null)
+    public async Task<IActionResult> GetList([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, [FromQuery] string? tag = null, [FromQuery] string? sort = null)
     {
 
         var pagination = new PaginationValidator(page, pageSize);

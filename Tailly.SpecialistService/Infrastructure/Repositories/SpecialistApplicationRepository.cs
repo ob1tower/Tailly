@@ -33,16 +33,11 @@ public class SpecialistApplicationRepository : ISpecialistApplicationRepository
         return entity?.ToDomain();
     }
 
-    public async Task<(List<SpecialistApplication> items, int total)> GetAllAsync(int page, int limit, SpecialistApplicationStatus? status = null)
+    public async Task<(List<SpecialistApplication> items, int total)> GetAllAsync(int page, int limit)
     {
         var query = _context.SpecialistApplications
             .AsNoTracking()
             .AsQueryable();
-
-        if (status.HasValue)
-        {
-            query = query.Where(x => x.Status == status.Value);
-        }
 
         var total = await query.CountAsync();
 

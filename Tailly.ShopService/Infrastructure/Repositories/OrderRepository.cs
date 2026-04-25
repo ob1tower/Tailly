@@ -53,11 +53,10 @@ public class OrderRepository : IOrderRepository
     public async Task CancelAsync(Guid orderId)
     {
         var entity = await _context.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
-        if (entity == null || !entity.CanBeCancelled)
+        if (entity == null)
             return;
 
         entity.Status = OrderStatus.Cancelled;
-        entity.CanBeCancelled = false;
 
         await _context.SaveChangesAsync();
     }
@@ -73,9 +72,7 @@ public class OrderRepository : IOrderRepository
             return;
 
         existingEntity.Status = order.Status;
-        existingEntity.CanBeCancelled = order.CanBeCancelled;
         existingEntity.EstimatedDeliveryDate = order.EstimatedDeliveryDate;
-        existingEntity.TrackingNumber = order.TrackingNumber;
         existingEntity.TotalPrice = order.TotalPrice; 
 
         await _context.SaveChangesAsync();

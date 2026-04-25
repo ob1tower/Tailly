@@ -13,17 +13,17 @@ namespace Tailly.AuthService.Web.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Roles = "Client, Specialist")]
+[Authorize(Roles = "Client,Specialist")]
 public class SecurityController : ControllerBase
 {
     private readonly IUserSecurityService _userSecurityService;
     private readonly IValidator<ChangePasswordRequest> _changePasswordValidator;
-    private readonly IValidator<RequestEmailChangeRequest> _requestEmailChangeValidator;
+    private readonly IValidator<EmailChangeRequest> _requestEmailChangeValidator;
     private readonly IValidator<ConfirmEmailChangeRequest> _confirmEmailChangeValidator;
 
     public SecurityController(IUserSecurityService userSecurityService,
                               IValidator<ChangePasswordRequest> changePasswordValidator,
-                              IValidator<RequestEmailChangeRequest> requestEmailChangeValidator,
+                              IValidator<EmailChangeRequest> requestEmailChangeValidator,
                               IValidator<ConfirmEmailChangeRequest> confirmEmailChangeValidator)
     {
         _userSecurityService = userSecurityService;
@@ -66,7 +66,7 @@ public class SecurityController : ControllerBase
     /// <returns>Request ID and masked current email.</returns>
     [HttpPost("me/security/email/change/request")]
     [EnableRateLimiting("token")]
-    public async Task<IActionResult> RequestEmailChange([FromBody] RequestEmailChangeRequest request)
+    public async Task<IActionResult> RequestEmailChange([FromBody] EmailChangeRequest request)
     {
         var validationResult = await _requestEmailChangeValidator.ValidateAsync(request);
 

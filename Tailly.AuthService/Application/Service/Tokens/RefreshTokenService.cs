@@ -9,6 +9,7 @@ namespace Tailly.AuthService.Application.Service.Tokens;
 public class RefreshTokenService : IRefreshTokenService
 {
     private readonly JwtOptions _options;
+
     public RefreshTokenService(IOptions<JwtOptions> options)
     {
         _options = options.Value;

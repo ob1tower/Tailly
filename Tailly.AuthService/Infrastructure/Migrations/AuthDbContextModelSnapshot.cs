@@ -2,7 +2,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Tailly.AuthService.Infrastructure.DataAccess;
@@ -12,11 +11,9 @@ using Tailly.AuthService.Infrastructure.DataAccess;
 namespace Tailly.AuthService.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20260422123247_InitialCreate")]
-    partial class InitialCreate
+    partial class AuthDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,6 +30,9 @@ namespace Tailly.AuthService.Migrations
 
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -58,6 +58,9 @@ namespace Tailly.AuthService.Migrations
 
                     b.Property<DateTime?>("Revoked")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("RoleId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("TokenHash")
                         .IsRequired()
@@ -198,6 +201,25 @@ namespace Tailly.AuthService.Migrations
 
                     b.Property<int>("RoleId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("BlockReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("BlockedUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsBlocked")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPermanentBlock")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("RestoreUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("SoftDeletedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("UserId", "RoleId");
 

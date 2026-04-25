@@ -63,22 +63,31 @@ public class RegistrationService : IRegistrationService
 
         if (existingUser != null)
         {
-            if (existingUser.Roles.Contains(RoleType.Client))
+            var clientRole = existingUser.GetRole(RoleType.Client);
+
+            if (clientRole != null)
             {
-                _logger.LogWarning("Registration failed. User already exists as Client: {Email}", email);
-                return Result.Failure<string, Error>(AuthErrors.UserAlreadyExists);
+                if (clientRole.IsEffectivelyBlocked)
+                {
+                    _logger.LogWarning("Registration failed. Client role is blocked for {Email}. Block reason: {Reason}",
+                        email, clientRole.BlockReason);
+                    return Result.Failure<string, Error>(AuthErrors.AccountBlocked);
+                }
+
+                if (clientRole.SoftDeletedAt == null && !clientRole.IsPendingDeletion)
+                {
+                    _logger.LogWarning("Registration failed. User already exists as active Client: {Email}", email);
+                    return Result.Failure<string, Error>(AuthErrors.UserAlreadyExists);
+                }
             }
 
-            
-            _logger.LogInformation("User {Email} already exists as Specialist. Allowing registration as Client.", email);
+            _logger.LogInformation("User {Email} already exists (as Specialist or with deleted Client role). Proceeding with Client registration.", email);
         }
 
         var passwordHash = _passwordHasher.HashPassword(password);
-
         var registrationId = await _pendingRegistrationService.CreateAsync(email, passwordHash);
 
         var code = VerificationCodeGenerator.GenerateCode();
-
         await _verificationCodeService.SetCodeAsync(email, code, "register");
 
         await _publishEndpoint.Publish(new SendEmailMessage
@@ -95,7 +104,6 @@ public class RegistrationService : IRegistrationService
         });
 
         _logger.LogInformation("Registration started for {Email}", email);
-
         return Result.Success<string, Error>(registrationId);
     }
 
@@ -138,7 +146,6 @@ public class RegistrationService : IRegistrationService
     {
         var tokenValid = await _verificationCodeService.VerifyCodeAsync(
             verificationToken, "ok", "register-token");
-
         if (!tokenValid.Success)
             return Result.Failure<AuthResult, Error>(AuthErrors.InvalidVerificationToken);
 
@@ -146,7 +153,7 @@ public class RegistrationService : IRegistrationService
         if (data == null)
             return Result.Failure<AuthResult, Error>(AuthErrors.RegistrationNotFound);
 
-        var (email, _) = data.Value;        
+        var (email, _) = data.Value;
 
         var existingUser = await _usersRepository.GetByEmailAsync(email);
 
@@ -155,25 +162,51 @@ public class RegistrationService : IRegistrationService
         if (existingUser != null)
         {
             user = existingUser;
-
             user.FirstName = firstName;
             user.LastName = lastName;
             user.MiddleName = middleName;
 
-            if (!user.Roles.Contains(RoleType.Client))
+            var clientRole = user.GetRole(RoleType.Client);
+
+            if (clientRole != null)
             {
-                await _usersRepository.AddRoleAsync(user.Id, (int)RoleType.Client);
-                _logger.LogInformation("Added Client role to existing Specialist {Email}. Password unchanged.", email);
+                if (clientRole.IsEffectivelyBlocked)
+                {
+                    _logger.LogWarning("Complete registration failed. Client role is blocked for {Email}", email);
+                    return Result.Failure<AuthResult, Error>(AuthErrors.AccountBlocked);
+                }
+
+                if (clientRole.SoftDeletedAt.HasValue)
+                {
+                    await _usersRepository.PatchUserRoleSoftDeleteAsync(user.Id, RoleType.Client, null, null);
+                    clientRole.SoftDeletedAt = null;
+                    clientRole.RestoreUntil = null;
+
+                    _logger.LogInformation("Restored previously deleted Client role for {Email}", email);
+                }
+                else
+                {
+                    _logger.LogInformation("User {Email} already has active Client role.", email);
+                }
             }
             else
             {
-                _logger.LogInformation("User {Email} already has Client role.", email);
+                await _usersRepository.AddRoleAsync(user.Id, (int)RoleType.Client);
+                user.UserRoles.Add(new UserRole
+                {
+                    Role = RoleType.Client,
+                    IsBlocked = false,
+                    IsPermanentBlock = false,
+                    SoftDeletedAt = null,
+                    RestoreUntil = null
+                });
+
+                _logger.LogInformation("Added new Client role to existing user (Specialist) {Email}", email);
             }
         }
         else
         {
-            var (_, newPasswordHash) = data.Value;  
-
+            var (_, newPasswordHash) = data.Value;
             user = new User
             {
                 Id = Guid.NewGuid(),
@@ -188,6 +221,15 @@ public class RegistrationService : IRegistrationService
 
             await _usersRepository.AddAsync(user);
             await _usersRepository.AddRoleAsync(user.Id, (int)RoleType.Client);
+
+            user.UserRoles.Add(new UserRole
+            {
+                Role = RoleType.Client,
+                IsBlocked = false,
+                IsPermanentBlock = false,
+                SoftDeletedAt = null,
+                RestoreUntil = null
+            });
 
             _logger.LogInformation("Created new user as Client: {Email}", email);
         }
@@ -212,6 +254,7 @@ public class RegistrationService : IRegistrationService
             Id = Guid.NewGuid(),
             TokenHash = hashedRefreshToken,
             UserId = user.Id,
+            RoleId = (int)RoleType.Client,
             Created = DateTime.UtcNow,
             Expires = refreshExpires
         });

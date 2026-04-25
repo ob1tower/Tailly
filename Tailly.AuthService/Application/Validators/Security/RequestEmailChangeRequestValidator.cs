@@ -3,7 +3,7 @@ using Tailly.AuthService.Application.Dtos.Requests.EmailChange;
 
 namespace Tailly.AuthService.Application.Validators.Security;
 
-public class RequestEmailChangeRequestValidator : AbstractValidator<RequestEmailChangeRequest>
+public class RequestEmailChangeRequestValidator : AbstractValidator<EmailChangeRequest>
 {
     private const int MAX_EMAIL_LENGTH = 256;
 

@@ -42,16 +42,11 @@ public class BannerService : IBannerService
 
         banner.CreatedAt = DateTime.UtcNow;
         banner.UpdatedAt = DateTime.UtcNow;
-
-        if (banner.Status == BannerStatus.Published)
-        {
-            banner.StartsAt ??= DateTime.UtcNow;
-        }
+        banner.StartsAt ??= DateTime.UtcNow;
 
         await _repository.AddAsync(banner);
 
-        _logger.LogInformation("Banner created successfully. Id: {BannerId}, Status: {Status}",
-            banner.Id, banner.Status);
+        _logger.LogInformation("Banner created successfully. Id: {BannerId}", banner.Id);
 
         return Result.Success<Banner, Error>(banner);
     }
@@ -85,15 +80,14 @@ public class BannerService : IBannerService
 
         banner.UpdatedAt = DateTime.UtcNow;
 
-        if (banner.Status == BannerStatus.Published && banner.StartsAt == null)
+        if (banner.StartsAt == null)
         {
             banner.StartsAt = DateTime.UtcNow;
         }
 
         await _repository.UpdateAsync(banner);
 
-        _logger.LogInformation("Banner updated successfully. Id: {BannerId}, New Status: {Status}",
-            banner.Id, banner.Status);
+        _logger.LogInformation("Banner created successfully. Id: {BannerId}", banner.Id);
 
         return Result.Success<Banner, Error>(banner);
     }
@@ -139,7 +133,7 @@ public class BannerService : IBannerService
         return Result.Success<Banner, Error>(banner);
     }
 
-    public async Task<Result<(List<Banner>, int), Error>> GetListAsync(int page, int limit, string? status, string? placement, string? sort)
+    public async Task<Result<(List<Banner>, int), Error>> GetListAsync(int page, int limit, string? search, string? sort)
     {
         BannerSort? parsedSort = null;
 
@@ -154,18 +148,9 @@ public class BannerService : IBannerService
             parsedSort = sortValue;
         }
 
-        var (banners, total) = await _repository.GetListAsync(
-            page,
-            limit,
-            status,
-            placement,
-            parsedSort);
+        var (banners, total) = await _repository.GetListAsync(page, limit, search, parsedSort);
 
-        _logger.LogInformation(
-            "Retrieved {Count} banners (admin list). Page: {Page}, PageSize: {PageSize}",
-            banners.Count,
-            page,
-            limit);
+        _logger.LogInformation("Retrieved {Count} banners. Page: {Page}, PageSize: {PageSize}", banners.Count, page, limit);
 
         return Result.Success<(List<Banner>, int), Error>((banners, total));
     }
@@ -187,22 +172,5 @@ public class BannerService : IBannerService
         _logger.LogInformation("Retrieved {Count} active banners for public", banners.Count);
 
         return Result.Success<List<Banner>, Error>(banners);
-    }
-
-    public async Task<Result<List<Banner>, Error>> GetBannersByPlacementAsync(string placement)
-    {
-        if (!BannerMapper.TryParsePlacement(placement, out var parsedPlacement))
-        {
-            _logger.LogWarning("Invalid placement: {Placement}", placement);
-            return Result.Failure<List<Banner>, Error>(BannerErrors.InvalidPlacement);
-        }
-
-        var now = DateTime.UtcNow;
-
-        var banners = await _repository.GetBannersByPlacementAsync(parsedPlacement, now);
-
-        _logger.LogInformation("Retrieved {Count} banners for placement '{Placement}'", banners.Count, placement);
-
-        return Result.Success<List<Banner>, Error>(banners ?? new List<Banner>());
     }
 }

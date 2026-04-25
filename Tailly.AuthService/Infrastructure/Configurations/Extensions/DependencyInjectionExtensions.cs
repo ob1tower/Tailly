@@ -38,6 +38,7 @@ using Tailly.AuthService.Infrastructure.Repositories;
 using Tailly.AuthService.Infrastructure.Repositories.Interfaces;
 using Tailly.AuthService.Infrastructure.Service;
 using Tailly.AuthService.Web.BackgroundServices;
+using Tailly.AuthService.Web.BackgroundServicesl;
 
 namespace Tailly.AuthService.Infrastructure.Configurations.Extensions;
 
@@ -114,6 +115,9 @@ public static class DependencyInjectionExtensions
         services.Configure<RabbitMqSettings>(
             configuration.GetSection("RabbitMq"));
 
+        services.Configure<FrontendOptions>(
+            configuration.GetSection("Frontend"));
+
         return services;
     }
 
@@ -160,6 +164,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IEmailSender, EmailSender>();
         services.AddScoped<IVerificationCodeService, VerificationCodeService>();
         services.AddHostedService<RefreshTokenCleanupService>();
+        services.AddHostedService<AccountDeletionCleanupService>();
         services.AddScoped<IPendingRegistrationService, PendingRegistrationService>();
         services.AddScoped<IAdminUserService, AdminUserService>();
         services.AddScoped<IAccountDeletionService, AccountDeletionService>();
@@ -318,6 +323,51 @@ public static class DependencyInjectionExtensions
 
                 await context.HttpContext.Response.WriteAsJsonAsync(response, CancellationToken.None);
             };
+
+            options.AddPolicy("account-deletion", context =>
+            {
+                var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "anon";
+                var ip = context.Connection.RemoteIpAddress?.ToString() ?? "anon";
+
+                var key = $"delete:{userId}:{ip}";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    key,
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 2,
+                        Window = TimeSpan.FromMinutes(10),
+                        QueueLimit = 0
+                    });
+            });
+
+            options.AddPolicy("account-restore", context =>
+            {
+                var ip = context.Connection.RemoteIpAddress?.ToString() ?? "anon";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    $"restore:{ip}",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 5,
+                        Window = TimeSpan.FromMinutes(10),
+                        QueueLimit = 0
+                    });
+            });
+
+            options.AddPolicy("admin-actions", context =>
+            {
+                var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "admin";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    $"admin:{userId}",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 50,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 0
+                    });
+            });
         });
 
         return services;
@@ -375,7 +425,7 @@ public static class DependencyInjectionExtensions
         services.AddSwaggerGen(options =>
         {
             var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            options.IncludeXmlComments(System.IO.Path.Combine(AppContext.BaseDirectory, xmlFilename));
+            options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 
             options.AddSecurityDefinition(
                 JwtBearerDefaults.AuthenticationScheme,

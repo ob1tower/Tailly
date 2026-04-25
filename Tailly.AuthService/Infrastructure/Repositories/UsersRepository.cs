@@ -3,6 +3,7 @@ using Tailly.AuthService.Core.Entities;
 using Tailly.AuthService.Core.Enums;
 using Tailly.AuthService.Core.Models;
 using Tailly.AuthService.Infrastructure.DataAccess;
+using Tailly.AuthService.Infrastructure.Mappers;
 using Tailly.AuthService.Infrastructure.Repositories.Interfaces;
 
 namespace Tailly.AuthService.Infrastructure.Repositories;
@@ -25,16 +26,10 @@ public class UsersRepository : IUsersRepository
             PasswordHash = user.PasswordHash,
             CreatedAt = user.CreatedAt,
             EmailConfirmed = user.EmailConfirmed,
-            IsBlocked = user.IsBlocked,
-            IsPermanentBlock = user.IsPermanentBlock,
-            BlockedUntil = user.BlockedUntil,
-            SoftDeletedAt = user.SoftDeletedAt,
-            RestoreUntil = user.RestoreUntil,
             SpecialistSlug = user.SpecialistSlug,
             FirstName = user.FirstName,
             LastName = user.LastName,
             MiddleName = user.MiddleName,
-            BlockReason = user.BlockReason,
             SpecialistId = user.SpecialistId,
             AdminId = user.AdminId
         };
@@ -53,30 +48,7 @@ public class UsersRepository : IUsersRepository
         if (userEntity == null)
             return null;
 
-        return new User
-        {
-            Id = userEntity.Id,
-            Email = userEntity.Email,
-            PasswordHash = userEntity.PasswordHash,
-            CreatedAt = userEntity.CreatedAt,
-            EmailConfirmed = userEntity.EmailConfirmed,
-
-            Roles = userEntity.UserRoles
-                .Select(x => (RoleType)x.RoleId)
-                .ToList(),
-
-            IsBlocked = userEntity.IsBlocked,
-            IsPermanentBlock = userEntity.IsPermanentBlock,
-            BlockedUntil = userEntity.BlockedUntil,
-            SoftDeletedAt = userEntity.SoftDeletedAt,
-            RestoreUntil = userEntity.RestoreUntil,
-            SpecialistSlug = userEntity.SpecialistSlug,
-            FirstName = userEntity.FirstName,
-            LastName = userEntity.LastName,
-            MiddleName = userEntity.MiddleName,
-            SpecialistId = userEntity.SpecialistId,
-            AdminId = userEntity.AdminId
-        };
+        return UserEntityMapper.ToDomain(userEntity);
     }
 
     public async Task<bool> ExistsAsync(string email)
@@ -95,31 +67,7 @@ public class UsersRepository : IUsersRepository
         if (userEntity == null)
             return null;
 
-        return new User
-        {
-            Id = userEntity.Id,
-            Email = userEntity.Email,
-            PasswordHash = userEntity.PasswordHash,
-            CreatedAt = userEntity.CreatedAt,
-            EmailConfirmed = userEntity.EmailConfirmed,
-
-            Roles = userEntity.UserRoles
-                .Select(x => (RoleType)x.RoleId)
-                .ToList(),
-
-            IsBlocked = userEntity.IsBlocked,
-            IsPermanentBlock = userEntity.IsPermanentBlock,
-            BlockedUntil = userEntity.BlockedUntil,
-            SoftDeletedAt = userEntity.SoftDeletedAt,
-            RestoreUntil = userEntity.RestoreUntil,
-            SpecialistSlug = userEntity.SpecialistSlug,
-            FirstName = userEntity.FirstName,
-            LastName = userEntity.LastName,
-            MiddleName = userEntity.MiddleName,
-            BlockReason = userEntity.BlockReason,
-            SpecialistId = userEntity.SpecialistId,
-            AdminId = userEntity.AdminId
-        };
+        return UserEntityMapper.ToDomain(userEntity);
     }
 
     public async Task AddRoleAsync(Guid userId, int roleId)
@@ -151,13 +99,7 @@ public class UsersRepository : IUsersRepository
         userEntity.Email = user.Email;
         userEntity.PasswordHash = user.PasswordHash;
         userEntity.EmailConfirmed = user.EmailConfirmed;
-        userEntity.IsBlocked = user.IsBlocked;
-        userEntity.IsPermanentBlock = user.IsPermanentBlock;
-        userEntity.BlockedUntil = user.BlockedUntil;
-        userEntity.SoftDeletedAt = user.SoftDeletedAt;
-        userEntity.RestoreUntil = user.RestoreUntil;
         userEntity.SpecialistSlug = user.SpecialistSlug;
-        userEntity.BlockReason = user.BlockReason;
         userEntity.FirstName = user.FirstName;
         userEntity.LastName = user.LastName;
         userEntity.MiddleName = user.MiddleName;
@@ -177,31 +119,7 @@ public class UsersRepository : IUsersRepository
         if (!userEntities.Any())
             return [];
 
-        return userEntities.Select(userEntity => new User
-        {
-            Id = userEntity.Id,
-            Email = userEntity.Email,
-            PasswordHash = userEntity.PasswordHash,
-            CreatedAt = userEntity.CreatedAt,
-            EmailConfirmed = userEntity.EmailConfirmed,
-
-            Roles = userEntity.UserRoles
-                .Select(x => (RoleType)x.RoleId)
-                .ToList(),
-
-            IsBlocked = userEntity.IsBlocked,
-            IsPermanentBlock = userEntity.IsPermanentBlock,
-            BlockedUntil = userEntity.BlockedUntil,
-            SoftDeletedAt = userEntity.SoftDeletedAt,
-            RestoreUntil = userEntity.RestoreUntil,
-            SpecialistSlug = userEntity.SpecialistSlug,
-            FirstName = userEntity.FirstName,
-            LastName = userEntity.LastName,
-            MiddleName = userEntity.MiddleName,
-            BlockReason = userEntity.BlockReason,
-            SpecialistId = userEntity.SpecialistId,
-            AdminId = userEntity.AdminId
-        }).ToList();
+        return userEntities.Select(UserEntityMapper.ToDomain).ToList();
     }
 
     public IQueryable<UserEntity> Query()
@@ -209,5 +127,38 @@ public class UsersRepository : IUsersRepository
         return _authDbContext.Users
             .Include(x => x.UserRoles)
             .AsNoTracking();
+    }
+
+    public async Task<int> PatchUserRoleBlockAsync(Guid userId, RoleType role, bool isBlocked, bool isPermanentBlock, DateTime? blockedUntil, string? blockReason)
+    {
+        return await _authDbContext.UserRoles
+            .Where(x => x.UserId == userId && x.RoleId == (int)role)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(ur => ur.IsBlocked, isBlocked)
+                .SetProperty(ur => ur.IsPermanentBlock, isPermanentBlock)
+                .SetProperty(ur => ur.BlockedUntil, blockedUntil)
+                .SetProperty(ur => ur.BlockReason, blockReason));
+    }
+
+    public async Task<int> PatchUserRoleSoftDeleteAsync(Guid userId, RoleType role, DateTime? softDeletedAt, DateTime? restoreUntil)
+    {
+        return await _authDbContext.UserRoles
+            .Where(x => x.UserId == userId && x.RoleId == (int)role)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(ur => ur.SoftDeletedAt, softDeletedAt)
+                .SetProperty(ur => ur.RestoreUntil, restoreUntil));
+    }
+
+    public async Task<int> RemoveExpiredDeletedRolesAsync()
+    {
+        var now = DateTime.UtcNow;
+
+        var deletedCount = await _authDbContext.UserRoles
+            .Where(ur => ur.SoftDeletedAt.HasValue &&
+                         ur.RestoreUntil.HasValue &&
+                         ur.RestoreUntil.Value < now)
+            .ExecuteDeleteAsync();
+
+        return deletedCount;
     }
 }

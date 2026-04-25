@@ -60,6 +60,7 @@ namespace Tailly.AuthService.Migrations
                 {
                     Token = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -82,7 +83,8 @@ namespace Tailly.AuthService.Migrations
                     Created = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Expires = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Revoked = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoleId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -100,7 +102,13 @@ namespace Tailly.AuthService.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    RoleId = table.Column<int>(type: "integer", nullable: false)
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    SoftDeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    RestoreUntil = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsBlocked = table.Column<bool>(type: "boolean", nullable: false),
+                    IsPermanentBlock = table.Column<bool>(type: "boolean", nullable: false),
+                    BlockedUntil = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    BlockReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {

@@ -1,5 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using Tailly.ShopService.Application.Errors;
+using Tailly.ShopService.Application.Helpers;
 using Tailly.ShopService.Application.Service.Interfaces;
 using Tailly.ShopService.Core.Common;
 using Tailly.ShopService.Core.Enums;
@@ -114,9 +115,7 @@ public class OrderService : IOrderService
             };
         }
 
-        var status = form.PaymentMethod == PaymentMethod.Cash
-            ? OrderStatus.PendingPayment
-            : OrderStatus.Created;
+        var status = OrderStatus.Created;
 
         var order = new Order
         {
@@ -127,15 +126,13 @@ public class OrderService : IOrderService
             TotalPrice = totalPrice,
             DeliveryMethod = form.DeliveryMethod,
             PaymentMethod = form.PaymentMethod,
-            EstimatedDeliveryDate = DateTime.UtcNow.AddDays(3),
+            EstimatedDeliveryDate = DateTime.UtcNow.Date.AddDays(3),
             CreatedAt = DateTime.UtcNow,
-            CanBeCancelled = true,
 
             RecipientFirstName = form.Recipient.FirstName,
             RecipientLastName = form.Recipient.LastName,
             RecipientPhone = form.Recipient.Phone,
             RecipientEmail = form.Recipient.Email,
-            TrackingNumber = $"TRK-{Random.Shared.Next(100000, 999999)}",
 
             PickupPoint = pickupPoint,
             Address = orderAddress,
@@ -172,12 +169,21 @@ public class OrderService : IOrderService
         if (order == null || order.OwnerUserId != userId)
             return Result.Failure(ShopErrors.OrderNotFound.Description);
 
-        if (!order.CanBeCancelled)
+        if (order.Status == OrderStatus.Cancelled)
+            return Result.Success();
+
+        var calculatedStatus = OrderStatusCalculator.Calculate(
+            order.CreatedAt,
+            order.Status == OrderStatus.Cancelled
+        );
+
+        if (calculatedStatus == OrderStatus.Shipped || calculatedStatus == OrderStatus.Completed)
             return Result.Failure(ShopErrors.OrderCannotBeCancelled.Description);
 
         await _orderRepository.CancelAsync(orderId);
 
         _logger.LogInformation("Order {OrderId} cancelled by user {UserId}", orderId, userId);
+
         return Result.Success();
     }
 
@@ -227,10 +233,10 @@ public class OrderService : IOrderService
         if (order == null || order.OwnerUserId != userId)
             return Result.Failure<string, Error>(ShopErrors.OrderNotFound);
 
-        if (order.Status != OrderStatus.Created && order.Status != OrderStatus.PendingPayment)
-            return Result.Failure<string, Error>(ShopErrors.OrderAlreadyPaid);
+        var isOfflinePayment = order.PaymentMethod == PaymentMethod.Cash
+                            || order.PaymentMethod == PaymentMethod.CardOnDelivery;
 
-        if (order.PaymentMethod == PaymentMethod.Cash)
+        if (isOfflinePayment)
             return Result.Failure<string, Error>(ShopErrors.InvalidPaymentMethod);
 
         var paymentUrl = $"http://localhost:3000/fake-payment/{orderId}";
@@ -245,15 +251,10 @@ public class OrderService : IOrderService
         if (order == null || order.OwnerUserId != userId)
             return Result.Failure(ShopErrors.OrderNotFound.Description);
 
-        if (order.Status == OrderStatus.Completed)
-            return Result.Success();
+        if (order.Status == OrderStatus.Cancelled)
+            return Result.Failure(ShopErrors.OrderAlreadyCancelled.Description);
 
-        order.Status = OrderStatus.Completed;
-        order.CanBeCancelled = false;
-
-        await _orderRepository.UpdateAsync(order);
-
-        _logger.LogInformation("Order {OrderId} completed after payment by user {UserId}", orderId, userId);
+        _logger.LogInformation("Payment confirmed for order {OrderId} by user {UserId}", orderId, userId);
 
         return Result.Success();
     }

@@ -24,4 +24,19 @@ public static class AdminErrors
 
     public static readonly Error UserNotDeleted =
         new("Admin.UserNotDeleted", "User is not deleted.");
+
+    public static readonly Error InvalidRole =
+        new("Admin.InvalidRole", "Invalid role specified for this operation.");
+
+    public static readonly Error SpecialistOnlyField =
+        new("Admin.SpecialistOnlyField", "Specialist slug can only be updated for users with Specialist role.");
+
+    public static readonly Error InvalidManagedRole =
+        new("Admin.InvalidManagedRole", "Invalid role scope. Allowed: client, specialist.");
+
+    public static readonly Error UpdateFailed =
+        new("Admin.UpdateFailed", "Failed to update user data.");
+
+    public static readonly Error UserRoleNotFound =
+        new("Admin.UserRoleNotFound", "Specified role not found for this user or has been deleted.");
 }
