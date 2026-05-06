@@ -13,21 +13,21 @@ public static class SpecialistEnumMapper
         _ => "other"
     };
 
-    public static string MapChildrenPresence(ChildrenPresence value) => value switch
+    public static string MapChildrenPresence(ChildrenPolicy value) => value switch
     {
-        ChildrenPresence.Yes => "yes",
-        ChildrenPresence.No => "no",
-        ChildrenPresence.Sometimes => "sometimes",
+        ChildrenPolicy.Yes => "yes",
+        ChildrenPolicy.No => "no",
+        ChildrenPolicy.Sometimes => "sometimes",
         _ => "no"
     };
 
-    public static string MapPriceUnit(PriceUnit value) => value switch
+    public static string MapPriceUnit(ServicePriceUnit value) => value switch
     {
-        PriceUnit.Hour => "hour",
-        PriceUnit.Day => "day",
-        PriceUnit.Service => "service",
-        PriceUnit.Walk => "walk",
-        PriceUnit.Visit => "visit",
+        ServicePriceUnit.Hour => "hour",
+        ServicePriceUnit.Day => "day",
+        ServicePriceUnit.Service => "service",
+        ServicePriceUnit.Walk => "walk",
+        ServicePriceUnit.Visit => "visit",
         _ => "hour"
     };
 
@@ -80,12 +80,12 @@ public static class SpecialistEnumMapper
         _ => "walking"
     };
 
-    public static string MapBookingMode(SpecialistBookingMode mode) => mode switch
+    public static string MapBookingMode(BookingMode mode) => mode switch
     {
-        SpecialistBookingMode.FixedSlot => "fixed_slot",
-        SpecialistBookingMode.TimeRange => "time_range",
-        SpecialistBookingMode.MultiDayStay => "multi_day_stay",
-        SpecialistBookingMode.OpenRequest => "open_request",
+        BookingMode.FixedSlot => "fixed_slot",
+        BookingMode.TimeRange => "time_range",
+        BookingMode.MultiDayStay => "multi_day_stay",
+        BookingMode.OpenRequest => "open_request",
         _ => "fixed_slot"
     };
 
@@ -130,11 +130,11 @@ public static class SpecialistEnumMapper
         _ => HousingType.Apartment
     };
 
-    public static ChildrenPresence ParseChildrenPresence(string? value) => value?.ToLowerInvariant() switch
+    public static ChildrenPolicy ParseChildrenPresence(string? value) => value?.ToLowerInvariant() switch
     {
-        "yes" => ChildrenPresence.Yes,
-        "sometimes" => ChildrenPresence.Sometimes,
-        _ => ChildrenPresence.No
+        "yes" => ChildrenPolicy.Yes,
+        "sometimes" => ChildrenPolicy.Sometimes,
+        _ => ChildrenPolicy.No
     };
 
     public static PetType ParsePetType(string? value) => value?.ToLowerInvariant() switch
@@ -147,24 +147,6 @@ public static class SpecialistEnumMapper
         "fish" => PetType.Fish,
         "amphibian" => PetType.Amphibian,
         _ => PetType.Dog
-    };
-
-    public static PetSize ParsePetSize(string? value) => value?.ToLowerInvariant() switch
-    {
-        "up_to_2kg" => PetSize.UpTo2Kg,
-        "2_5kg" => PetSize.Kg2To5,
-        "5_10kg" => PetSize.Kg5To10,
-        "10_20kg" => PetSize.Kg10To20,
-        "over_20kg" => PetSize.Over20Kg,
-        _ => PetSize.Kg5To10
-    };
-
-    public static PetAge ParsePetAge(string? value) => value?.ToLowerInvariant() switch
-    {
-        "baby" => PetAge.Baby,
-        "young" => PetAge.Young,
-        "senior" => PetAge.Senior,
-        _ => PetAge.Adult
     };
 
     public static ServiceType ParseServiceType(string? name) => name?.ToLowerInvariant() switch
@@ -180,12 +162,42 @@ public static class SpecialistEnumMapper
         _ => ServiceType.Walking
     };
 
-    public static PriceUnit ParsePriceUnit(string? value) => value?.ToLowerInvariant() switch
+    public static ServicePriceUnit ParsePriceUnit(string? value) => value?.ToLowerInvariant() switch
     {
-        "day" => PriceUnit.Day,
-        "service" => PriceUnit.Service,
-        "walk" => PriceUnit.Walk,
-        "visit" => PriceUnit.Visit,
-        _ => PriceUnit.Hour
+        "day" => ServicePriceUnit.Day,
+        "service" => ServicePriceUnit.Service,
+        "walk" => ServicePriceUnit.Walk,
+        "visit" => ServicePriceUnit.Visit,
+        _ => ServicePriceUnit.Hour
     };
+
+    public static PetSize ParsePetSize(string? value) => value?.ToLowerInvariant() switch
+    {
+        "up_to_2kg" => PetSize.UpTo2Kg,
+        "2_5kg" or "kg2_to_5" => PetSize.Kg2To5,
+        "5_10kg" or "kg5_to_10" => PetSize.Kg5To10,
+        "10_20kg" or "kg10_to_20" => PetSize.Kg10To20,
+        "over_20kg" => PetSize.Over20Kg,
+        _ => PetSize.Kg5To10
+    };
+
+    public static PetAge ParsePetAge(string? value) => value?.ToLowerInvariant() switch
+    {
+        "baby" => PetAge.Baby,
+        "young" => PetAge.Young,
+        "senior" => PetAge.Senior,
+        _ => PetAge.Adult
+    };
+
+    public static string? MapExperienceUnit(ExperienceUnit? unit)
+    {
+        if (!unit.HasValue) return null;
+
+        return unit.Value switch
+        {
+            ExperienceUnit.Years => "years",
+            ExperienceUnit.Months => "months",
+            _ => unit.Value.ToString().ToLower()
+        };
+    }
 }

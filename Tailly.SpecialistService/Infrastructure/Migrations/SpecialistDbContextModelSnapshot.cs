@@ -33,6 +33,25 @@ namespace Tailly.SpecialistService.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
+                    b.Property<string>("AdditionalInfo")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("AnimalTypes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("CanGiveMedication")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("CanHandleDifficultBehavior")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("CanTakeOvernightOrders")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("City")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -41,12 +60,25 @@ namespace Tailly.SpecialistService.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("CreatedSpecialistId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CreatedSpecialistSlug")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("DistrictPreferences")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
                     b.Property<int>("ExperienceYears")
+                        .HasMaxLength(100)
                         .HasColumnType("integer");
 
                     b.Property<string>("FirstName")
@@ -54,11 +86,23 @@ namespace Tailly.SpecialistService.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<bool>("HasOwnPets")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("HasPetFirstAidBasics")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("HousingType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<DateTime?>("InterviewDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("InterviewNote")
-                        .HasColumnType("text");
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -66,7 +110,13 @@ namespace Tailly.SpecialistService.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("MiddleName")
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Motivation")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -76,24 +126,46 @@ namespace Tailly.SpecialistService.Migrations
                     b.Property<string>("PhotoUrl")
                         .HasColumnType("text");
 
-                    b.Property<string>("RejectionReason")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ServicesWanted")
+                    b.Property<string>("PortfolioUrl")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<int?>("Status")
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("ReviewComment")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReviewedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SchedulePreferences")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ServiceFormats")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("SpecialistAccountCreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
 
                     b.HasIndex("Email");
 
@@ -104,11 +176,17 @@ namespace Tailly.SpecialistService.Migrations
                     b.ToTable("SpecialistApplications");
                 });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.AvailabilityEntity", b =>
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarAvailabilityWindowEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<Guid>("CalendarId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text");
 
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
@@ -116,23 +194,23 @@ namespace Tailly.SpecialistService.Migrations
                     b.Property<TimeOnly>("EndTime")
                         .HasColumnType("time without time zone");
 
-                    b.Property<Guid>("SpecialistId")
-                        .HasColumnType("uuid");
-
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("time without time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SpecialistId");
+                    b.HasIndex("CalendarId", "Date");
 
-                    b.ToTable("Availabilities");
+                    b.ToTable("CalendarAvailabilityWindows");
                 });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.BookedSlotEntity", b =>
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarBookedSlotEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CalendarId")
                         .HasColumnType("uuid");
 
                     b.Property<DateOnly>("Date")
@@ -144,20 +222,70 @@ namespace Tailly.SpecialistService.Migrations
                     b.Property<Guid?>("OrderId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("SpecialistId")
-                        .HasColumnType("uuid");
-
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("time without time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SpecialistId");
+                    b.HasIndex("CalendarId", "Date");
 
-                    b.ToTable("BookedSlots");
+                    b.ToTable("CalendarBookedSlots");
                 });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.AdvantageEntity", b =>
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarBookingSettingsEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CalendarId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DayEndTime")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DayStartTime")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DefaultDurationMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SlotStepMinutes")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CalendarId")
+                        .IsUnique();
+
+                    b.ToTable("CalendarBookingSettings");
+                });
+
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarDayOverrideEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CalendarId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CalendarId", "Date");
+
+                    b.ToTable("CalendarDayOverrides");
+                });
+
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -166,16 +294,36 @@ namespace Tailly.SpecialistService.Migrations
                     b.Property<Guid>("SpecialistId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Title")
+                    b.Property<string>("Timezone")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SpecialistId");
+                    b.HasIndex("SpecialistId")
+                        .IsUnique();
 
-                    b.ToTable("Advantages");
+                    b.ToTable("Calendars");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("404a5b56-ca67-4990-aa5e-f85518ad5fda"),
+                            SpecialistId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            Timezone = "Europe/Moscow"
+                        },
+                        new
+                        {
+                            Id = new Guid("e4a2f917-2f72-4c75-a32b-873bd451a680"),
+                            SpecialistId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            Timezone = "Europe/Moscow"
+                        },
+                        new
+                        {
+                            Id = new Guid("d6f8e041-4b55-4507-a4b5-f883c5ff1814"),
+                            SpecialistId = new Guid("33333333-3333-3333-3333-333333333333"),
+                            Timezone = "Europe/Moscow"
+                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.DetailsEntity", b =>
@@ -186,19 +334,8 @@ namespace Tailly.SpecialistService.Migrations
 
                     b.Property<string>("About")
                         .IsRequired()
-                        .HasMaxLength(3000)
-                        .HasColumnType("character varying(3000)");
-
-                    b.Property<int?>("ExperienceDurationUnit")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("ExperienceDurationValue")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ExperienceLabel")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<int>("HasChildrenUnderTen")
                         .HasColumnType("integer");
@@ -215,6 +352,32 @@ namespace Tailly.SpecialistService.Migrations
                         .IsUnique();
 
                     b.ToTable("Details");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            About = "Люблю животных, имею двух своих собак. Занимаюсь выгулом и передержкой уже более 5 лет.",
+                            HasChildrenUnderTen = 2,
+                            HousingType = 1,
+                            SpecialistId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                            About = "Профессиональный выгульщик с опытом работы с крупными породами.",
+                            HasChildrenUnderTen = 1,
+                            HousingType = 2,
+                            SpecialistId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                            About = "Профессиональный грумер собак и кошек с 7-летним стажем.",
+                            HasChildrenUnderTen = 3,
+                            HousingType = 1,
+                            SpecialistId = new Guid("33333333-3333-3333-3333-333333333333")
+                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.PetAgeEntity", b =>
@@ -223,18 +386,31 @@ namespace Tailly.SpecialistService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("DetailsId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("PetAge")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("SpecialistId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("SpecialistId", "PetAge")
-                        .IsUnique();
+                    b.HasIndex("DetailsId");
 
                     b.ToTable("PetAges");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("7628afe2-19bd-421b-907f-3d955adec9e4"),
+                            DetailsId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            PetAge = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("98061f42-aa5f-433a-815a-b3cd3a447d85"),
+                            DetailsId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            PetAge = 4
+                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.PetSizeEntity", b =>
@@ -243,18 +419,43 @@ namespace Tailly.SpecialistService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("DetailsId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("PetSize")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("SpecialistId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("SpecialistId", "PetSize")
-                        .IsUnique();
+                    b.HasIndex("DetailsId");
 
                     b.ToTable("PetSizes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("f18ec021-f366-4f60-b483-dd8b322e642a"),
+                            DetailsId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            PetSize = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("872c5a69-22fa-4563-a5c4-1e7714adbd24"),
+                            DetailsId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            PetSize = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("f727f6da-f5f9-4955-aa30-62d81ca8e9ca"),
+                            DetailsId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                            PetSize = 4
+                        },
+                        new
+                        {
+                            Id = new Guid("2d505ef4-521e-4be9-a786-13d1b7a9fba6"),
+                            DetailsId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                            PetSize = 5
+                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.PetTypeEntity", b =>
@@ -263,21 +464,52 @@ namespace Tailly.SpecialistService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("DetailsId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("PetType")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("SpecialistId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("SpecialistId", "PetType")
-                        .IsUnique();
+                    b.HasIndex("DetailsId");
 
                     b.ToTable("PetTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c820aead-cdc1-4524-bbe5-bd5511bdfdb4"),
+                            DetailsId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            PetType = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("aaafa93d-f6b3-44ce-8a15-24a32f31e95f"),
+                            DetailsId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                            PetType = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("17d0351f-b708-41b6-a9fd-dd087c178269"),
+                            DetailsId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                            PetType = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("9a50e91e-df52-407a-b737-da3ae70f795b"),
+                            DetailsId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                            PetType = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("2a8e6135-9e15-4382-ba73-7982ea699eed"),
+                            DetailsId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                            PetType = 2
+                        });
                 });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Gallery.GalleryEntity", b =>
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Gallery.SpecialistGalleryEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -293,14 +525,35 @@ namespace Tailly.SpecialistService.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("SpecialistId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SpecialistId");
+                    b.HasIndex("SpecialistId", "Order");
 
-                    b.ToTable("Galleries");
+                    b.ToTable("SpecialistGalleries");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("d891fc8d-1c4f-49d8-8bdf-38a8db07dd1a"),
+                            Alt = "Анна с питомцем",
+                            ImageUrl = "/uploads/gallery/anna1.jpg",
+                            Order = 1,
+                            SpecialistId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            Id = new Guid("97492b9a-7cdc-4d25-8f56-0c6086fa3264"),
+                            Alt = "Анна на прогулке",
+                            ImageUrl = "/uploads/gallery/anna2.jpg",
+                            Order = 2,
+                            SpecialistId = new Guid("11111111-1111-1111-1111-111111111111")
+                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Reviews.ReviewEntity", b =>
@@ -316,6 +569,9 @@ namespace Tailly.SpecialistService.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("OrderId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("PetName")
                         .HasMaxLength(100)
@@ -339,8 +595,8 @@ namespace Tailly.SpecialistService.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasMaxLength(3000)
-                        .HasColumnType("character varying(3000)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.HasKey("Id");
 
@@ -349,69 +605,22 @@ namespace Tailly.SpecialistService.Migrations
                     b.ToTable("Reviews");
                 });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Services.AvailabilityServiceEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("AvailabilityId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ServiceId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AvailabilityId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("AvailabilityServices");
-                });
-
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Services.BookedSlotServiceEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("BookedSlotId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ServiceId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookedSlotId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("BookedSlotServices");
-                });
-
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Services.ServiceEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
-                    b.Property<string>("LocationLabel")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                    b.Property<int>("Name")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(10,2)");
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
 
                     b.Property<int>("PriceUnit")
                         .HasColumnType("integer");
@@ -419,33 +628,49 @@ namespace Tailly.SpecialistService.Migrations
                     b.Property<Guid>("SpecialistId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("SpecialistId");
 
                     b.ToTable("Services");
-                });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Specialist.AvailabilityWeekdayEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("SpecialistId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Weekday")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SpecialistId");
-
-                    b.ToTable("AvailabilityWeekdays");
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("9e4dfeba-89fb-472e-8d18-05b3f18426ca"),
+                            Description = "Выгул собаки 60 минут",
+                            Name = 1,
+                            Price = 1200m,
+                            PriceUnit = 4,
+                            SpecialistId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            Id = new Guid("301a4d2e-af0e-42f1-964b-26d3bb53042c"),
+                            Description = "Комфортная передержка в квартире",
+                            Name = 2,
+                            Price = 2500m,
+                            PriceUnit = 2,
+                            SpecialistId = new Guid("11111111-1111-1111-1111-111111111111")
+                        },
+                        new
+                        {
+                            Id = new Guid("0d494aa3-066c-4c79-ba5f-ba16b5b0dc62"),
+                            Description = "Выгул с элементами дрессировки",
+                            Name = 5,
+                            Price = 1800m,
+                            PriceUnit = 1,
+                            SpecialistId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = new Guid("894585c0-f54a-4831-a229-3af97c373065"),
+                            Description = "Полный груминг",
+                            Name = 3,
+                            Price = 3500m,
+                            PriceUnit = 3,
+                            SpecialistId = new Guid("33333333-3333-3333-3333-333333333333")
+                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", b =>
@@ -460,8 +685,8 @@ namespace Tailly.SpecialistService.Migrations
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<int>("CompletedOrdersCount")
                         .HasColumnType("integer");
@@ -469,15 +694,10 @@ namespace Tailly.SpecialistService.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
                     b.Property<string>("District")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -498,9 +718,11 @@ namespace Tailly.SpecialistService.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<double?>("Latitude")
+                        .HasPrecision(9, 6)
                         .HasColumnType("double precision");
 
                     b.Property<double?>("Longitude")
+                        .HasPrecision(9, 6)
                         .HasColumnType("double precision");
 
                     b.Property<string>("MiddleName")
@@ -513,7 +735,8 @@ namespace Tailly.SpecialistService.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<decimal>("Rating")
-                        .HasColumnType("decimal(3,2)");
+                        .HasPrecision(3, 1)
+                        .HasColumnType("numeric(3,1)");
 
                     b.Property<int>("RepeatOrdersCount")
                         .HasColumnType("integer");
@@ -526,7 +749,7 @@ namespace Tailly.SpecialistService.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -535,35 +758,120 @@ namespace Tailly.SpecialistService.Migrations
                         .IsUnique();
 
                     b.ToTable("Specialists");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            AvatarUrl = "/uploads/avatars/anna.jpg",
+                            City = "Москва",
+                            CompletedOrdersCount = 87,
+                            CreatedAt = new DateTime(2025, 11, 6, 17, 7, 49, 523, DateTimeKind.Utc).AddTicks(752),
+                            District = "Сокольники",
+                            Email = "anna@example.com",
+                            ExperienceYears = 5,
+                            FirstName = "Анна",
+                            LastName = "Смирнова",
+                            Latitude = 55.793100000000003,
+                            Longitude = 37.677799999999998,
+                            Phone = "+79161234567",
+                            Rating = 4.8m,
+                            RepeatOrdersCount = 24,
+                            ReviewsCount = 42,
+                            Slug = "anna-petcare",
+                            UserId = new Guid("438a4a9e-c17b-439d-ab8b-007ed01d2ac8")
+                        },
+                        new
+                        {
+                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
+                            City = "Москва",
+                            CompletedOrdersCount = 45,
+                            CreatedAt = new DateTime(2026, 1, 6, 17, 7, 49, 523, DateTimeKind.Utc).AddTicks(794),
+                            District = "Марьино",
+                            Email = "dima@example.com",
+                            ExperienceYears = 3,
+                            FirstName = "Дмитрий",
+                            LastName = "Кузнецов",
+                            Latitude = 55.6494,
+                            Longitude = 37.743000000000002,
+                            Phone = "+79162345678",
+                            Rating = 4.6m,
+                            RepeatOrdersCount = 12,
+                            ReviewsCount = 28,
+                            Slug = "dima-dogwalker",
+                            UserId = new Guid("bcbd93af-e24d-432e-9c48-86d0103bbf28")
+                        },
+                        new
+                        {
+                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
+                            City = "Санкт-Петербург",
+                            CompletedOrdersCount = 112,
+                            CreatedAt = new DateTime(2025, 9, 6, 17, 7, 49, 523, DateTimeKind.Utc).AddTicks(810),
+                            District = "Центральный",
+                            Email = "maria@example.com",
+                            ExperienceYears = 7,
+                            FirstName = "Мария",
+                            LastName = "Попова",
+                            Latitude = 59.938600000000001,
+                            Longitude = 30.3141,
+                            Phone = "+79213456789",
+                            Rating = 4.9m,
+                            RepeatOrdersCount = 35,
+                            ReviewsCount = 67,
+                            Slug = "maria-grooming",
+                            UserId = new Guid("2b80396d-b879-4abf-97ff-8b53ce4ccf22")
+                        });
                 });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.AvailabilityEntity", b =>
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarAvailabilityWindowEntity", b =>
                 {
-                    b.HasOne("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", "Specialist")
-                        .WithMany("Availabilities")
-                        .HasForeignKey("SpecialistId")
+                    b.HasOne("Tailly.SpecialistService.Core.Entities.Calendar.CalendarEntity", "Calendar")
+                        .WithMany("AvailabilityWindows")
+                        .HasForeignKey("CalendarId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Specialist");
+                    b.Navigation("Calendar");
                 });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.BookedSlotEntity", b =>
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarBookedSlotEntity", b =>
                 {
-                    b.HasOne("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", "Specialist")
+                    b.HasOne("Tailly.SpecialistService.Core.Entities.Calendar.CalendarEntity", "Calendar")
                         .WithMany("BookedSlots")
-                        .HasForeignKey("SpecialistId")
+                        .HasForeignKey("CalendarId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Specialist");
+                    b.Navigation("Calendar");
                 });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.AdvantageEntity", b =>
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarBookingSettingsEntity", b =>
+                {
+                    b.HasOne("Tailly.SpecialistService.Core.Entities.Calendar.CalendarEntity", "Calendar")
+                        .WithOne("BookingSettings")
+                        .HasForeignKey("Tailly.SpecialistService.Core.Entities.Calendar.CalendarBookingSettingsEntity", "CalendarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Calendar");
+                });
+
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarDayOverrideEntity", b =>
+                {
+                    b.HasOne("Tailly.SpecialistService.Core.Entities.Calendar.CalendarEntity", "Calendar")
+                        .WithMany("DayOverrides")
+                        .HasForeignKey("CalendarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Calendar");
+                });
+
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarEntity", b =>
                 {
                     b.HasOne("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", "Specialist")
-                        .WithMany("Advantages")
-                        .HasForeignKey("SpecialistId")
+                        .WithOne("Calendar")
+                        .HasForeignKey("Tailly.SpecialistService.Core.Entities.Calendar.CalendarEntity", "SpecialistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -583,41 +891,41 @@ namespace Tailly.SpecialistService.Migrations
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.PetAgeEntity", b =>
                 {
-                    b.HasOne("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", "Specialist")
+                    b.HasOne("Tailly.SpecialistService.Core.Entities.Details.DetailsEntity", "Details")
                         .WithMany("PetAges")
-                        .HasForeignKey("SpecialistId")
+                        .HasForeignKey("DetailsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Specialist");
+                    b.Navigation("Details");
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.PetSizeEntity", b =>
                 {
-                    b.HasOne("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", "Specialist")
+                    b.HasOne("Tailly.SpecialistService.Core.Entities.Details.DetailsEntity", "Details")
                         .WithMany("PetSizes")
-                        .HasForeignKey("SpecialistId")
+                        .HasForeignKey("DetailsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Specialist");
+                    b.Navigation("Details");
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.PetTypeEntity", b =>
                 {
-                    b.HasOne("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", "Specialist")
+                    b.HasOne("Tailly.SpecialistService.Core.Entities.Details.DetailsEntity", "Details")
                         .WithMany("PetTypes")
-                        .HasForeignKey("SpecialistId")
+                        .HasForeignKey("DetailsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Specialist");
+                    b.Navigation("Details");
                 });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Gallery.GalleryEntity", b =>
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Gallery.SpecialistGalleryEntity", b =>
                 {
                     b.HasOne("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", "Specialist")
-                        .WithMany("Gallery")
+                        .WithMany("SpecialistGallery")
                         .HasForeignKey("SpecialistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -636,44 +944,6 @@ namespace Tailly.SpecialistService.Migrations
                     b.Navigation("Specialist");
                 });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Services.AvailabilityServiceEntity", b =>
-                {
-                    b.HasOne("Tailly.SpecialistService.Core.Entities.Calendar.AvailabilityEntity", "Availability")
-                        .WithMany("Services")
-                        .HasForeignKey("AvailabilityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Tailly.SpecialistService.Core.Entities.Services.ServiceEntity", "Service")
-                        .WithMany("Availabilities")
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Availability");
-
-                    b.Navigation("Service");
-                });
-
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Services.BookedSlotServiceEntity", b =>
-                {
-                    b.HasOne("Tailly.SpecialistService.Core.Entities.Calendar.BookedSlotEntity", "BookedSlot")
-                        .WithMany("Services")
-                        .HasForeignKey("BookedSlotId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Tailly.SpecialistService.Core.Entities.Services.ServiceEntity", "Service")
-                        .WithMany("BookedSlots")
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BookedSlot");
-
-                    b.Navigation("Service");
-                });
-
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Services.ServiceEntity", b =>
                 {
                     b.HasOne("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", "Specialist")
@@ -685,57 +955,37 @@ namespace Tailly.SpecialistService.Migrations
                     b.Navigation("Specialist");
                 });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Specialist.AvailabilityWeekdayEntity", b =>
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarEntity", b =>
                 {
-                    b.HasOne("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", "Specialist")
-                        .WithMany("AvailabilityWeekdays")
-                        .HasForeignKey("SpecialistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Specialist");
-                });
-
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.AvailabilityEntity", b =>
-                {
-                    b.Navigation("Services");
-                });
-
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.BookedSlotEntity", b =>
-                {
-                    b.Navigation("Services");
-                });
-
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Services.ServiceEntity", b =>
-                {
-                    b.Navigation("Availabilities");
-
-                    b.Navigation("BookedSlots");
-                });
-
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", b =>
-                {
-                    b.Navigation("Advantages");
-
-                    b.Navigation("Availabilities");
-
-                    b.Navigation("AvailabilityWeekdays");
+                    b.Navigation("AvailabilityWindows");
 
                     b.Navigation("BookedSlots");
 
-                    b.Navigation("Details");
+                    b.Navigation("BookingSettings");
 
-                    b.Navigation("Gallery");
+                    b.Navigation("DayOverrides");
+                });
 
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.DetailsEntity", b =>
+                {
                     b.Navigation("PetAges");
 
                     b.Navigation("PetSizes");
 
                     b.Navigation("PetTypes");
+                });
+
+            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", b =>
+                {
+                    b.Navigation("Calendar");
+
+                    b.Navigation("Details");
 
                     b.Navigation("Reviews");
 
                     b.Navigation("Services");
+
+                    b.Navigation("SpecialistGallery");
                 });
 #pragma warning restore 612, 618
         }

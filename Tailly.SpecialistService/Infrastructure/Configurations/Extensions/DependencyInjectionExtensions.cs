@@ -70,9 +70,6 @@ public static class DependencyInjectionExtensions
         services.Configure<JwtOptions>(
             configuration.GetSection("JwtConfig"));
 
-        services.Configure<RabbitMqSettings>(
-            configuration.GetSection("RabbitMq"));
-
         return services;
     }
 
@@ -81,6 +78,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<ISpecialistApplicationService, SpecialistApplicationService>();
         services.AddScoped<ISpecialistsService, SpecialistsService>();
         services.AddScoped<IMediaService, MediaService>();
+        services.AddScoped<ISpecialistProfileService, SpecialistProfileService>();
 
         return services;
     }
@@ -95,11 +93,16 @@ public static class DependencyInjectionExtensions
 
     private static IServiceCollection AddFluentValidationSetup(this IServiceCollection services)
     {
-        services.AddValidatorsFromAssemblyContaining<GetSpecialistBySlugRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<CreateSpecialistApplicationRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<AssignInterviewRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<RejectApplicationRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<AttachSpecialistAccountRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<ApproveApplicationRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<UpdateSpecialistMainInfoRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<UpdateSpecialistDetailsRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<CreateServiceRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<UpdateServiceRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<ReviewReplyRequestValidator>();
 
         return services;
     }

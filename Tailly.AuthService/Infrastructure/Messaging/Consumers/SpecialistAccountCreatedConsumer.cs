@@ -87,7 +87,9 @@ public class SpecialistAccountCreatedConsumer : IConsumer<SpecialistAccountCreat
             }
             else
             {
-                var temporaryPassword = "Temp" + Guid.NewGuid().ToString("N").Substring(0, 8);
+                var temporaryPassword = !string.IsNullOrEmpty(message.TemporaryPassword)
+                    ? message.TemporaryPassword
+                    : "Temp" + Guid.NewGuid().ToString("N").Substring(0, 8);
                 var passwordHash = _passwordHasher.HashPassword(temporaryPassword);
 
                 var user = new User

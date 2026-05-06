@@ -107,6 +107,7 @@ public class ProductRepository : IProductRepository
 
         var total = await query.CountAsync();
         var entities = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip((page - 1) * limit)
             .Take(limit)
             .ToListAsync();

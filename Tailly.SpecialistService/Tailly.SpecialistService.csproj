@@ -32,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Application\Validators\SpecialistProfile\" />
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 

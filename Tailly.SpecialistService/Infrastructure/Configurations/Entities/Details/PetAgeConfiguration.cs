@@ -10,10 +10,8 @@ public class PetAgeConfiguration : IEntityTypeConfiguration<PetAgeEntity>
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.PetAge)
-            .IsRequired();
-
-        builder.HasIndex(x => new { x.SpecialistId, x.PetAge })
-            .IsUnique();
+        builder.HasOne(x => x.Details)
+               .WithMany(x => x.PetAges)
+               .HasForeignKey(x => x.DetailsId);
     }
 }

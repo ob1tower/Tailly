@@ -17,6 +17,7 @@ public class PasswordRecoveryService : IPasswordRecoveryService
     private readonly IPasswordHashingService _passwordHasher;
     private readonly IVerificationCodeService _verificationCodeService;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IAdminPasswordRecoveryRepository _passwordRecoveryRepository;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<PasswordRecoveryService> _logger;
 
@@ -24,6 +25,7 @@ public class PasswordRecoveryService : IPasswordRecoveryService
                                    IPasswordHashingService passwordHasher,
                                    IVerificationCodeService verificationCodeService,
                                    IRefreshTokenRepository refreshTokenRepository,
+                                   IAdminPasswordRecoveryRepository passwordRecoveryRepository,
                                    IPublishEndpoint publishEndpoint,
                                    ILogger<PasswordRecoveryService> logger)
     {
@@ -31,28 +33,68 @@ public class PasswordRecoveryService : IPasswordRecoveryService
         _passwordHasher = passwordHasher;
         _verificationCodeService = verificationCodeService;
         _refreshTokenRepository = refreshTokenRepository;
+        _passwordRecoveryRepository = passwordRecoveryRepository;
         _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
 
     public async Task<Result<PasswordRecoveryResult>> StartPasswordRecoveryAsync(string email)
     {
-        email = email?.Trim().ToLowerInvariant() ?? 
-            throw new ArgumentNullException(nameof(email));
+        email = email?.Trim().ToLowerInvariant() ??
+                    throw new ArgumentNullException(nameof(email));
 
         var user = await _usersRepository.GetByEmailAsync(email);
 
         var flow = "default";
+
         if (user != null)
         {
-            flow = user.UserRoles.Any(x =>
+            var isAdmin = user.UserRoles.Any(x =>
                 x.SoftDeletedAt == null &&
-                (x.Role == RoleType.Admin || x.Role == RoleType.SuperAdmin))
-                ? "admin"
-                : "default";
+                x.Role == RoleType.Admin);
+
+            if (isAdmin)
+            {
+                flow = "admin";
+
+                if (UserRules.IsPasswordRecoveryBlockedForAllRoles(user))
+                    return Result.Failure<PasswordRecoveryResult>(AuthErrors.AccountBlocked.Description);
+
+                var hasPendingRequest = await _passwordRecoveryRepository
+                    .GetAllAsync()
+                    .ContinueWith(t => t.Result.Any(r =>
+                        r.Email == email &&
+                        r.Status == AdminPasswordRecoveryStatus.Pending));
+
+                if (hasPendingRequest)
+                    return Result.Failure<PasswordRecoveryResult>(AdminErrors.RequestAlreadyPending.Description);
+
+                var recovery = new AdminPasswordRecovery
+                {
+                    Id = Guid.NewGuid(),
+                    Email = email,
+                    RequestedAt = DateTimeHelper.NormalizeToUtc(DateTime.UtcNow),
+                    Status = AdminPasswordRecoveryStatus.Pending
+                };
+
+                await _passwordRecoveryRepository.AddAsync(recovery);
+
+                await _publishEndpoint.Publish(new SendEmailMessage
+                {
+                    To = email,
+                    Subject = "Password Recovery Request",
+                    Body = $"""
+                    <h2>Password Recovery Request</h2>
+                    <p>You have requested a password reset for your account <strong>{email}</strong>.</p>
+                    <p>Your application has been accepted and submitted to the administrator.</p>
+                    """,
+                    Purpose = "admin-password-recovery-request"
+                });
+
+                _logger.LogInformation("Admin password recovery requested. Email={Email}", email);
+            }
         }
 
-        _logger.LogInformation("Password recovery started for {Email} with flow {Flow}", email, flow);
         return Result.Success(new PasswordRecoveryResult { Flow = flow });
     }
 

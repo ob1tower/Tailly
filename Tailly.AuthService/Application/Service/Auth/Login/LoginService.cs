@@ -18,6 +18,7 @@ public class LoginService : ILoginService
     private readonly IPasswordHashingService _passwordHasher;
     private readonly IJwtTokenService _jwtService;
     private readonly IRefreshTokenService _refreshTokenService;
+    private readonly IAdminProfileRepository _adminProfileRepository;
     private readonly ILogger<LoginService> _logger;
 
     public LoginService(IUsersRepository usersRepository,
@@ -25,6 +26,7 @@ public class LoginService : ILoginService
                         IPasswordHashingService passwordHasher,
                         IJwtTokenService jwtService,
                         IRefreshTokenService refreshTokenService,
+                        IAdminProfileRepository adminProfileRepository,
                         ILogger<LoginService> logger)
     {
         _usersRepository = usersRepository;
@@ -32,6 +34,7 @@ public class LoginService : ILoginService
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
         _refreshTokenService = refreshTokenService;
+        _adminProfileRepository = adminProfileRepository;
         _logger = logger;
     }
 
@@ -47,10 +50,10 @@ public class LoginService : ILoginService
             return Result.Failure<AuthResult, Error>(AuthErrors.InvalidCredentials);
         }
 
-        if (role == RoleType.Admin || role == RoleType.SuperAdmin)
+        if (role == RoleType.Admin)
         {
             var adminRoles = user.UserRoles
-                .Where(r => (r.Role == RoleType.Admin || r.Role == RoleType.SuperAdmin)
+                .Where(r => (r.Role == RoleType.Admin)
                          && r.SoftDeletedAt == null)
                 .ToList();
 
@@ -109,9 +112,38 @@ public class LoginService : ILoginService
             return Result.Failure<AuthResult, Error>(AuthErrors.EmailNotConfirmed);
         }
 
+        if (role == RoleType.Admin)
+        {
+            var profile = await _adminProfileRepository.GetByUserIdAsync(user.Id);
+            if (profile != null && profile.PasswordAttemptsLockUntil.HasValue &&
+                profile.PasswordAttemptsLockUntil > DateTime.UtcNow)
+            {
+                _logger.LogWarning("Login failed. Admin account is temporarily locked due to too many failed attempts. UserId={UserId}", user.Id);
+                return Result.Failure<AuthResult, Error>(AuthErrors.AccountTemporarilyLocked);
+            }
+        }
+
         if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
         {
             _logger.LogWarning("Login failed. Invalid password for {Email}", email);
+
+            if (role == RoleType.Admin)
+            {
+                var profile = await _adminProfileRepository.GetByUserIdAsync(user.Id);
+                if (profile != null)
+                {
+                    profile.FailedPasswordAttempts++;
+
+                    if (profile.FailedPasswordAttempts >= 5)
+                    {
+                        profile.PasswordAttemptsLockUntil = DateTime.UtcNow.AddMinutes(15);
+                        _logger.LogWarning("Admin account locked due to too many failed attempts. UserId={UserId}", user.Id);
+                    }
+
+                    await _adminProfileRepository.UpdateAsync(profile);
+                }
+            }
+
             return Result.Failure<AuthResult, Error>(AuthErrors.InvalidCredentials);
         }
 
@@ -127,15 +159,30 @@ public class LoginService : ILoginService
             await _usersRepository.UpdateAsync(user);
         }
 
-        var (accessToken, accessExpires) = await _jwtService.CreateAccessTokenAsync(new UserEntity
+        if (role == RoleType.Admin)
+        {
+            var profile = await _adminProfileRepository.GetByUserIdAsync(user.Id);
+            if (profile != null)
+            {
+                profile.LastLoginAt = DateTime.UtcNow;
+                await _adminProfileRepository.UpdateAsync(profile);
+            }
+        }
+
+        var userEntity = new UserEntity
         {
             Id = user.Id,
             Email = user.Email,
-            UserRoles = new List<UserRoleEntity>
+            SpecialistId = user.SpecialistId,
+
+            UserRoles = user.UserRoles.Select(r => new UserRoleEntity
             {
-                new UserRoleEntity { UserId = user.Id, RoleId = (int)role }
-            }
-        });
+                UserId = user.Id,
+                RoleId = (int)r.Role
+            }).ToList()
+        };
+
+        var (accessToken, accessExpires) = await _jwtService.CreateAccessTokenAsync(userEntity);
 
         var (rawRefreshToken, hashedRefreshToken) = _refreshTokenService.GenerateToken();
         var refreshExpires = _refreshTokenService.GetRefreshTokenExpiryDate();

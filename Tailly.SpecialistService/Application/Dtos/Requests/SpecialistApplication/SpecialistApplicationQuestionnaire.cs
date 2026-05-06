@@ -2,7 +2,7 @@
 
 public sealed class SpecialistApplicationQuestionnaire
 {
-    public string ExperienceYears { get; set; } = string.Empty;   
+    public int ExperienceYears { get; set; }
     public List<string> AnimalTypes { get; set; } = [];
     public List<string> ServiceFormats { get; set; } = [];
     public bool CanGiveMedication { get; set; }
@@ -10,10 +10,10 @@ public sealed class SpecialistApplicationQuestionnaire
     public bool CanTakeOvernightOrders { get; set; }
     public bool HasOwnPets { get; set; }
     public bool HasPetFirstAidBasics { get; set; }
-    public string HousingType { get; set; } = string.Empty;
-    public string DistrictPreferences { get; set; } = string.Empty;
-    public string SchedulePreferences { get; set; } = string.Empty;
-    public string PortfolioUrl { get; set; } = string.Empty;
-    public string Motivation { get; set; } = string.Empty;
-    public string AdditionalInfo { get; set; } = string.Empty;
+    public string HousingType { get; set; } = default!;
+    public string DistrictPreferences { get; set; } = default!;
+    public string SchedulePreferences { get; set; } = default!;
+    public string PortfolioUrl { get; set; } = default!;
+    public string Motivation { get; set; } = default!;
+    public string AdditionalInfo { get; set; } = default!;
 }

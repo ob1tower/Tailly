@@ -8,14 +8,14 @@ public enum HousingType
     Other
 }
 
-public enum ChildrenPresence
+public enum ChildrenPolicy
 {
     Yes = 1,
     No,
     Sometimes
 }
 
-public enum PriceUnit
+public enum ServicePriceUnit
 {
     Hour = 1,
     Day,
@@ -59,6 +59,14 @@ public enum ExperienceUnit
     Months
 }
 
+public enum BookingMode
+{
+    FixedSlot = 1,
+    TimeRange,
+    MultiDayStay,
+    OpenRequest
+}
+
 public enum SpecialistSort
 {
     RatingDesc = 1,
@@ -75,32 +83,8 @@ public enum ServiceType
     Photoshoot
 }
 
-public enum SpecialistBookingMode
+public enum CalendarDayStatus
 {
-    FixedSlot = 1,
-    TimeRange,
-    MultiDayStay,
-    OpenRequest
-}
-
-public enum PetTypePreference
-{
-    Dog = 1,
-    Cat,
-    Bird,
-    Rodent,
-    Rabbit,
-    Reptile,
-    Fish,
-    Other
-}
-
-public enum ServiceFormat
-{
-    Walking = 1,
-    Boarding,
-    Grooming,
-    Training,
-    Photoshoot,
-    Other
+    Available = 1,
+    PartiallyBooked
 }

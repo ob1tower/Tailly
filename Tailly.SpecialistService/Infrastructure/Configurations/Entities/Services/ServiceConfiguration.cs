@@ -11,24 +11,21 @@ public class ServiceConfiguration : IEntityTypeConfiguration<ServiceEntity>
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Name)
-            .HasMaxLength(200)
-            .IsRequired();
+               .IsRequired();
+
+        builder.Property(x => x.Description)
+               .HasMaxLength(1000);
 
         builder.Property(x => x.Price)
-            .HasColumnType("decimal(10,2)");
+               .HasPrecision(10, 2)
+               .IsRequired();
 
-        builder.Property(x => x.LocationLabel)
-            .HasMaxLength(200);
+        builder.Property(x => x.PriceUnit)
+               .IsRequired();
 
-        builder.Property(x => x.CreatedAt)
-            .IsRequired();
-
-        builder.HasMany(x => x.Availabilities)
-            .WithOne(x => x.Service)
-            .HasForeignKey(x => x.ServiceId);
-
-        builder.HasMany(x => x.BookedSlots)
-            .WithOne(x => x.Service)
-            .HasForeignKey(x => x.ServiceId);
+        builder.HasOne(x => x.Specialist)
+               .WithMany(x => x.Services)
+               .HasForeignKey(x => x.SpecialistId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }

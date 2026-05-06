@@ -24,16 +24,16 @@ public class MediaController : ControllerBase
     }
 
     /// <summary>
-    /// Uploads image for specialist avatar photo.
+    /// Uploading an image (avatar or photo to the gallery).
     /// </summary>
     /// <param name="file">Image file to upload.</param>
-    /// <param name="mediaType">Type of media: avatar.</param>
+    /// <param name="mediaType">Type of media: avatar, specialist_gallery.</param>
     /// <returns>URL of the uploaded file.</returns>
     [HttpPost("upload")]
     public async Task<IActionResult> Upload(IFormFile file, [FromQuery] string mediaType)
     {
-        var userId = User.GetUserId();
-        if (userId == null)
+        var specialistId = User.GetSpecialistId();
+        if (specialistId == null)
             return Unauthorized();
 
         var request = new UploadMediaRequest
@@ -46,12 +46,10 @@ public class MediaController : ControllerBase
         if (!validation.IsValid)
             return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
 
-        var result = await _mediaService.UploadAsync(file, mediaType, userId.Value);
+        var result = await _mediaService.UploadAsync(file, mediaType, specialistId.Value);
 
         if (result.IsFailure)
-        {
             return BadRequest(result.Error);
-        }
 
         return Ok(new { url = result.Value });
     }

@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using Tailly.AuthService.Core.Enums;
 
 namespace Tailly.AuthService.Infrastructure.Configurations.Extensions;
 

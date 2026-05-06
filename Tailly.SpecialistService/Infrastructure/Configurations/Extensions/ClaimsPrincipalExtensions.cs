@@ -13,4 +13,13 @@ public static class ClaimsPrincipalExtensions
 
         return null;
     }
+
+    public static Guid? GetSpecialistId(this ClaimsPrincipal user)
+    {
+        var claim = user.FindFirst("specialistId")?.Value;
+
+        return Guid.TryParse(claim, out var id)
+            ? id
+            : null;
+    }
 }

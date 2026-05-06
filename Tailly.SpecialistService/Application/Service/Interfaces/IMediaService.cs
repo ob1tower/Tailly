@@ -5,6 +5,6 @@ namespace Tailly.SpecialistService.Application.Service.Interfaces
 {
     public interface IMediaService
     {
-        Task<Result<string, Error>> UploadAsync(IFormFile file, string? mediaType, Guid userId);
+        Task<Result<string, Error>> UploadAsync(IFormFile file, string? mediaType, Guid specialistId);
     }
 }

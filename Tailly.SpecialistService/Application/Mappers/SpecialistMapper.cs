@@ -1,238 +1,238 @@
-﻿using Tailly.SpecialistService.Application.Dtos.Responses.BookingPolicy;
+﻿using Tailly.SpecialistService.Application.Dtos.Requests.Specialist;
 using Tailly.SpecialistService.Application.Dtos.Responses.Calendar;
-using Tailly.SpecialistService.Application.Dtos.Responses.Common;
-using Tailly.SpecialistService.Application.Dtos.Responses.Short;
-using Tailly.SpecialistService.Application.Dtos.Responses.SpecialistProfile;
-using Tailly.SpecialistService.Core.Enums;
-using Tailly.SpecialistService.Core.Models.Calendar;
+using Tailly.SpecialistService.Application.Dtos.Responses.Gallery;
+using Tailly.SpecialistService.Application.Dtos.Responses.Reviews;
+using Tailly.SpecialistService.Application.Dtos.Responses.Services;
+using Tailly.SpecialistService.Application.Dtos.Responses.Specialist;
+using Tailly.SpecialistService.Core.Models.Gallery;
+using Tailly.SpecialistService.Core.Models.Reviews;
 using Tailly.SpecialistService.Core.Models.Specialist;
 
 namespace Tailly.SpecialistService.Application.Mappers;
 
-public static class SpecialistMapper
+public static class SpecialistResponseMapper
 {
-    public static SpecialistProfileResponse ToProfileResponse(this Specialist model)
+    public static SpecialistProfileResponse ToResponse(Specialist specialist)
     {
-        if (model == null)
-            throw new ArgumentNullException(nameof(model));
-
-        var details = model.Details ?? new Details();
-
         return new SpecialistProfileResponse
         {
-            Id = model.Id,
-            Slug = model.Slug,
+            Id = specialist.Id,
+            Slug = specialist.Slug,
 
-            Main = model.ToMainInfoResponse(),
-            Stats = model.ToStatsResponse(),
-            Calendar = model.ToCalendarResponse(),
-            Details = model.ToDetailsResponse(),
+            Main = new SpecialistMainResponse
+            {
+                FirstName = specialist.FirstName ?? "",
+                LastName = specialist.LastName ?? "",
+                MiddleName = specialist.MiddleName ?? "",
+                City = specialist.City ?? "",
+                District = specialist.District ?? "",
+                Phone = specialist.Phone ?? "",
+                Email = specialist.Email ?? "",
+                AvatarUrl = specialist.AvatarUrl ?? ""
+            },
 
-            Services = model.Services.Select(s => s.ToServiceResponse()).ToList(),
-            Reviews = model.Reviews.Select(r => r.ToReviewResponse()).ToList(),
+            Calendar = specialist.Calendar != null
+                ? new CalendarResponse
+                {
+                    AvailabilityWindows = specialist.Calendar.AvailabilityWindows?
+                        .Select(x => new AvailabilityWindowResponse
+                        {
+                            Date = x.Date.ToString("yyyy-MM-dd"),
+                            StartTime = x.StartTime.ToString("HH:mm"),
+                            EndTime = x.EndTime.ToString("HH:mm")
+                        })
+                        .ToList() ?? [],
 
-            SpecialistGallery = model.Gallery.Select(g => g.ToGalleryResponse()).ToList(),
-            PetGallery = new List<GalleryResponse>() // пока пусто, можно потом сделать отдельную коллекцию
+                    DayOverrides = specialist.Calendar.DayOverrides?
+                        .Select(x => new ManualOverrideResponse
+                        {
+                            Date = x.Date.ToString("yyyy-MM-dd"),
+                            Status = x.Status.ToString().ToLower()
+                        })
+                        .ToList() ?? [],
+
+                    BookedSlots = specialist.Calendar.BookedSlots?
+                        .Select(x => new BookedSlotResponse
+                        {
+                            Date = x.Date.ToString("yyyy-MM-dd"),
+                            StartTime = x.StartTime.ToString("HH:mm"),
+                            EndTime = x.EndTime.ToString("HH:mm")
+                        })
+                        .ToList() ?? []
+                }
+                : new CalendarResponse
+                {
+                    AvailabilityWindows = [],
+                    DayOverrides = [],
+                    BookedSlots = []
+                },
+
+            Stats = new SpecialistStatsResponse
+            {
+                ExperienceYears = specialist.ExperienceYears,
+                Rating = specialist.Rating,
+                ReviewsCount = specialist.ReviewsCount,
+                CompletedOrdersCount = specialist.CompletedOrdersCount,
+                RepeatOrdersCount = specialist.RepeatOrdersCount
+            },
+
+            Details = specialist.Details != null
+                ? ToDetailsResponse(specialist.Details)
+                : new SpecialistDetailsResponse
+                {
+                    HousingType = "",
+                    HasChildrenUnderTen = "",
+                    About = "",
+                    PetSizes = [],
+                    PetAges = [],
+                    PetTypes = []
+                },
+
+            Services = specialist.Services?
+                .Select(ToServiceOfferResponse)
+                .ToList() ?? [],
+
+            Reviews = specialist.Reviews?
+                .Select(ToReviewResponse)
+                .ToList() ?? [],
+
+            SpecialistGallery = specialist.SpecialistGallery?
+                .Select(ToGalleryItemResponse)
+                .ToList() ?? []
         };
     }
 
-    // ==================== Простые мапперы ====================
-
-    private static SpecialistMainInfoResponse ToMainInfoResponse(this Specialist m) => new()
+    public static object ToShortResponse(Specialist specialist)
     {
-        FirstName = m.FirstName,
-        LastName = m.LastName,
-        MiddleName = m.MiddleName,
-        City = m.City,
-        District = m.District ?? "",
-        Phone = m.Phone ?? "",
-        Email = m.Email,
-        AvatarUrl = m.AvatarUrl
-    };
-
-    private static SpecialistStatsResponse ToStatsResponse(this Specialist m) => new()
-    {
-        ExperienceYears = m.ExperienceYears,
-        Rating = m.Rating,
-        ReviewsCount = m.ReviewsCount,
-        CompletedOrdersCount = m.CompletedOrdersCount,
-        RepeatOrdersCount = m.RepeatOrdersCount
-    };
-
-    private static SpecialistCalendarResponse ToCalendarResponse(this Specialist m) => new()
-    {
-        Timezone = "Europe/Moscow",
-        DayOverrides = new List<SpecialistCalendarDayOverrideResponse>(),
-        BookedSlots = m.BookedSlots.Select(b => b.ToBookedSlotResponse()).ToList(),
-        AvailabilityWindows = m.Availabilities.Select(a => a.ToAvailabilityWindowResponse()).ToList(),
-        BookingSettings = new SpecialistCalendarBookingSettingsResponse
+        return new
         {
-            DayStartTime = "09:00",
-            DayEndTime = "18:00",
-            SlotStepMinutes = 30,
-            DefaultDurationMinutes = 60
-        },
-        AvailabilityRules = new List<object>(),
-        AvailabilityOverrides = new List<object>()
-    };
+            id = specialist.Id,
+            slug = specialist.Slug,
 
-    private static SpecialistDetailsResponse ToDetailsResponse(this Specialist m)
+            main = new
+            {
+                firstName = specialist.FirstName ?? "",
+                lastName = specialist.LastName ?? "",
+                avatarUrl = specialist.AvatarUrl ?? "",
+                city = specialist.City ?? ""
+            },
+
+            stats = new
+            {
+                rating = specialist.Rating,
+                reviewsCount = specialist.ReviewsCount
+            },
+
+            services = specialist.Services?
+            .Select(s => new
+            {
+                name = SpecialistEnumMapper.MapServiceType(s.Name),
+                price = s.Price
+            })
+            .ToList() ?? []
+        };
+    }
+
+    private static SpecialistDetailsResponse ToDetailsResponse(Details details)
     {
-        var d = m.Details ?? new Details();
-
         return new SpecialistDetailsResponse
         {
-            ExperienceLabel = d.ExperienceLabel ?? "",
-            ExperienceDurationValue = d.ExperienceDurationValue,
-            ExperienceDurationUnit = d.ExperienceDurationUnit.HasValue
-                ? SpecialistEnumMapper.MapExperienceUnit(d.ExperienceDurationUnit.Value)
-                : null,
+            HousingType =
+                SpecialistEnumMapper.MapHousingType(
+                    details.HousingType
+                ),
 
-            HousingType = SpecialistEnumMapper.MapHousingType(d.HousingType),
-            HasChildrenUnderTen = SpecialistEnumMapper.MapChildrenPresence(d.HasChildrenUnderTen),
+            HasChildrenUnderTen =
+                SpecialistEnumMapper.MapChildrenPresence(
+                    details.HasChildrenUnderTen
+                ),
 
-            PetTypes = m.PetTypes.Select(SpecialistEnumMapper.MapPetType).ToList(),
-            PetSizes = m.PetSizes.Select(SpecialistEnumMapper.MapPetSize).ToList(),
-            PetAges = m.PetAges.Select(SpecialistEnumMapper.MapPetAge).ToList(),
+            About = details.About ?? "",
 
-            Advantages = m.Advantages.Select(a => a.Title).ToList(),
-            About = d.About ?? ""
+            PetSizes = details.PetSizes?
+                .Select(SpecialistEnumMapper.MapPetSize)
+                .ToList() ?? [],
+
+            PetAges = details.PetAges?
+                .Select(SpecialistEnumMapper.MapPetAge)
+                .ToList() ?? [],
+
+            PetTypes = details.PetTypes?
+                .Select(SpecialistEnumMapper.MapPetType)
+                .ToList() ?? []
         };
     }
 
-    private static SpecialistServiceResponse ToServiceResponse(this ServiceOffer s) => new()
+    private static ServiceOfferResponse ToServiceOfferResponse(ServiceOffer service)
     {
-        Id = s.Id!.Value,
-        Name = s.Name ?? "",
-        Price = s.Price,
-        PriceUnit = SpecialistEnumMapper.MapPriceUnit(s.PriceUnit),
-        LocationLabel = s.LocationLabel ?? "",
-        ServiceId = SpecialistEnumMapper.MapServiceType(s.Type),
-        BookingPolicy = s.Type.ToBookingPolicyResponse()
-    };
-
-    private static SpecialistServiceBookingPolicyResponse ToBookingPolicyResponse(this ServiceType type)
-    {
-        return type switch
+        return new ServiceOfferResponse
         {
-            ServiceType.Walking => new SpecialistServiceBookingPolicyResponse
-            {
-                Mode = "fixed_slot",
-                Duration = new()
-                {
-                    DefaultDurationMinutes = 60,
-                    MinDurationMinutes = 30,
-                    MaxDurationMinutes = 180,
-                    DurationStepMinutes = 30
-                },
-                Buffer = new()
-                {
-                    HasBufferBefore = true,
-                    BufferBeforeMinutes = 15,
-                    HasBufferAfter = true,
-                    BufferAfterMinutes = 15
-                },
-                AllowsClientComment = true,
-                RequiresSpecialistConfirmation = false
-            },
+            Id = service.Id,
+            Name = SpecialistEnumMapper.MapServiceType(service.Name),
+            Description = service.Description ?? "",
+            Price = service.Price,
 
-            ServiceType.Boarding => new SpecialistServiceBookingPolicyResponse
-            {
-                Mode = "multi_day_stay",
-                MultiDay = new()
-                {
-                    AllowsMultiDayBooking = true,
-                    MinStayDays = 1,
-                    MaxStayDays = 14,
-                    CheckInTime = "12:00",
-                    CheckOutTime = "11:00"
-                },
-                AllowsClientComment = true,
-                RequiresSpecialistConfirmation = true
-            },
-
-            _ => new SpecialistServiceBookingPolicyResponse
-            {
-                Mode = "fixed_slot",
-                Duration = new() { DefaultDurationMinutes = 60 },
-                AllowsClientComment = true,
-                RequiresSpecialistConfirmation = false
-            }
+            PriceUnit =
+                SpecialistEnumMapper.MapPriceUnit(
+                    service.PriceUnit
+                )
         };
     }
 
-    private static ReviewResponse ToReviewResponse(this Review r) => new()
+    private static ReviewResponse ToReviewResponse(Review review)
     {
-        AuthorName = r.AuthorName,
-        Rating = r.Rating,
-        Text = r.Text ?? "",
-        ServiceTitle = r.ServiceTitle,
-        PetName = r.PetName,
-        CreatedAt = r.CreatedAt,
-        ReplyText = r.ReplyText,
-        ReplyCreatedAt = r.ReplyCreatedAt
-    };
-
-    private static GalleryResponse ToGalleryResponse(this Gallery g) => new()
-    {
-        ImageUrl = g.ImageUrl,
-        Alt = g.Alt ?? ""
-    };
-
-    // ==================== ToShortResponse для списка специалистов ====================
-    public static SpecialistShortResponse ToShortResponse(this Specialist model)
-    {
-        if (model == null)
-            throw new ArgumentNullException(nameof(model));
-
-        return new SpecialistShortResponse
+        return new ReviewResponse
         {
-            Id = model.Id,
-            Slug = model.Slug,
-            Name = $"{model.FirstName} {model.LastName}".Trim(),
-            AvatarUrl = model.AvatarUrl,
-
-            City = model.City,
-            District = model.District ?? "",
-
-            Description = model.Description ?? model.Details?.About ?? "",
-
-            ExperienceYears = model.ExperienceYears,
-            Rating = model.Rating,
-            ReviewsCount = model.ReviewsCount,
-
-            Location = new GeoPointResponse
-            {
-                Lat = model.Latitude ?? 0,
-                Lon = model.Longitude ?? 0
-            },
-
-            Services = model.Services?.Select(s => new ServiceShortResponse
-            {
-                ServiceId = SpecialistEnumMapper.MapServiceType(s.Type),
-                PetTypes = model.PetTypes?.Select(SpecialistEnumMapper.MapPetType).ToList()
-                           ?? new List<string>(),
-                PriceFrom = s.Price
-            }).ToList() ?? new List<ServiceShortResponse>()
+            Id = review.Id,
+            OrderId = review.OrderId,
+            AuthorName = review.AuthorName ?? "",
+            Text = review.Text ?? "",
+            Rating = review.Rating,
+            ServiceTitle = review.ServiceTitle ?? "",
+            PetName = review.PetName ?? "",
+            CreatedAt = review.CreatedAt,
+            ReplyText = review.ReplyText ?? "",
+            ReplyCreatedAt = review.ReplyCreatedAt
         };
     }
 
-    // ==================== Вспомогательные методы для Calendar ====================
-    private static SpecialistCalendarBookedSlotResponse ToBookedSlotResponse(this BookedSlot b) => new()
+    private static GalleryItemResponse ToGalleryItemResponse(GalleryItem gallery)
     {
-        Id = b.Id.ToString(),
-        Date = b.Date.ToString("yyyy-MM-dd"),
-        StartTime = b.StartTime.ToString("HH:mm"),
-        EndTime = b.EndTime.ToString("HH:mm"),
-        ServiceIds = b.ServiceIds.Select(id => id.ToString()).ToList()
-    };
+        return new GalleryItemResponse
+        {
+            Id = gallery.Id,
+            ImageUrl = gallery.ImageUrl ?? "",
+            Alt = gallery.Alt ?? "",
+            Order = gallery.Order
+        };
+    }
 
-    private static SpecialistCalendarAvailabilityWindowResponse ToAvailabilityWindowResponse(this Availability a) => new()
+    public static Details ToDetails(UpdateSpecialistDetailsRequest request)
     {
-        Id = a.Id.ToString(),
-        Date = a.Date.ToString("yyyy-MM-dd"),
-        StartTime = a.StartTime.ToString("HH:mm"),
-        EndTime = a.EndTime.ToString("HH:mm"),
-        ServiceIds = a.ServiceIds.Select(id => id.ToString()).ToList()
-    };
+        if (request == null)
+            throw new ArgumentNullException(nameof(request));
+
+        return new Details
+        {
+            HousingType = SpecialistEnumMapper.ParseHousingType(request.HousingType),
+            HasChildrenUnderTen = SpecialistEnumMapper.ParseChildrenPresence(request.HasChildrenUnderTen),
+            About = request.About,
+            PetSizes = request.PetSizes?
+                .Select(SpecialistEnumMapper.ParsePetSize)
+                .ToList() ?? [],
+            PetAges = request.PetAges?
+                .Select(SpecialistEnumMapper.ParsePetAge)
+                .ToList() ?? [],
+            PetTypes = request.PetTypes?
+                .Select(SpecialistEnumMapper.ParsePetType)
+                .ToList() ?? [],
+            SpecialistGallery = request.SpecialistGallery?
+                .Select(x => new GalleryItem
+                {
+                    ImageUrl = x.ImageUrl,
+                    Alt = x.Alt ?? ""
+                })
+                .ToList() ?? []
+        };
+    }
 }

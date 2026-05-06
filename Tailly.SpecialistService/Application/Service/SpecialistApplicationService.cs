@@ -30,52 +30,14 @@ public class SpecialistApplicationService : ISpecialistApplicationService
         _logger = logger;
     }
 
-    public async Task<Result<SpecialistApplication, Error>> CreateAsync(SpecialistApplication application)
-    {
-        if (application == null)
-            return Result.Failure<SpecialistApplication, Error>(SpecialistApplicationErrors.InvalidApplication);
-
-        if (!string.IsNullOrWhiteSpace(application.Email))
-            application.Email = application.Email.Trim().ToLowerInvariant();
-
-        bool hasActiveApplication = await _applicationRepository.HasActiveApplicationAsync(application.Email);
-        if (hasActiveApplication)
-        {
-            _logger.LogWarning("Duplicate pending application attempt. Email: {Email}", application.Email);
-            return Result.Failure<SpecialistApplication, Error>(SpecialistApplicationErrors.ApplicationAlreadyExists);
-        }
-
-        bool isAlreadySpecialist = await _specialistRepository.ExistsByEmailAsync(application.Email);
-        if (isAlreadySpecialist)
-        {
-            _logger.LogWarning("User is already a specialist. Email: {Email}", application.Email);
-            return Result.Failure<SpecialistApplication, Error>(SpecialistApplicationErrors.AlreadySpecialist);
-        }
-
-        application.Id = Guid.NewGuid();
-        application.Status = SpecialistApplicationStatus.Pending;
-        application.CreatedAt = DateTime.UtcNow;
-        application.UpdatedAt = DateTime.UtcNow;
-
-        await _applicationRepository.AddAsync(application);
-
-        _logger.LogInformation("New specialist application created successfully. Id: {Id}, UserId: {UserId}, Email: {Email}",
-            application.Id, application.UserId, application.Email);
-
-        return Result.Success<SpecialistApplication, Error>(application);
-    }
-
     public async Task<Result<(List<SpecialistApplication> items, int total), Error>> GetAllAsync(
-        int page, int limit, SpecialistApplicationStatus? status = null)
+            int page, int limit, SpecialistApplicationStatus? status = null)
     {
-        var (items, total) = await _applicationRepository.GetAllAsync(page, limit);
-
-        _logger.LogInformation("Retrieved {Count} specialist applications (page {Page})", items.Count, page);
-
-        return Result.Success<(List<SpecialistApplication> items, int total), Error>((items, total));
+        var (items, total) = await _applicationRepository.GetAllAsync(page, limit, status);
+        return Result.Success<(List<SpecialistApplication>, int), Error>((items, total));
     }
 
-    public async Task<Result> AssignInterviewAsync(Guid id, string note, DateTime? interviewDate)
+    public async Task<Result> AssignInterviewAsync(Guid id, string note, DateTime? interviewDate, string reviewedBy)
     {
         var app = await _applicationRepository.GetByIdAsync(id);
         if (app == null)
@@ -84,105 +46,150 @@ public class SpecialistApplicationService : ISpecialistApplicationService
         if (app.Status == SpecialistApplicationStatus.Rejected)
             return Result.Failure(SpecialistApplicationErrors.CannotChangeRejected.Description);
 
-        if (app.Status != SpecialistApplicationStatus.Pending)
-            return Result.Failure(SpecialistApplicationErrors.InvalidStatusTransition.Description);
+        if (app.Status == SpecialistApplicationStatus.Approved)
+            return Result.Failure(SpecialistApplicationErrors.AlreadyProcessed.Description);
+
+        if (interviewDate.HasValue)
+        {
+            var utcDate = DateTimeHelper.NormalizeToUtc(interviewDate.Value);
+
+            if (utcDate < DateTime.UtcNow)
+                return Result.Failure(SpecialistApplicationErrors.InterviewDateInPast.Description);
+
+            if (utcDate < DateTime.UtcNow.AddHours(1))
+                return Result.Failure(SpecialistApplicationErrors.InterviewDateTooSoon.Description);
+
+            if (await _applicationRepository.HasInterviewConflictAsync(reviewedBy, utcDate))
+                return Result.Failure(SpecialistApplicationErrors.InterviewSlotConflict.Description);
+        }
 
         app.Status = SpecialistApplicationStatus.InterviewScheduled;
         app.InterviewNote = note;
-        app.InterviewDate = interviewDate;
+        app.InterviewDate = interviewDate.HasValue
+            ? DateTimeHelper.NormalizeToUtc(interviewDate.Value)
+            : null;
         app.UpdatedAt = DateTime.UtcNow;
+        app.ReviewComment = note;
+        app.ReviewedBy = reviewedBy;
 
         await _applicationRepository.UpdateAsync(app);
-
         _logger.LogInformation("Interview assigned for application {Id}", id);
         return Result.Success();
     }
 
-    public async Task<Result> RejectAsync(Guid id, string reason)
+    public async Task<Result> RejectAsync(Guid id, string reason, string reviewedBy)
     {
         var app = await _applicationRepository.GetByIdAsync(id);
         if (app == null)
             return Result.Failure(SpecialistApplicationErrors.NotFound.Description);
 
-        if (app.Status == SpecialistApplicationStatus.Rejected)
-            return Result.Failure(SpecialistApplicationErrors.AlreadyProcessed.Description);
+        if (app.Status == SpecialistApplicationStatus.Approved)
+            return Result.Failure(SpecialistApplicationErrors.CannotChangeApprove.Description);
+
+        if (string.IsNullOrWhiteSpace(reason) || reason.Length < 15)
+            return Result.Failure(SpecialistApplicationErrors.RejectionReasonTooShort.Description);
+
+        if (!reason.Any(char.IsLetter))
+            return Result.Failure(SpecialistApplicationErrors.RejectionReasonInvalid.Description);
 
         app.Status = SpecialistApplicationStatus.Rejected;
         app.RejectionReason = reason;
         app.UpdatedAt = DateTime.UtcNow;
+        app.ReviewComment = reason;
+        app.ReviewedBy = reviewedBy;
 
         await _applicationRepository.UpdateAsync(app);
-
-        _logger.LogInformation("Application {Id} rejected. Reason: {Reason}", id, reason);
-
+        _logger.LogInformation("Application {Id} rejected", id);
         return Result.Success();
     }
 
-    public async Task<Result> ApproveAsync(Guid id)
+    public async Task<Result> ApproveAsync(Guid id, string reviewedBy, string? reviewComment = null)
     {
         var app = await _applicationRepository.GetByIdAsync(id);
         if (app == null)
             return Result.Failure(SpecialistApplicationErrors.NotFound.Description);
 
         if (app.Status == SpecialistApplicationStatus.Rejected)
-            return Result.Failure(SpecialistApplicationErrors.CannotChangeApprove.Description);
+            return Result.Failure(SpecialistApplicationErrors.CannotChangeRejected.Description);
 
-        if (app.Status != SpecialistApplicationStatus.InterviewScheduled)
-            return Result.Failure(SpecialistApplicationErrors.InvalidStatusTransition.Description);
+        if (app.Status == SpecialistApplicationStatus.Approved)
+            return Result.Failure(SpecialistApplicationErrors.AlreadyProcessed.Description);
 
         app.Status = SpecialistApplicationStatus.Approved;
+        app.ReviewedBy = reviewedBy;
+        app.ReviewComment = reviewComment;   
         app.UpdatedAt = DateTime.UtcNow;
 
         await _applicationRepository.UpdateAsync(app);
-
-        _logger.LogInformation("Application {Id} approved", id);
+        _logger.LogInformation("Application {Id} approved.", id);
         return Result.Success();
     }
 
-    public async Task<Result<Specialist, Error>> AttachSpecialistAccountAsync(Guid applicationId, string reviewedByAdminId)
+    public async Task<Result<(Specialist Specialist, string TemporaryPassword), Error>>AttachSpecialistAccountAsync(Guid applicationId, string reviewedByAdminId)
     {
         var app = await _applicationRepository.GetByIdAsync(applicationId);
         if (app == null)
-            return Result.Failure<Specialist, Error>(SpecialistApplicationErrors.NotFound);
+            return Result.Failure<(Specialist Specialist, string TemporaryPassword), Error>(SpecialistApplicationErrors.NotFound);
 
         if (app.Status != SpecialistApplicationStatus.Approved)
-            return Result.Failure<Specialist, Error>(SpecialistApplicationErrors.InvalidStatusTransition);
+            return Result.Failure<(Specialist Specialist, string TemporaryPassword), Error>(SpecialistApplicationErrors.InvalidStatusTransition);
 
-        string uniqueSlug = await SpecialistSlugGenerator.GenerateUniqueSlugAsync(
-            app.FirstName,
-            app.LastName,
-            _specialistRepository);
+        if (app.CreatedSpecialistId.HasValue)
+            return Result.Failure<(Specialist Specialist, string TemporaryPassword), Error>(SpecialistApplicationErrors.SpecialistAlreadyExists);
+
+        var temporaryPassword = "Temp" + Guid.NewGuid().ToString("N").Substring(0, 8);
+
+        var slug = await SpecialistSlugGenerator.GenerateUniqueSlugAsync(
+            app.FirstName, app.LastName, _specialistRepository);
+
+        var specialistId = Guid.NewGuid();
 
         var specialist = new Specialist
         {
-            Id = Guid.NewGuid(),
-            UserId = null,                    
-            Slug = uniqueSlug,    
+            Id = specialistId,
+            UserId = Guid.Empty,
+            Slug = slug,
             FirstName = app.FirstName,
             LastName = app.LastName,
             MiddleName = app.MiddleName,
+            District = app.DistrictPreferences,
             City = app.City,
-            Phone = app.Phone,
-            Email = app.Email,
-            AvatarUrl = app.PhotoUrl,
-            About = app.About,
-            Description = app.About,
             ExperienceYears = app.ExperienceYears,
-            CreatedAt = DateTime.UtcNow,
-
+            Email = app.Email,
+            Phone = app.Phone,
             Rating = 0,
             ReviewsCount = 0,
             CompletedOrdersCount = 0,
-            RepeatOrdersCount = 0
+            RepeatOrdersCount = 0,
+            CreatedAt = DateTime.UtcNow,
+
+            Details = new Details
+            {
+                About = app.About ?? "",
+                HousingType = HousingType.Apartment,
+                HasChildrenUnderTen = ChildrenPolicy.No,
+
+                PetSizes = [PetSize.Kg5To10],
+                PetAges = [PetAge.Adult],
+                PetTypes = [PetType.Dog]
+            }
         };
 
         await _specialistRepository.AddAsync(specialist);
 
+        app.CreatedSpecialistId = specialist.Id;
+        app.CreatedSpecialistSlug = specialist.Slug;
+        app.SpecialistAccountCreatedAt = DateTime.UtcNow;
+        app.UpdatedAt = DateTime.UtcNow;
+        app.ReviewedBy = reviewedByAdminId;
+
+        await _applicationRepository.UpdateAsync(app);
+
         await _publishEndpoint.Publish(new SpecialistAccountCreated
         {
             ApplicationId = applicationId,
-            SpecialistId = specialist.Id,
-            Slug = uniqueSlug,           
+            SpecialistId = specialistId,
+            Slug = slug,
             Email = app.Email,
             FirstName = app.FirstName,
             LastName = app.LastName,
@@ -190,13 +197,27 @@ public class SpecialistApplicationService : ISpecialistApplicationService
             Phone = app.Phone,
             City = app.City,
             About = app.About ?? "",
-            TemporaryPassword = "",
+            TemporaryPassword = temporaryPassword,
             CreatedByAdminId = reviewedByAdminId
         });
 
-        _logger.LogInformation("Specialist account created from application {ApplicationId}. SpecialistId: {SpecialistId}, Slug: {Slug}",
-            applicationId, specialist.Id, uniqueSlug);
+        _logger.LogInformation("SpecialistAccountCreated published for application {ApplicationId}", applicationId);
 
-        return Result.Success<Specialist, Error>(specialist);
+        return Result.Success<(Specialist, string), Error>((specialist, temporaryPassword));
+    }
+
+    public async Task<Result<SpecialistApplication, Error>> CreateAsync(SpecialistApplication application)
+    {
+        var hasActive = await _applicationRepository.HasActiveApplicationAsync(application.Email);
+        if (hasActive)
+            return Result.Failure<SpecialistApplication, Error>(SpecialistApplicationErrors.ApplicationAlreadyExists);
+
+        application.CreatedAt = DateTime.UtcNow;
+        application.UpdatedAt = DateTime.UtcNow;
+        application.Status = SpecialistApplicationStatus.Pending;
+
+        await _applicationRepository.AddAsync(application);
+        _logger.LogInformation("New specialist application created: {Email}", application.Email);
+        return Result.Success<SpecialistApplication, Error>(application);
     }
 }
