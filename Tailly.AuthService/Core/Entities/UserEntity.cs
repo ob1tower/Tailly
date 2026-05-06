@@ -21,4 +21,5 @@ public class UserEntity
     public ICollection<RefreshTokenEntity> RefreshTokens { get; set; } = [];
     public Guid? SpecialistId { get; set; }
     public Guid? AdminId { get; set; }
+    public AdminProfileEntity? AdminProfile { get; set; }
 }

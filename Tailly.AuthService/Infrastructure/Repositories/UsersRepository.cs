@@ -161,4 +161,91 @@ public class UsersRepository : IUsersRepository
 
         return deletedCount;
     }
+
+    public async Task<List<User>> GetAdminsAsync(int page, int pageSize)
+    {
+        var users = await _authDbContext.Users
+            .Include(x => x.UserRoles)
+            .Where(u => u.UserRoles.Any(r =>
+                r.RoleId == (int)RoleType.Admin &&
+                r.SoftDeletedAt == null))
+            .OrderBy(u => u.LastName)
+            .ThenBy(u => u.Email)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return users.Select(UserEntityMapper.ToDomain).ToList();
+    }
+
+    public async Task<int> CountAdminsAsync()
+    {
+        return await _authDbContext.Users
+            .CountAsync(u => u.UserRoles.Any(r =>
+                r.RoleId == (int)RoleType.Admin &&
+                r.SoftDeletedAt == null));
+    }
+
+    public async Task<User?> GetAdminByAdminIdAsync(Guid adminId)
+    {
+        var userEntity = await _authDbContext.Users
+            .Include(x => x.UserRoles)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u =>
+                u.AdminId == adminId &&
+                u.UserRoles.Any(r =>
+                    (r.RoleId == (int)RoleType.Admin ||
+                     r.RoleId == (int)RoleType.SuperAdmin)));
+
+        if (userEntity == null)
+            return null;
+
+        return UserEntityMapper.ToDomain(userEntity);
+    }
+
+    public async Task<List<AdminUserWithProfile>> GetAdminsWithProfilesAsync(int page, int pageSize)
+    {
+        var query = _authDbContext.Users
+            .Include(u => u.UserRoles)
+            .Include(u => u.AdminProfile)
+            .Where(u => u.UserRoles.Any(r =>
+                r.RoleId == (int)RoleType.Admin &&          
+                r.SoftDeletedAt == null))
+            .SelectMany(u => u.UserRoles, (user, role) => new AdminUserWithProfile
+            {
+                User = user,
+                Role = role,
+                Profile = user.AdminProfile
+            })
+            .Where(x => x.Role.RoleId == (int)RoleType.Admin)
+            .OrderBy(x => x.User.LastName)
+            .ThenBy(x => x.User.Email)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize);
+
+        return await query.ToListAsync();
+    }
+
+    public async Task<int> PatchUserSoftDeleteAsync(Guid userId, DateTime softDeletedAt, DateTime? restoreUntil)
+    {
+        return await _authDbContext.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(u => u.SoftDeletedAt, softDeletedAt)
+                .SetProperty(u => u.RestoreUntil, restoreUntil));
+    }
+
+    public async Task DeleteUserAsync(Guid userId)
+    {
+        await _authDbContext.Users
+            .Where(u => u.Id == userId)
+            .ExecuteDeleteAsync();
+    }
+
+    public async Task DeleteUserRolesAsync(Guid userId)
+    {
+        await _authDbContext.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .ExecuteDeleteAsync();
+    }
 }

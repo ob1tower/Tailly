@@ -54,4 +54,7 @@ public static class AuthErrors
 
     public static readonly Error DeletionUpdateFailed =
         new("Auth.DeletionUpdateFailed", "Failed to update deletion status.");
+
+    public static readonly Error AccountTemporarilyLocked =
+        new("Auth.AccountTemporarilyLocked", "Your account is temporarily locked due to too many failed login attempts. Please try again later.");
 }

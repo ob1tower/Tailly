@@ -11,19 +11,22 @@ public class ReviewConfiguration : IEntityTypeConfiguration<ReviewEntity>
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.AuthorName)
-            .HasMaxLength(200)
-            .IsRequired();
+               .HasMaxLength(200)
+               .IsRequired();
 
         builder.Property(x => x.Text)
-            .HasMaxLength(3000);
+               .HasMaxLength(2000)
+               .IsRequired();
 
         builder.Property(x => x.ServiceTitle)
-            .HasMaxLength(200);
+               .HasMaxLength(200);
 
         builder.Property(x => x.PetName)
-            .HasMaxLength(100);
+               .HasMaxLength(100);
 
-        builder.Property(x => x.CreatedAt)
-            .IsRequired();
+        builder.Property(x => x.Rating)
+               .IsRequired();
+
+        builder.HasIndex(x => x.SpecialistId);
     }
 }

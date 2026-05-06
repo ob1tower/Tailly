@@ -9,11 +9,13 @@ using StackExchange.Redis;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Tailly.AuthService.Application.Dtos.Common;
 using Tailly.AuthService.Application.Service.AccountDeletion;
 using Tailly.AuthService.Application.Service.Admin;
+using Tailly.AuthService.Application.Service.AdminProfiles;
 using Tailly.AuthService.Application.Service.Auth.Common;
 using Tailly.AuthService.Application.Service.Auth.Login;
 using Tailly.AuthService.Application.Service.Auth.PasswordRecovery;
@@ -24,6 +26,7 @@ using Tailly.AuthService.Application.Service.Claims;
 using Tailly.AuthService.Application.Service.Security;
 using Tailly.AuthService.Application.Service.Security.Interfaces;
 using Tailly.AuthService.Application.Service.Security.Otp;
+using Tailly.AuthService.Application.Service.SuperAdmin;
 using Tailly.AuthService.Application.Service.Tokens;
 using Tailly.AuthService.Application.Service.Tokens.Interfaces;
 using Tailly.AuthService.Application.Validators.Auth;
@@ -75,12 +78,16 @@ public static class DependencyInjectionExtensions
     {
         services.AddControllers()
             .AddJsonOptions(o =>
-                o.JsonSerializerOptions.DefaultIgnoreCondition =
-                    JsonIgnoreCondition.WhenWritingNull);
+            {
+                o.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                o.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            });
 
         services.ConfigureHttpJsonOptions(o =>
-            o.SerializerOptions.DefaultIgnoreCondition =
-                JsonIgnoreCondition.WhenWritingNull);
+        {
+            o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            o.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        });
 
         return services;
     }
@@ -168,6 +175,8 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IPendingRegistrationService, PendingRegistrationService>();
         services.AddScoped<IAdminUserService, AdminUserService>();
         services.AddScoped<IAccountDeletionService, AccountDeletionService>();
+        services.AddScoped<ISuperAdminService, SuperAdminService>();
+        services.AddScoped<IAdminProfileService, AdminProfileService>();
 
         return services;
     }
@@ -177,6 +186,8 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IAccountDeletionTokenRepository, AccountDeletionTokenRepository>();
+        services.AddScoped<IAdminProfileRepository, AdminProfileRepository>();
+        services.AddScoped<IAdminPasswordRecoveryRepository, AdminPasswordRecoveryRepository>();
 
         return services;
     }

@@ -11,6 +11,8 @@ await app.ApplyMigrationsAsync();
 
 await app.SeedSuperAdminAsync();
 
+await app.SeedTestClientAndSpecialistAsync();
+
 app.Configure();
 
 app.Run();

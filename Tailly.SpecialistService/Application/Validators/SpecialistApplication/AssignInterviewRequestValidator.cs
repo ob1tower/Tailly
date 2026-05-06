@@ -10,5 +10,9 @@ public class AssignInterviewRequestValidator : AbstractValidator<AssignInterview
         RuleFor(x => x.Note)
             .NotEmpty().WithMessage("Note is required.")
             .MaximumLength(500);
+
+        RuleFor(x => x.InterviewDate)
+            .NotNull()
+            .WithMessage("InterviewDate is required.");
     }
 }

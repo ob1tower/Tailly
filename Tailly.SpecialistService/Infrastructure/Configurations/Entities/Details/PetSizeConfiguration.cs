@@ -10,10 +10,8 @@ public class PetSizeConfiguration : IEntityTypeConfiguration<PetSizeEntity>
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.PetSize)
-            .IsRequired();
-
-        builder.HasIndex(x => new { x.SpecialistId, x.PetSize })
-            .IsUnique();
+        builder.HasOne(x => x.Details)
+               .WithMany(x => x.PetSizes)
+               .HasForeignKey(x => x.DetailsId);
     }
 }

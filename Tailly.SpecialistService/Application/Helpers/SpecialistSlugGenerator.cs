@@ -4,10 +4,7 @@ namespace Tailly.SpecialistService.Application.Helpers;
 
 public static class SpecialistSlugGenerator
 {
-    public static async Task<string> GenerateUniqueSlugAsync(
-        string firstName,
-        string lastName,
-        ISpecialistRepository specialistRepository)
+    public static async Task<string> GenerateUniqueSlugAsync(string firstName, string lastName, ISpecialistRepository specialistRepository)
     {
         string baseSlug = $"{firstName.ToLower().Trim()}-{lastName.ToLower().Trim()}"
             .Replace(" ", "-")

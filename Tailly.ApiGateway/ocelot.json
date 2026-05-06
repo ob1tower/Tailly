@@ -255,6 +255,174 @@
       "UpstreamPathTemplate": "/admin/users/{id}/profile",
       "UpstreamHttpMethod": [ "PATCH" ]
     },
+    {
+      "DownstreamPathTemplate": "/api/SuperAdmin/super-admin/admins",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/super-admin/admins",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SuperAdmin/super-admin/admins",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/super-admin/admins",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SuperAdmin/super-admin/admins/{adminId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/super-admin/admins/{adminId}",
+      "UpstreamHttpMethod": [ "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SuperAdmin/super-admin/admins/{adminId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/super-admin/admins/{adminId}",
+      "UpstreamHttpMethod": [ "PATCH" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SuperAdmin/super-admin/admins/{adminId}/block",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/super-admin/admins/{adminId}/block",
+      "UpstreamHttpMethod": [ "PATCH" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SuperAdmin/super-admin/admins/{adminId}/password-attempts-lock",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/super-admin/admins/{adminId}/password-attempts-lock",
+      "UpstreamHttpMethod": [ "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SuperAdmin/super-admin/password-recovery-requests",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/super-admin/password-recovery-requests",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SuperAdmin/super-admin/password-recovery-requests/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/super-admin/password-recovery-requests/{everything}",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/AdminProfile/admin/profile",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/profile",
+      "UpstreamHttpMethod": [ "GET", "PATCH" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Security/admin/profile/email-change/request",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/profile/email-change/request",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Security/admin/profile/email-change/confirm",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/profile/email-change/confirm",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Security/admin/profile/email-change",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/profile/email-change",
+      "UpstreamHttpMethod": [ "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Security/admin/security/password/change",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/security/password/change",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SuperAdmin/super-admin/admins/{adminId}/password-attempts-lock",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/admin/profile/password-attempts-lock",
+      "UpstreamHttpMethod": [ "DELETE" ]
+    },
     // =============================================
     // ==================== SHOP SERVICE ====================
     // =============================================
@@ -687,6 +855,18 @@
     },
 
     {
+      "DownstreamPathTemplate": "/api/SpecialistProfile/specialists/{slug}/edit-options",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{slug}/edit-options",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/Specialist/specialists/{slug}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -783,7 +963,7 @@
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
-      "DownstreamPathTemplate": "/api/AdminSpecialistApplication/admin/specialist-applications/{id}/attach-specialist-account",
+      "DownstreamPathTemplate": "/api/AdminSpecialistApplication/admin/specialist-applications/{id}/create-specialist-account",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -791,7 +971,7 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/admin/specialist-applications/{id}/attach-specialist-account",
+      "UpstreamPathTemplate": "/admin/specialist-applications/{id}/create-specialist-account",
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
@@ -830,6 +1010,141 @@
       "UpstreamPathTemplate": "/specialist/media/{everything}",
       "UpstreamHttpMethod": [ "POST" ],
       "FileUpload": true
+    },
+    {
+      "DownstreamPathTemplate": "/api/SpecialistProfile/specialists/{slug}/services",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{slug}/services",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SpecialistProfile/specialists/{slug}/services/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{slug}/services/{id}",
+      "UpstreamHttpMethod": [ "PATCH", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/SpecialistProfile/specialists/{slug}/reviews/{id}/reply",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{slug}/reviews/{id}/reply",
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    // =============================================
+    // ==================== BOOKING SERVICE ====================
+    // =============================================
+    {
+      "DownstreamPathTemplate": "/api/ServiceOrder/me/orders/services",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "booking",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/orders/services",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/ServiceOrder/me/orders/services/{orderId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "booking",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/orders/services/{orderId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/ServiceOrder/me/orders/services/{orderId}/confirm",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "booking",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/orders/services/{orderId}/confirm",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/ServiceOrder/me/orders/services/{orderId}/start",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "booking",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/orders/services/{orderId}/start",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/ServiceOrder/me/orders/services/{orderId}/complete",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "booking",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/orders/services/{orderId}/complete",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/ServiceOrder/me/orders/services/{orderId}/cancel",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "booking",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/orders/services/{orderId}/cancel",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/ServiceOrder/me/orders/services/{orderId}/repeat",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "booking",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/orders/services/{orderId}/repeat",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/ServiceOrder/me/orders/services/{orderId}/review",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "booking",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/orders/services/{orderId}/review",
+      "UpstreamHttpMethod": [ "POST" ]
     }
   ],
   "GlobalConfiguration": {

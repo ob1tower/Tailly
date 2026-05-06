@@ -44,6 +44,76 @@ namespace Tailly.AuthService.Migrations
                     b.ToTable("AccountDeletionTokens");
                 });
 
+            modelBuilder.Entity("Tailly.AuthService.Core.Entities.AdminPasswordRecoveryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ProcessedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TemporaryPassword")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email");
+
+                    b.ToTable("AdminPasswordRecoverys");
+                });
+
+            modelBuilder.Entity("Tailly.AuthService.Core.Entities.AdminProfileEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("BirthDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("Department")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FailedPasswordAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("LastLoginAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("PasswordAttemptsLockUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("AdminProfiles");
+                });
+
             modelBuilder.Entity("Tailly.AuthService.Core.Entities.RefreshTokenEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -239,6 +309,17 @@ namespace Tailly.AuthService.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Tailly.AuthService.Core.Entities.AdminProfileEntity", b =>
+                {
+                    b.HasOne("Tailly.AuthService.Core.Entities.UserEntity", "User")
+                        .WithOne("AdminProfile")
+                        .HasForeignKey("Tailly.AuthService.Core.Entities.AdminProfileEntity", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Tailly.AuthService.Core.Entities.RefreshTokenEntity", b =>
                 {
                     b.HasOne("Tailly.AuthService.Core.Entities.UserEntity", "User")
@@ -276,6 +357,8 @@ namespace Tailly.AuthService.Migrations
 
             modelBuilder.Entity("Tailly.AuthService.Core.Entities.UserEntity", b =>
                 {
+                    b.Navigation("AdminProfile");
+
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("UserRoles");

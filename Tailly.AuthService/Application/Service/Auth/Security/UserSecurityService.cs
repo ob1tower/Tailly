@@ -1,10 +1,12 @@
 ﻿using CSharpFunctionalExtensions;
 using MassTransit;
+using StackExchange.Redis;
 using Tailly.AuthService.Application.Errors;
 using Tailly.AuthService.Application.Service.Security;
 using Tailly.AuthService.Application.Service.Security.Interfaces;
 using Tailly.AuthService.Application.Service.Security.Otp;
 using Tailly.AuthService.Core.Common;
+using Tailly.AuthService.Core.Enums;
 using Tailly.AuthService.Core.Models;
 using Tailly.AuthService.Infrastructure.Messaging.Messages;
 using Tailly.AuthService.Infrastructure.Repositories.Interfaces;
@@ -18,6 +20,7 @@ public class UserSecurityService : IUserSecurityService
     private readonly IVerificationCodeService _verificationCodeService;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IDatabase _redis;
     private readonly ILogger<UserSecurityService> _logger;
 
     public UserSecurityService(IUsersRepository usersRepository,
@@ -25,6 +28,7 @@ public class UserSecurityService : IUserSecurityService
                                IVerificationCodeService verificationCodeService,
                                IRefreshTokenRepository refreshTokenRepository,
                                IPublishEndpoint publishEndpoint,
+                               IConnectionMultiplexer redis,
                                ILogger<UserSecurityService> logger)
     {
         _usersRepository = usersRepository;
@@ -32,6 +36,7 @@ public class UserSecurityService : IUserSecurityService
         _verificationCodeService = verificationCodeService;
         _refreshTokenRepository = refreshTokenRepository;
         _publishEndpoint = publishEndpoint;
+        _redis = redis.GetDatabase();
         _logger = logger;
     }
 
@@ -173,6 +178,102 @@ public class UserSecurityService : IUserSecurityService
         await _refreshTokenRepository.InvalidateAllAsync(userId);
 
         _logger.LogInformation("Email changed successfully for user {UserId} to {NewEmail}", userId, newEmail);
+        return Result.Success();
+    }
+
+    public async Task<Result<EmailChangeResult, Error>> EmailChangeAsync(Guid userId, string newEmail, string password)
+    {
+        newEmail = newEmail?.Trim().ToLowerInvariant()
+            ?? throw new ArgumentNullException(nameof(newEmail));
+
+        var user = await _usersRepository.GetByIdAsync(userId);
+        if (user == null)
+            return Result.Failure<EmailChangeResult, Error>(AdminErrors.UserNotFound);
+
+        var isSuperAdmin = user.UserRoles.Any(r =>
+            r.Role == RoleType.SuperAdmin && r.SoftDeletedAt == null);
+
+        if (!isSuperAdmin)
+            return Result.Failure<EmailChangeResult, Error>(AdminErrors.OnlySuperAdminCanChangeEmail);
+
+        if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
+            return Result.Failure<EmailChangeResult, Error>(AuthErrors.InvalidPassword);
+
+        if (user.Email.Equals(newEmail, StringComparison.OrdinalIgnoreCase))
+            return Result.Failure<EmailChangeResult, Error>(AdminErrors.SameEmail);
+
+        if (await _usersRepository.ExistsAsync(newEmail))
+            return Result.Failure<EmailChangeResult, Error>(AdminErrors.EmailAlreadyExists);
+
+        var code = VerificationCodeGenerator.GenerateCode();
+        await _verificationCodeService.SetCodeAsync(newEmail, code, "admin-change-email");
+
+        var newEmailKey = $"email-change:new:{userId}";
+        await _redis.StringSetAsync(newEmailKey, newEmail, TimeSpan.FromMinutes(15));
+
+        await _publishEndpoint.Publish(new SendEmailMessage
+        {
+            To = newEmail,
+            Subject = "Email confirmation of the change",
+            Body = $"""
+            <h2>Changing the email address of the main administrator</h2>
+            <p>Confirmation code:</p>
+            <h1>{code}</h1>
+            <p>The code is valid for 15 minutes.</p>
+            """,
+            Purpose = "admin-change-email"
+        });
+
+        var maskedOldEmail = EmailHelper.Mask(user.Email);
+
+        _logger.LogInformation("SuperAdmin requested email change. UserId={UserId}, NewEmail={NewEmail}", userId, newEmail);
+
+        return Result.Success<EmailChangeResult, Error>(new EmailChangeResult
+        {
+            RequestId = Guid.NewGuid().ToString(),
+            MaskedOldEmail = maskedOldEmail
+        });
+    }
+
+    public async Task<Result> ConfirmEmailChangeAsync(Guid userId, string code)
+    {
+        var user = await _usersRepository.GetByIdAsync(userId);
+        if (user == null)
+            return Result.Failure(AdminErrors.UserNotFound.Description);
+
+        var newEmailKey = $"email-change:new:{userId}";
+        var newEmailValue = await _redis.StringGetAsync(newEmailKey);
+
+        if (newEmailValue.IsNullOrEmpty)
+            return Result.Failure(AdminErrors.NewEmailNotFound.Description);
+
+        var newEmail = newEmailValue.ToString()!;
+
+        var verifyResult = await _verificationCodeService.VerifyCodeAsync(
+            newEmail,
+            code,
+            "admin-change-email");
+
+        if (!verifyResult.Success)
+            return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
+
+        user.Email = newEmail;
+        user.EmailConfirmed = true;
+
+        await _usersRepository.UpdateAsync(user);
+        await _refreshTokenRepository.InvalidateAllAsync(userId);
+
+        await _redis.KeyDeleteAsync(newEmailKey);
+
+        _logger.LogInformation("SuperAdmin email changed successfully. UserId={UserId}, NewEmail={NewEmail}", userId, newEmail);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> CancelEmailChangeAsync(Guid userId)
+    {
+        await _verificationCodeService.RemoveCodeAsync(userId.ToString(), "admin-change-email");
+        _logger.LogInformation("Email change cancelled for user {UserId}", userId);
         return Result.Success();
     }
 }

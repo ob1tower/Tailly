@@ -1,6 +1,5 @@
 ﻿using Tailly.SpecialistService.Application.Dtos.Requests.SpecialistApplication;
 using Tailly.SpecialistService.Application.Dtos.Responses.SpecialistApplication;
-using Tailly.SpecialistService.Core.Enums;
 using Tailly.SpecialistService.Core.Models.Applications;
 
 namespace Tailly.SpecialistService.Application.Mappers;
@@ -16,59 +15,48 @@ public static class SpecialistApplicationMapper
             ? Array.Empty<string>()
             : request.FullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-        string firstName = string.Empty;
-        string middleName = string.Empty;
-        string lastName = string.Empty;
-
-        switch (nameParts.Length)
-        {
-            case 0:
-                break;
-            case 1:
-                lastName = nameParts[0];          
-                break;
-            case 2:
-                lastName = nameParts[0];
-                firstName = nameParts[1];
-                break;
-            default: 
-                lastName = nameParts[0];
-                firstName = nameParts[1];
-                middleName = string.Join(" ", nameParts.Skip(2));
-                break;
-        }
+        string lastName = nameParts.Length > 0 ? nameParts[0] : "";                  
+        string firstName = nameParts.Length > 1 ? nameParts[1] : "";                
+        string middleName = nameParts.Length > 2
+            ? string.Join(" ", nameParts.Skip(2))
+            : "";                                                                    
 
         return new SpecialistApplication
         {
             Id = Guid.NewGuid(),
             UserId = userId ?? Guid.Empty,
-            Email = request.Email?.Trim().ToLowerInvariant() ?? string.Empty,
-            FirstName = firstName,
-            MiddleName = middleName,
-            LastName = lastName,
-            Phone = request.Phone?.Trim() ?? string.Empty,
-            City = request.City?.Trim() ?? string.Empty,
-            About = request.About?.Trim() ?? string.Empty,
-            PhotoUrl = null,
+            Email = request.Email?.Trim().ToLowerInvariant() ?? "",
+            FirstName = firstName,     
+            MiddleName = middleName,    
+            LastName = lastName,      
+            Phone = request.Phone?.Trim() ?? "",
+            City = request.City?.Trim() ?? "",
+            About = request.About?.Trim() ?? "",
 
-            ExperienceYears = ParseExperienceYears(request.Questionnaire?.ExperienceYears),
-            ServicesWanted = request.Questionnaire?.ServiceFormats != null
+            ExperienceYears = request.Questionnaire?.ExperienceYears ?? 0,
+            AnimalTypes = request.Questionnaire?.AnimalTypes != null
+                ? string.Join(",", request.Questionnaire.AnimalTypes)
+                : "",
+            ServiceFormats = request.Questionnaire?.ServiceFormats != null
                 ? string.Join(",", request.Questionnaire.ServiceFormats)
-                : string.Empty,
+                : "",
 
-            Status = SpecialistApplicationStatus.Pending,
+            CanGiveMedication = request.Questionnaire?.CanGiveMedication ?? false,
+            CanHandleDifficultBehavior = request.Questionnaire?.CanHandleDifficultBehavior ?? false,
+            CanTakeOvernightOrders = request.Questionnaire?.CanTakeOvernightOrders ?? false,
+            HasOwnPets = request.Questionnaire?.HasOwnPets ?? false,
+            HasPetFirstAidBasics = request.Questionnaire?.HasPetFirstAidBasics ?? false,
+            HousingType = request.Questionnaire?.HousingType ?? "",
+            DistrictPreferences = request.Questionnaire?.DistrictPreferences ?? "",
+            SchedulePreferences = request.Questionnaire?.SchedulePreferences ?? "",
+            PortfolioUrl = request.Questionnaire?.PortfolioUrl ?? "",
+            Motivation = request.Questionnaire?.Motivation ?? "",
+            AdditionalInfo = request.Questionnaire?.AdditionalInfo ?? "",
+
+            Status = Core.Enums.SpecialistApplicationStatus.Pending,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
-    }
-
-    private static int ParseExperienceYears(string? experience)
-    {
-        if (string.IsNullOrWhiteSpace(experience))
-            return 0;
-
-        var match = System.Text.RegularExpressions.Regex.Match(experience, @"\d+");
-        return match.Success ? int.Parse(match.Value) : 0;
     }
 
     public static SpecialistApplicationListItemResponse ToListItem(SpecialistApplication app)
@@ -78,9 +66,43 @@ public static class SpecialistApplicationMapper
             Id = app.Id,
             FullName = $"{app.LastName} {app.FirstName} {app.MiddleName}".Trim(),
             Email = app.Email,
+            Phone = app.Phone,                                          
             City = app.City,
-            Status = app.Status.ToString(),
-            CreatedAt = app.CreatedAt
+            Status = SpecialistEnumMapper.MapApplicationStatus(app.Status),
+            CreatedAt = app.CreatedAt,
+            UpdatedAt = app.UpdatedAt,                                  
+            InterviewDate = app.InterviewDate?.ToString("yyyy-MM-ddTHH:mm"),
+            ReviewComment = app.ReviewComment,                          
+            ReviewedBy = app.ReviewedBy,                               
+            About = app.About,
+            CreatedSpecialistId = app.CreatedSpecialistId,               
+            CreatedSpecialistSlug = app.CreatedSpecialistSlug,           
+            SpecialistAccountCreatedAt = app.SpecialistAccountCreatedAt,          
+
+            Questionnaire = new SpecialistApplicationQuestionnaireResponse
+            {
+                ExperienceYears = app.ExperienceYears,
+
+                AnimalTypes = string.IsNullOrEmpty(app.AnimalTypes)
+                ? new List<string>()
+                : app.AnimalTypes.Split(',').Select(x => x.Trim()).ToList(),
+
+                ServiceFormats = string.IsNullOrEmpty(app.ServiceFormats)
+                ? new List<string>()
+                : app.ServiceFormats.Split(',').Select(x => x.Trim()).ToList(),
+
+                CanGiveMedication = app.CanGiveMedication,
+                CanHandleDifficultBehavior = app.CanHandleDifficultBehavior,
+                CanTakeOvernightOrders = app.CanTakeOvernightOrders,
+                HasOwnPets = app.HasOwnPets,
+                HasPetFirstAidBasics = app.HasPetFirstAidBasics,
+                HousingType = app.HousingType,
+                PortfolioUrl = app.PortfolioUrl,
+                DistrictPreferences = app.DistrictPreferences,
+                SchedulePreferences = app.SchedulePreferences,
+                Motivation = app.Motivation,
+                AdditionalInfo = app.AdditionalInfo
+            }
         };
     }
 }

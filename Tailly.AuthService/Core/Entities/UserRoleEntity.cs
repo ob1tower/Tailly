@@ -12,4 +12,9 @@ public class UserRoleEntity
     public bool IsPermanentBlock { get; set; }
     public DateTime? BlockedUntil { get; set; }
     public string? BlockReason { get; set; }
+
+    public bool IsEffectivelyBlocked =>
+        IsPermanentBlock ||
+        (BlockedUntil.HasValue && BlockedUntil.Value > DateTime.UtcNow) ||
+        (IsBlocked && !BlockedUntil.HasValue);
 }

@@ -7,13 +7,9 @@ public class ServiceEntity
 {
     public Guid Id { get; set; }
     public Guid SpecialistId { get; set; }
-    public SpecialistEntity Specialist { get; set; } = default!;
-    public string Name { get; set; } = string.Empty;
+    public SpecialistEntity Specialist { get; set; } = null!;
+    public ServiceType Name { get; set; }
+    public string? Description { get; set; }
     public decimal Price { get; set; }
-    public PriceUnit PriceUnit { get; set; }
-    public string LocationLabel { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public ServiceType Type { get; set; }
-    public ICollection<AvailabilityServiceEntity> Availabilities { get; set; } = [];
-    public ICollection<BookedSlotServiceEntity> BookedSlots { get; set; } = [];
+    public ServicePriceUnit PriceUnit { get; set; }
 }

@@ -55,4 +55,41 @@ public static class AuthMapper
         RoleType.SuperAdmin => "super_admin",
         _ => role.ToString().ToLowerInvariant()
     };
+
+    public static string? MapDepartment(AdminDepartment? dep)
+    {
+        return dep switch
+        {
+            AdminDepartment.Administration => "Администрация",
+            AdminDepartment.Support => "Поддержка",
+            AdminDepartment.Moderation => "Модерация",
+            AdminDepartment.Marketing => "Маркетинг",
+            AdminDepartment.HR => "HR",
+            _ => null
+        };
+    }
+
+    public static AdminDepartment? ParseDepartment(string? dep)
+    {
+        if (string.IsNullOrWhiteSpace(dep))
+            return null;
+
+        var lower = dep.Trim().ToLowerInvariant();
+
+        return lower switch
+        {
+            "administration" => AdminDepartment.Administration,
+            "support" => AdminDepartment.Support,
+            "moderation" => AdminDepartment.Moderation,
+            "marketing" => AdminDepartment.Marketing,
+            "hr" => AdminDepartment.HR,
+
+            "администрация" => AdminDepartment.Administration,
+            "поддержка" => AdminDepartment.Support,
+            "модерация" => AdminDepartment.Moderation,
+            "маркетинг" => AdminDepartment.Marketing,
+
+            _ => null
+        };
+    }
 }

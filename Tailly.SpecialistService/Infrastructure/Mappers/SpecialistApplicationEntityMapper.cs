@@ -1,5 +1,4 @@
 ﻿using Tailly.SpecialistService.Core.Entities.Applications;
-using Tailly.SpecialistService.Core.Enums;
 using Tailly.SpecialistService.Core.Models.Applications;
 
 namespace Tailly.SpecialistService.Infrastructure.Mappers;
@@ -8,6 +7,9 @@ public static class SpecialistApplicationEntityMapper
 {
     public static SpecialistApplicationEntity ToEntity(SpecialistApplication model)
     {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+
         return new SpecialistApplicationEntity
         {
             Id = model.Id,
@@ -20,14 +22,31 @@ public static class SpecialistApplicationEntityMapper
             City = model.City,
             About = model.About,
             ExperienceYears = model.ExperienceYears,
-            ServicesWanted = model.ServicesWanted,
+            AnimalTypes = model.AnimalTypes,
+            ServiceFormats = model.ServiceFormats,
+            CanGiveMedication = model.CanGiveMedication,
+            CanHandleDifficultBehavior = model.CanHandleDifficultBehavior,
+            CanTakeOvernightOrders = model.CanTakeOvernightOrders,
+            HasOwnPets = model.HasOwnPets,
+            HasPetFirstAidBasics = model.HasPetFirstAidBasics,
+            HousingType = model.HousingType,
+            DistrictPreferences = model.DistrictPreferences,
+            SchedulePreferences = model.SchedulePreferences,
+            PortfolioUrl = model.PortfolioUrl,
+            Motivation = model.Motivation,
+            AdditionalInfo = model.AdditionalInfo,
             PhotoUrl = model.PhotoUrl,
             Status = model.Status,
             CreatedAt = model.CreatedAt,
             UpdatedAt = model.UpdatedAt,
+            ReviewComment = model.ReviewComment,
+            ReviewedBy = model.ReviewedBy,
             InterviewNote = model.InterviewNote,
             InterviewDate = model.InterviewDate,
-            RejectionReason = model.RejectionReason
+            RejectionReason = model.RejectionReason,
+            CreatedSpecialistId = model.CreatedSpecialistId,
+            CreatedSpecialistSlug = model.CreatedSpecialistSlug,
+            SpecialistAccountCreatedAt = model.SpecialistAccountCreatedAt
         };
     }
 
@@ -48,39 +67,31 @@ public static class SpecialistApplicationEntityMapper
             City = entity.City,
             About = entity.About,
             ExperienceYears = entity.ExperienceYears,
-            ServicesWanted = entity.ServicesWanted,
+            AnimalTypes = entity.AnimalTypes,
+            ServiceFormats = entity.ServiceFormats,
+            CanGiveMedication = entity.CanGiveMedication,
+            CanHandleDifficultBehavior = entity.CanHandleDifficultBehavior,
+            CanTakeOvernightOrders = entity.CanTakeOvernightOrders,
+            HasOwnPets = entity.HasOwnPets,
+            HasPetFirstAidBasics = entity.HasPetFirstAidBasics,
+            HousingType = entity.HousingType,
+            DistrictPreferences = entity.DistrictPreferences,
+            SchedulePreferences = entity.SchedulePreferences,
+            PortfolioUrl = entity.PortfolioUrl,
+            Motivation = entity.Motivation,
+            AdditionalInfo = entity.AdditionalInfo,
             PhotoUrl = entity.PhotoUrl,
-            Status = entity.Status ?? SpecialistApplicationStatus.Pending,
+            Status = entity.Status,                   
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
+            ReviewComment = entity.ReviewComment,
+            ReviewedBy = entity.ReviewedBy,
             InterviewNote = entity.InterviewNote,
             InterviewDate = entity.InterviewDate,
-            RejectionReason = entity.RejectionReason
-        };
-    }
-
-    public static SpecialistApplication ToDomainRequired(this SpecialistApplicationEntity entity)
-    {
-        return new SpecialistApplication
-        {
-            Id = entity.Id,
-            UserId = entity.UserId,
-            Email = entity.Email,
-            FirstName = entity.FirstName,
-            LastName = entity.LastName,
-            MiddleName = entity.MiddleName,
-            Phone = entity.Phone,
-            City = entity.City,
-            About = entity.About,
-            ExperienceYears = entity.ExperienceYears,
-            ServicesWanted = entity.ServicesWanted,
-            PhotoUrl = entity.PhotoUrl,
-            Status = entity.Status ?? SpecialistApplicationStatus.Pending,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt,
-            InterviewNote = entity.InterviewNote,
-            InterviewDate = entity.InterviewDate,
-            RejectionReason = entity.RejectionReason
+            RejectionReason = entity.RejectionReason,
+            CreatedSpecialistId = entity.CreatedSpecialistId,
+            CreatedSpecialistSlug = entity.CreatedSpecialistSlug,
+            SpecialistAccountCreatedAt = entity.SpecialistAccountCreatedAt
         };
     }
 }

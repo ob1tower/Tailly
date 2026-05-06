@@ -19,6 +19,11 @@ public class ClaimProvider
                 new Claim(ClaimTypes.Role, ((RoleType)r.RoleId).ToString()))
         );
 
+        if (user.SpecialistId.HasValue)
+        {
+            claims.Add(new Claim("specialistId", user.SpecialistId.Value.ToString()));
+        }
+
         return Task.FromResult(claims);
     }
 }

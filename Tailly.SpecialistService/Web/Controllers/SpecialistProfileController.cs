@@ -2,119 +2,246 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tailly.SpecialistService.Application.Dtos.Requests.SpecialistProfile;
-using Tailly.SpecialistService.Application.Errors;
+using Tailly.SpecialistService.Application.Dtos.Requests.Reviews;
+using Tailly.SpecialistService.Application.Dtos.Requests.Services;
+using Tailly.SpecialistService.Application.Dtos.Requests.Specialist;
+using Tailly.SpecialistService.Application.Dtos.Responses.Options;
 using Tailly.SpecialistService.Application.Mappers;
 using Tailly.SpecialistService.Application.Service.Interfaces;
+using Tailly.SpecialistService.Core.Enums;
 using Tailly.SpecialistService.Core.Models.Specialist;
 using Tailly.SpecialistService.Infrastructure.Configurations.Extensions;
 
 namespace Tailly.SpecialistService.Web.Controllers;
 
 [Route("api/[controller]")]
-[Authorize(Roles = "Specialist")]
 [ApiController]
 public class SpecialistProfileController : ControllerBase
 {
-    private readonly ISpecialistsService _service;
-    private readonly IValidator<SpecialistMainInfoUpdateRequest> _validator;
-    private readonly IValidator<SpecialistDetailsUpdateRequest> _detailsValidator;
+    private readonly ISpecialistProfileService _service;
+    private readonly IValidator<UpdateSpecialistMainInfoRequest> _updateMainValidator;
+    private readonly IValidator<UpdateSpecialistDetailsRequest> _updateDetailsValidator;
+    private readonly IValidator<CreateServiceRequest> _createServiceValidator;
+    private readonly IValidator<UpdateServiceRequest> _updateServiceValidator;
+    private readonly IValidator<ReviewReplyRequest> _replyValidator;
 
-    public SpecialistProfileController(ISpecialistsService service,
-                                       IValidator<SpecialistMainInfoUpdateRequest> validator,
-                                       IValidator<SpecialistDetailsUpdateRequest> detailsValidator)
+    public SpecialistProfileController(ISpecialistProfileService service,
+                                       IValidator<UpdateSpecialistMainInfoRequest> updateMainValidator,
+                                       IValidator<UpdateSpecialistDetailsRequest> updateDetailsValidator,
+                                       IValidator<CreateServiceRequest> createServiceValidator,
+                                       IValidator<UpdateServiceRequest> updateServiceValidator,
+                                       IValidator<ReviewReplyRequest> replyValidator)
     {
         _service = service;
-        _validator = validator;
-        _detailsValidator = detailsValidator;
+        _updateMainValidator = updateMainValidator;
+        _updateDetailsValidator = updateDetailsValidator;
+        _createServiceValidator = createServiceValidator;
+        _updateServiceValidator = updateServiceValidator;
+        _replyValidator = replyValidator;
     }
 
+    /// <summary>
+    /// Updates the specialist's basic data (fullName, city, phoneNumber, avatar).
+    /// </summary>
+    /// <param name="slug">Specialist's slug.</param>
+    /// <param name="request">Data to update.</param>
     [HttpPatch("specialists/{slug}/main")]
-    public async Task<IActionResult> UpdateMain(string slug, [FromBody] SpecialistMainInfoUpdateRequest request)
+    [Authorize(Roles = "Specialist")]
+    public async Task<IActionResult> UpdateMain([FromRoute] string slug, [FromBody] UpdateSpecialistMainInfoRequest request)
     {
-        var validation = await _validator.ValidateAsync(request);
-        if (!validation.IsValid)
-            return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
-
         var userId = User.GetUserId();
-        if (userId == null)
+        var specialistId = User.GetSpecialistId();
+
+        if (userId == null || specialistId == null)
             return Unauthorized();
 
-        var result = await _service.UpdateMainAsync(
-            slug,
-            userId.Value,
-            request.FirstName,
-            request.LastName,
-            request.MiddleName,
-            request.City,
-            request.District,
-            request.Phone,
-            request.AvatarUrl);
+        var validationResult = await _updateMainValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        var result = await _service.UpdateMainInfoAsync(
+            slug: slug,
+            specialistId: specialistId.Value,
+            userId: userId.Value,
+            firstName: request.FirstName,
+            lastName: request.LastName,
+            middleName: request.MiddleName,
+            city: request.City,
+            district: request.District,
+            phone: request.Phone,
+            avatarUrl: request.AvatarUrl);
 
         if (result.IsFailure)
             return BadRequest(result.Error);
 
-        return Ok(new { success = true });
+        return Ok();
     }
 
+    /// <summary>
+    /// Updates the details of the specialist's profile (housing, pets, about yourself, gallery).
+    /// </summary>
+    /// <param name="slug">Specialist's slug.</param>
+    /// <param name="request">Data for updating details.</param>
     [HttpPatch("specialists/{slug}/details")]
-    public async Task<IActionResult> UpdateDetails(string slug, [FromBody] SpecialistDetailsUpdateRequest request)
+    [Authorize(Roles = "Specialist")]
+    public async Task<IActionResult> UpdateDetails([FromRoute] string slug, [FromBody] UpdateSpecialistDetailsRequest request)
     {
-        var validation = await _detailsValidator.ValidateAsync(request);
-        if (!validation.IsValid)
-            return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
+        var specialistId = User.GetSpecialistId();
 
-        var userId = User.GetUserId();
-        if (userId == null)
+        if (specialistId == null)
             return Unauthorized();
 
-        var experienceUnit = SpecialistEnumMapper.ParseExperienceUnit(request.ExperienceDurationUnit);
-        var housingType = SpecialistEnumMapper.ParseHousingType(request.HousingType);
-        var childrenPresence = SpecialistEnumMapper.ParseChildrenPresence(request.HasChildrenUnderTen);
+        var validationResult = await _updateDetailsValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
 
-        var petTypes = request.PetTypes.Select(SpecialistEnumMapper.ParsePetType).ToList();
-        var petSizes = request.PetSizes.Select(SpecialistEnumMapper.ParsePetSize).ToList();
-        var petAges = request.PetAges.Select(SpecialistEnumMapper.ParsePetAge).ToList();
+        var details = SpecialistResponseMapper.ToDetails(request);
 
-        var advantages = request.Advantages
-            .Select(title => new Advantage { Title = title })
-            .ToList();
-
-        var services = request.Services.Select(s => new ServiceOffer
-        {
-            Id = s.Id,
-            Name = s.Name,
-            LocationLabel = s.LocationLabel,
-            Price = s.Price,
-            PriceUnit = SpecialistEnumMapper.ParsePriceUnit(s.PriceUnit),
-            Type = SpecialistEnumMapper.ParseServiceType(s.Name)
-        }).ToList();
-
-        var result = await _service.UpdateDetailsAsync(
-            slug,
-            userId.Value,
-            request.ExperienceLabel,
-            request.ExperienceDurationValue,
-            experienceUnit,
-            housingType,
-            petSizes,
-            petAges,
-            childrenPresence,
-            petTypes,
-            advantages,
-            request.About,
-            services);
+        var result = await _service.UpdateDetailsAsync(slug, specialistId.Value, details);
 
         if (result.IsFailure)
-        {
-            return result.Error.Code switch
-            {
-                "Specialist.NotFound" => NotFound(result.Error),
-                "Specialist.Forbidden" => Forbid(),
-                _ => BadRequest(result.Error)
-            };
-        }
+            return BadRequest(result.Error);
 
-        return Ok(new { success = true });
+        return Ok();
+    }
+
+    /// <summary>
+    /// Adds a new service to a specialist.
+    /// </summary>
+    /// <param name="slug">Specialist's slug.</param>
+    /// <param name="request">The data of the new service.</param>
+    [HttpPost("specialists/{slug}/services")]
+    [Authorize(Roles = "Specialist")]
+    public async Task<IActionResult> CreateService([FromRoute] string slug, [FromBody] CreateServiceRequest request)
+    {
+        var specialistId = User.GetSpecialistId();
+
+        if (specialistId == null)
+            return Unauthorized();
+
+        var validationResult = await _createServiceValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        var service = new ServiceOffer
+        {
+            Name = SpecialistEnumMapper.ParseServiceType(request.Name),
+            Description = request.Description,
+            Price = request.Price,
+            PriceUnit = SpecialistEnumMapper.ParsePriceUnit(request.PriceUnit)
+        };
+
+        var result = await _service.AddServiceAsync(slug, specialistId.Value, service);
+
+        if (result.IsFailure)
+            return BadRequest(result.Error);
+
+        return Ok();
+    }
+
+    /// <summary>
+    /// Updates an existing specialist service.
+    /// </summary>
+    /// <param name="slug">Specialist's slug.</param>
+    /// <param name="serviceId">Service ID.</param>
+    /// <param name="request">New service data.</param>
+    [HttpPatch("specialists/{slug}/services/{serviceId:guid}")]
+    [Authorize(Roles = "Specialist")]
+    public async Task<IActionResult> UpdateService([FromRoute] string slug, [FromRoute] Guid serviceId, [FromBody] UpdateServiceRequest request)
+    {
+        var specialistId = User.GetSpecialistId();
+
+        if (specialistId == null)
+            return Unauthorized();
+
+        var validationResult = await _updateServiceValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        var service = new ServiceOffer
+        {
+            Id = serviceId,
+            Name = SpecialistEnumMapper.ParseServiceType(request.Name),
+            Description = request.Description,
+            Price = request.Price,
+            PriceUnit = SpecialistEnumMapper.ParsePriceUnit(request.PriceUnit)
+        };
+
+        var result = await _service.UpdateServiceAsync(slug, specialistId.Value, service);
+
+        if (result.IsFailure)
+            return BadRequest(result.Error);
+
+        return Ok();
+    }
+
+    /// <summary>
+    /// Deletes the specialist's service.
+    /// </summary>
+    /// <param name="slug">Specialist's slug.</param>
+    /// <param name="serviceId">Service ID.</param>
+    [HttpDelete("specialists/{slug}/services/{serviceId:guid}")]
+    [Authorize(Roles = "Specialist")]
+    public async Task<IActionResult> DeleteService([FromRoute] string slug, [FromRoute] Guid serviceId)
+    {
+        var specialistId = User.GetSpecialistId();
+
+        if (specialistId == null)
+            return Unauthorized();
+
+        var result = await _service.DeleteServiceAsync(slug, specialistId.Value, serviceId);
+
+        if (result.IsFailure)
+            return BadRequest(result.Error);
+
+        return Ok();
+    }
+
+    /// <summary>
+    /// Adds or updates the specialist's response to the review.
+    /// </summary>
+    /// <param name="slug">Specialist's slug.</param>
+    /// <param name="reviewId">Review ID.</param>
+    /// <param name="request">Response text.</param>
+    [HttpPut("specialists/{slug}/reviews/{reviewId:guid}/reply")]
+    [Authorize(Roles = "Specialist")]
+    public async Task<IActionResult> ReplyToReview([FromRoute] string slug, [FromRoute] Guid reviewId, [FromBody] ReviewReplyRequest request)
+    {
+        var specialistId = User.GetSpecialistId();
+        if (specialistId == null)
+            return Unauthorized();
+
+        var validationResult = await _replyValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        var result = await _service.ReplyToReviewAsync(slug, specialistId.Value, reviewId, request.Text);
+
+        if (result.IsFailure)
+            return BadRequest(result.Error);
+
+        return Ok();
+    }
+
+    /// <summary>
+    /// Returns directories for editing the specialist's profile 
+    /// (housing types, pet sizes, ages, types of services, etc.).
+    /// </summary>
+    [HttpGet("specialists/{slug}/edit-options")]
+    [AllowAnonymous]
+    public IActionResult GetEditOptions(string slug)
+    {
+        var response = new SpecialistProfileEditOptionsResponse
+        {
+            HousingTypes = Enum.GetNames(typeof(HousingType)).ToList(),
+            PetTypes = Enum.GetNames(typeof(PetType)).ToList(),
+            PetSizes = Enum.GetNames(typeof(PetSize)).ToList(),
+            PetAges = Enum.GetNames(typeof(PetAge)).ToList(),
+            ChildrenPresences = Enum.GetNames(typeof(ChildrenPolicy)).ToList(),
+            PriceUnits = Enum.GetNames(typeof(ServicePriceUnit)).ToList(),
+            ExperienceUnits = Enum.GetNames(typeof(ExperienceUnit)).ToList()
+        };
+
+        return Ok(response);
     }
 }

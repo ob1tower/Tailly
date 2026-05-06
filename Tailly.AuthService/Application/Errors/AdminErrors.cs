@@ -39,4 +39,25 @@ public static class AdminErrors
 
     public static readonly Error UserRoleNotFound =
         new("Admin.UserRoleNotFound", "Specified role not found for this user or has been deleted.");
+
+    public static readonly Error EmailAlreadyExists =
+        new("Admin.EmailAlreadyExists", "Email already exists.");
+
+    public static readonly Error RequestAlreadyProcessed =
+        new("Admin.RequestAlreadyProcessed", "This password recovery request has already been processed.");
+
+    public static readonly Error RequestAlreadyPending =
+        new("Admin.RequestAlreadyPending", "You already have a pending password recovery request.");
+
+    public static readonly Error BirthDateNotAllowed =
+        new("Admin.BirthDateNotAllowed", "Only super administrators can update birth date.");
+
+    public static readonly Error OnlySuperAdminCanChangeEmail =
+        new("Admin.OnlySuperAdminCanChangeEmail", "Only super administrators can change their email.");
+
+    public static readonly Error SameEmail =
+        new("Admin.SameEmail", "New email is the same as current.");
+    
+    public static readonly Error NewEmailNotFound =
+        new("Admin.NewEmailNotFound", "New email not found in verification data.");
 }

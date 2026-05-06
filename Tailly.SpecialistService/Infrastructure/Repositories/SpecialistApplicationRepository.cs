@@ -19,7 +19,6 @@ public class SpecialistApplicationRepository : ISpecialistApplicationRepository
     public async Task AddAsync(SpecialistApplication application)
     {
         var entity = SpecialistApplicationEntityMapper.ToEntity(application);
-
         await _context.SpecialistApplications.AddAsync(entity);
         await _context.SaveChangesAsync();
     }
@@ -33,11 +32,17 @@ public class SpecialistApplicationRepository : ISpecialistApplicationRepository
         return entity?.ToDomain();
     }
 
-    public async Task<(List<SpecialistApplication> items, int total)> GetAllAsync(int page, int limit)
+    public async Task<(List<SpecialistApplication> items, int total)> GetAllAsync(
+        int page, int limit, SpecialistApplicationStatus? status = null)
     {
         var query = _context.SpecialistApplications
             .AsNoTracking()
             .AsQueryable();
+
+        if (status.HasValue)
+        {
+            query = query.Where(x => x.Status == status.Value);
+        }
 
         var total = await query.CountAsync();
 
@@ -48,7 +53,7 @@ public class SpecialistApplicationRepository : ISpecialistApplicationRepository
             .ToListAsync();
 
         var items = entities
-            .Select(x => x.ToDomainRequired())
+            .Select(x => x.ToDomain()!)
             .ToList();
 
         return (items, total);
@@ -69,13 +74,30 @@ public class SpecialistApplicationRepository : ISpecialistApplicationRepository
         entity.City = application.City;
         entity.About = application.About;
         entity.ExperienceYears = application.ExperienceYears;
-        entity.ServicesWanted = application.ServicesWanted;
+        entity.AnimalTypes = application.AnimalTypes;
+        entity.ServiceFormats = application.ServiceFormats;
+        entity.CanGiveMedication = application.CanGiveMedication;
+        entity.CanHandleDifficultBehavior = application.CanHandleDifficultBehavior;
+        entity.CanTakeOvernightOrders = application.CanTakeOvernightOrders;
+        entity.HasOwnPets = application.HasOwnPets;
+        entity.HasPetFirstAidBasics = application.HasPetFirstAidBasics;
+        entity.HousingType = application.HousingType;
+        entity.DistrictPreferences = application.DistrictPreferences;
+        entity.SchedulePreferences = application.SchedulePreferences;
+        entity.PortfolioUrl = application.PortfolioUrl;
+        entity.Motivation = application.Motivation;
+        entity.AdditionalInfo = application.AdditionalInfo;
         entity.PhotoUrl = application.PhotoUrl;
         entity.Status = application.Status;
         entity.UpdatedAt = DateTime.UtcNow;
+        entity.ReviewComment = application.ReviewComment;
+        entity.ReviewedBy = application.ReviewedBy;
         entity.InterviewNote = application.InterviewNote;
         entity.InterviewDate = application.InterviewDate;
         entity.RejectionReason = application.RejectionReason;
+        entity.CreatedSpecialistId = application.CreatedSpecialistId;
+        entity.CreatedSpecialistSlug = application.CreatedSpecialistSlug;
+        entity.SpecialistAccountCreatedAt = application.SpecialistAccountCreatedAt;
 
         await _context.SaveChangesAsync();
     }
@@ -91,5 +113,22 @@ public class SpecialistApplicationRepository : ISpecialistApplicationRepository
         return await _context.SpecialistApplications
             .AnyAsync(a => a.Email.ToLower() == email.ToLower() &&
                            a.Status == SpecialistApplicationStatus.Pending);
+    }
+
+    public async Task<bool> HasInterviewConflictAsync(string reviewedBy, DateTime interviewDate)
+    {
+        if (string.IsNullOrWhiteSpace(reviewedBy))
+            return false;
+
+        var start = interviewDate.AddMinutes(-59);
+        var end = interviewDate.AddMinutes(59);
+
+        return await _context.SpecialistApplications
+            .AnyAsync(a =>
+                a.ReviewedBy == reviewedBy &&
+                a.InterviewDate.HasValue &&
+                a.InterviewDate >= start &&
+                a.InterviewDate <= end &&
+                a.Status == SpecialistApplicationStatus.InterviewScheduled);
     }
 }
