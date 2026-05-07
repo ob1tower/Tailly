@@ -15,6 +15,7 @@ public interface ISpecialistRepository
     Task UpdateDetailsAsync(Guid specialistId, Details details);
     Task<ServiceOffer?> GetServiceByIdAsync(Guid serviceId);
     Task AddServiceAsync(Guid specialistId, ServiceOffer service);
+    Task<bool> ExistsByEmailAsync(string email);
     Task UpdateServiceAsync(ServiceOffer service);
     Task DeleteServiceAsync(Guid serviceId);
     Task AddReviewReplyAsync(Guid reviewId, string replyText);

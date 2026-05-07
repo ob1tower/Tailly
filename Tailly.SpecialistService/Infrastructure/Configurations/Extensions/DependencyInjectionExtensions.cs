@@ -96,7 +96,6 @@ public static class DependencyInjectionExtensions
         services.AddValidatorsFromAssemblyContaining<CreateSpecialistApplicationRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<AssignInterviewRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<RejectApplicationRequestValidator>();
-        services.AddValidatorsFromAssemblyContaining<AttachSpecialistAccountRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<ApproveApplicationRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<UpdateSpecialistMainInfoRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<UpdateSpecialistDetailsRequestValidator>();

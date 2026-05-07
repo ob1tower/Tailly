@@ -108,13 +108,6 @@ public class SpecialistApplicationRepository : ISpecialistApplicationRepository
             .AnyAsync(x => x.Id == id);
     }
 
-    public async Task<bool> HasActiveApplicationAsync(string email)
-    {
-        return await _context.SpecialistApplications
-            .AnyAsync(a => a.Email.ToLower() == email.ToLower() &&
-                           a.Status == SpecialistApplicationStatus.Pending);
-    }
-
     public async Task<bool> HasInterviewConflictAsync(string reviewedBy, DateTime interviewDate)
     {
         if (string.IsNullOrWhiteSpace(reviewedBy))
@@ -130,5 +123,18 @@ public class SpecialistApplicationRepository : ISpecialistApplicationRepository
                 a.InterviewDate >= start &&
                 a.InterviewDate <= end &&
                 a.Status == SpecialistApplicationStatus.InterviewScheduled);
+    }
+
+    public async Task<bool> HasPendingOrApprovedApplicationAsync(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        return await _context.SpecialistApplications
+            .AsNoTracking()
+            .AnyAsync(a =>
+                a.Email.ToLower() == email.ToLower() &&
+                (a.Status == SpecialistApplicationStatus.Pending ||
+                 a.Status == SpecialistApplicationStatus.Approved));
     }
 }

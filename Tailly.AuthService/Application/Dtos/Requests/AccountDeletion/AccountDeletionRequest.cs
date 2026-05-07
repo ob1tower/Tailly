@@ -2,6 +2,5 @@
 
 public sealed class AccountDeletionRequest
 {
-    public string UserId { get; set; } = default!;
     public string Password { get; set; } = default!;
 }

@@ -220,18 +220,6 @@
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
-      "DownstreamPathTemplate": "/api/AccountDeletion/account/deletion/restore-preview",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "auth",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/account/deletion/restore-preview",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
       "DownstreamPathTemplate": "/api/AccountDeletion/account/deletion/restore",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -241,7 +229,7 @@
         }
       ],
       "UpstreamPathTemplate": "/account/deletion/restore",
-      "UpstreamHttpMethod": [ "POST" ]
+      "UpstreamHttpMethod": [ "GET" ]
     },
     {
       "DownstreamPathTemplate": "/api/AdminUsers/admin/users/{id}/profile",

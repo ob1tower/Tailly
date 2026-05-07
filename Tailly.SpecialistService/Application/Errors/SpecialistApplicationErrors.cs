@@ -26,7 +26,7 @@ public static class SpecialistApplicationErrors
         new("Application.SpecialistAlreadyExists", "The specialist's account has already been created for this application.");
 
     public static readonly Error ApplicationAlreadyExists =
-        new("Application.AlreadyExists", "You already have an active application under consideration.");
+        new("Application.AlreadyExists", "You already have a pending or approved application.");
 
     public static readonly Error AlreadySpecialist =
         new("Application.AlreadySpecialist", "You are already a specialist on the platform.");

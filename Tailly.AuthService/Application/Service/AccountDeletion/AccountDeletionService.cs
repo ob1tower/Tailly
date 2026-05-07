@@ -90,29 +90,19 @@ public class AccountDeletionService : IAccountDeletionService
             Body = $"""
             <h2>Account scheduled for deletion</h2>
             <p>Your {roleStr} account will be deleted in {RestoreDays} days.</p>
-            <p>If this was a mistake, restore it:</p>
-            <a href="{_frontend.BaseUrl}/restore?token={token}">Restore account</a>
-            """,
+            <p>If this was a mistake, click the link below to restore it:</p>
+            <p>
+                <a href="{_frontend.BaseUrl}/account/deletion/restore?token={token}" 
+                   style="color:#0066cc; font-weight:bold;">
+                    Restore my account
+                </a>
+            </p>
+            <p><small>This link will expire in {RestoreDays} days.</small></p>
+        """,
             Purpose = "account-deletion"
         });
 
         return Result.Success(restoreUntil);
-    }
-
-    public async Task<Result<(string email, string role, DateTime restoreUntil)>> GetRestorePreviewAsync(string token)
-    {
-        var tokenModel = await _tokenRepository.GetAsync(token);
-        if (tokenModel == null || tokenModel.ExpiresAt < DateTime.UtcNow)
-            return Result.Failure<(string, string, DateTime)>(AuthErrors.InvalidVerificationToken.Description);
-
-        var user = await _usersRepository.GetByIdAsync(tokenModel.UserId);
-        if (user == null)
-            return Result.Failure<(string, string, DateTime)>(AuthErrors.UserNotFound.Description);
-
-        var roleType = (RoleType)tokenModel.RoleId;
-        var roleStr = AuthMapper.MapRole(roleType);
-
-        return Result.Success((user.Email, roleStr, tokenModel.ExpiresAt));
     }
 
     public async Task<Result> RestoreAsync(string token)

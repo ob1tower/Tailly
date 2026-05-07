@@ -306,4 +306,14 @@ public class SpecialistRepository : ISpecialistRepository
             .AsNoTracking()
             .AnyAsync(s => s.SpecialistId == specialistId && s.Name == serviceType);
     }
+
+    public async Task<bool> ExistsByEmailAsync(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        return await _context.Specialists
+            .AsNoTracking()
+            .AnyAsync(s => s.Email.ToLower() == email.ToLower());
+    }
 }

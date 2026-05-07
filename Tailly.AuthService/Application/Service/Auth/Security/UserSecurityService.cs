@@ -98,10 +98,16 @@ public class UserSecurityService : IUserSecurityService
 
         var activeRoles = user.UserRoles.Where(r => r.SoftDeletedAt == null).ToList();
         if (activeRoles.Count == 0)
+        {
+            _logger.LogWarning("RequestEmailChange failed. No active roles for user: {UserId}", userId);
             return Result.Failure<EmailChangeResult, Error>(AuthErrors.AccountPendingDeletion);
+        }
 
         if (activeRoles.All(r => r.IsEffectivelyBlocked))
+        {
+            _logger.LogWarning("RequestEmailChange failed. All roles are blocked for user: {UserId}", userId);
             return Result.Failure<EmailChangeResult, Error>(AuthErrors.AccountBlocked);
+        }
 
         if (user.Email.Equals(newEmail, StringComparison.OrdinalIgnoreCase))
         {
@@ -115,17 +121,18 @@ public class UserSecurityService : IUserSecurityService
             return Result.Failure<EmailChangeResult, Error>(AuthErrors.UserAlreadyExists);
         }
 
-        var requestId = Guid.NewGuid().ToString();
         var code = VerificationCodeGenerator.GenerateCode();
 
-        await _verificationCodeService.SetCodeAsync(newEmail, code, "change-email");
+        var newEmailKey = $"email-change:new:{userId}";
+        await _redis.StringSetAsync(newEmailKey, newEmail, TimeSpan.FromMinutes(15));
 
         await _publishEndpoint.Publish(new SendEmailMessage
         {
-            To = newEmail,
+            To = user.Email,
             Subject = "Email Change Confirmation",
             Body = $"""
             <h2>Email Change Request</h2>
+            <p>Someone requested to change your email to: <b>{newEmail}</b></p>
             <p>Your confirmation code:</p>
             <h1>{code}</h1>
             <p>The code is valid for 15 minutes.</p>
@@ -133,14 +140,15 @@ public class UserSecurityService : IUserSecurityService
             Purpose = "change-email"
         });
 
+        await _verificationCodeService.SetCodeAsync(user.Email, code, "change-email");
+
         var maskedOldEmail = EmailHelper.Mask(user.Email);
 
-        _logger.LogInformation("Email change requested for user {UserId} → {NewEmail} (RequestId: {RequestId})",
-            userId, newEmail, requestId);
+        _logger.LogInformation("Email change requested for user {UserId} → {NewEmail}", userId, newEmail);
 
         return Result.Success<EmailChangeResult, Error>(new EmailChangeResult
         {
-            RequestId = requestId,
+            RequestId = Guid.NewGuid().ToString(),
             MaskedOldEmail = maskedOldEmail
         });
     }
@@ -159,23 +167,50 @@ public class UserSecurityService : IUserSecurityService
 
         var activeRoles = user.UserRoles.Where(r => r.SoftDeletedAt == null).ToList();
         if (activeRoles.Count == 0)
+        {
+            _logger.LogWarning("ConfirmEmailChange failed. No active roles for user: {UserId}", userId);
             return Result.Failure(AuthErrors.AccountPendingDeletion.Description);
+        }
 
         if (activeRoles.All(r => r.IsEffectivelyBlocked))
+        {
+            _logger.LogWarning("ConfirmEmailChange failed. All roles are blocked for user: {UserId}", userId);
             return Result.Failure(AuthErrors.AccountBlocked.Description);
+        }
 
-        var verifyResult = await _verificationCodeService.VerifyCodeAsync(newEmail, code, "change-email");
+        var verifyResult = await _verificationCodeService.VerifyCodeAsync(user.Email, code, "change-email");
         if (!verifyResult.Success)
         {
-            _logger.LogWarning("ConfirmEmailChange failed. Invalid code for new email: {NewEmail}", newEmail);
+            _logger.LogWarning("ConfirmEmailChange failed. Invalid code for user: {UserId}", userId);
+            return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
+        }
+
+        var newEmailKey = $"email-change:new:{userId}";
+        var newEmailValue = await _redis.StringGetAsync(newEmailKey);
+
+        if (newEmailValue.IsNullOrEmpty || !newEmailValue.ToString()!.Equals(newEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogWarning("ConfirmEmailChange failed. New email mismatch or not found in Redis. UserId: {UserId}", userId);
             return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
         }
 
         user.Email = newEmail;
         user.EmailConfirmed = true;
-        await _usersRepository.UpdateAsync(user);
 
+        await _usersRepository.UpdateAsync(user);
         await _refreshTokenRepository.InvalidateAllAsync(userId);
+        await _redis.KeyDeleteAsync(newEmailKey);
+
+        await _publishEndpoint.Publish(new SendEmailMessage
+        {
+            To = newEmail,
+            Subject = "Email successfully changed",
+            Body = $"""
+            <h2>Your email has been successfully changed</h2>
+            <p>New email: {newEmail}</p>
+            """,
+            Purpose = "email-changed"
+        });
 
         _logger.LogInformation("Email changed successfully for user {UserId} to {NewEmail}", userId, newEmail);
         return Result.Success();
@@ -206,14 +241,13 @@ public class UserSecurityService : IUserSecurityService
             return Result.Failure<EmailChangeResult, Error>(AdminErrors.EmailAlreadyExists);
 
         var code = VerificationCodeGenerator.GenerateCode();
-        await _verificationCodeService.SetCodeAsync(newEmail, code, "admin-change-email");
 
         var newEmailKey = $"email-change:new:{userId}";
         await _redis.StringSetAsync(newEmailKey, newEmail, TimeSpan.FromMinutes(15));
 
         await _publishEndpoint.Publish(new SendEmailMessage
         {
-            To = newEmail,
+            To = user.Email,
             Subject = "Email confirmation of the change",
             Body = $"""
             <h2>Changing the email address of the main administrator</h2>
@@ -223,6 +257,8 @@ public class UserSecurityService : IUserSecurityService
             """,
             Purpose = "admin-change-email"
         });
+
+        await _verificationCodeService.SetCodeAsync(user.Email, code, "admin-change-email");
 
         var maskedOldEmail = EmailHelper.Mask(user.Email);
 
@@ -235,11 +271,17 @@ public class UserSecurityService : IUserSecurityService
         });
     }
 
-    public async Task<Result> ConfirmEmailChangeAsync(Guid userId, string code)
+    public async Task<Result> ConfirmEmailAdminChangeAsync(Guid userId, string code)
     {
         var user = await _usersRepository.GetByIdAsync(userId);
         if (user == null)
             return Result.Failure(AdminErrors.UserNotFound.Description);
+
+        var verifyResult = await _verificationCodeService.VerifyCodeAsync(
+            user.Email, code, "admin-change-email");
+
+        if (!verifyResult.Success)
+            return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
 
         var newEmailKey = $"email-change:new:{userId}";
         var newEmailValue = await _redis.StringGetAsync(newEmailKey);
@@ -249,24 +291,25 @@ public class UserSecurityService : IUserSecurityService
 
         var newEmail = newEmailValue.ToString()!;
 
-        var verifyResult = await _verificationCodeService.VerifyCodeAsync(
-            newEmail,
-            code,
-            "admin-change-email");
-
-        if (!verifyResult.Success)
-            return Result.Failure(AuthErrors.InvalidVerificationCode.Description);
-
         user.Email = newEmail;
         user.EmailConfirmed = true;
 
         await _usersRepository.UpdateAsync(user);
         await _refreshTokenRepository.InvalidateAllAsync(userId);
-
         await _redis.KeyDeleteAsync(newEmailKey);
 
-        _logger.LogInformation("SuperAdmin email changed successfully. UserId={UserId}, NewEmail={NewEmail}", userId, newEmail);
+        await _publishEndpoint.Publish(new SendEmailMessage
+        {
+            To = newEmail,
+            Subject = "Email successfully changed",
+            Body = $"""
+            <h2>Your email has been successfully changed</h2>
+            <p>New email: {newEmail}</p>
+            """,
+            Purpose = "email-changed"
+        });
 
+        _logger.LogInformation("SuperAdmin email changed successfully. UserId={UserId}, NewEmail={NewEmail}", userId, newEmail);
         return Result.Success();
     }
 
