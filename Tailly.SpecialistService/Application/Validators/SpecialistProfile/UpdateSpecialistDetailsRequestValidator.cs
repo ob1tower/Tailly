@@ -54,7 +54,18 @@ public class UpdateSpecialistDetailsRequestValidator : AbstractValidator<UpdateS
 
     private bool BeAValidPetSize(string value)
     {
-        return Enum.TryParse<PetSize>(value, true, out _);
+        if (Enum.TryParse<PetSize>(value, true, out _))
+            return true;
+
+        return value.ToLowerInvariant() switch
+        {
+            "upto2kg" or "up_to_2kg" or "2kg" => true,
+            "kg2to5" or "2_5kg" or "2-5kg" => true,
+            "kg5to10" or "5_10kg" or "5-10kg" => true,
+            "kg10to20" or "10_20kg" or "10-20kg" => true,
+            "over20kg" or "over_20kg" or ">20kg" or "20kg+" => true,
+            _ => false
+        };
     }
 
     private bool BeAValidPetAge(string value)

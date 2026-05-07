@@ -20,19 +20,16 @@ public class AdminSpecialistApplicationController : ControllerBase
 
     private readonly IValidator<AssignInterviewRequest> _assignValidator;
     private readonly IValidator<RejectApplicationRequest> _rejectValidator;
-    private readonly IValidator<AttachSpecialistAccountRequest> _attachValidator;
     private readonly IValidator<ApproveApplicationRequest> _approveValidator;
 
     public AdminSpecialistApplicationController(ISpecialistApplicationService service,
                                                 IValidator<AssignInterviewRequest> assignValidator,
                                                 IValidator<RejectApplicationRequest> rejectValidator,
-                                                IValidator<AttachSpecialistAccountRequest> attachValidator,
                                                 IValidator<ApproveApplicationRequest> approveValidator)
     {
         _service = service;
         _assignValidator = assignValidator;
         _rejectValidator = rejectValidator;
-        _attachValidator = attachValidator;
         _approveValidator = approveValidator;
     }
 
@@ -92,8 +89,7 @@ public class AdminSpecialistApplicationController : ControllerBase
         if (userId == null)
             return Unauthorized();
 
-        var reviewedBy = request.ReviewedBy
-            ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+        var reviewedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
             ?? User.Identity?.Name
             ?? userId.ToString()!;
 
@@ -122,8 +118,7 @@ public class AdminSpecialistApplicationController : ControllerBase
         if (userId == null)
             return Unauthorized();
 
-        var reviewedBy = request.ReviewedBy
-            ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+        var reviewedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
             ?? User.Identity?.Name
             ?? userId.ToString()!;
 
@@ -151,8 +146,7 @@ public class AdminSpecialistApplicationController : ControllerBase
         if (userId == null)
             return Unauthorized();
 
-        var reviewedBy = request.ReviewedBy
-            ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+        var reviewedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
             ?? User.Identity?.Name
             ?? userId.ToString()!;
 
@@ -168,19 +162,18 @@ public class AdminSpecialistApplicationController : ControllerBase
     /// Creates a specialist account from an approved application.
     /// </summary>
     /// <param name="id">Application ID.</param>
-    /// <param name="request">Reviewed by admin info.</param>
     [HttpPost("admin/specialist-applications/{id:guid}/create-specialist-account")]
-    public async Task<IActionResult> AttachSpecialistAccount(Guid id, [FromBody] AttachSpecialistAccountRequest request)
+    public async Task<IActionResult> CreateSpecialistAccount(Guid id)
     {
-        var validation = await _attachValidator.ValidateAsync(request);
-        if (!validation.IsValid)
-            return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
-
         var userId = User.GetUserId();
         if (userId == null)
             return Unauthorized();
 
-        var result = await _service.AttachSpecialistAccountAsync(id, request.ReviewedBy);
+        var reviewedBy = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+            ?? User.Identity?.Name
+            ?? userId.ToString()!;
+
+        var result = await _service.AttachSpecialistAccountAsync(id, reviewedBy);
 
         if (result.IsFailure)
             return BadRequest(result.Error);
@@ -189,8 +182,24 @@ public class AdminSpecialistApplicationController : ControllerBase
 
         return Ok(new
         {
-            success = true,
-            specialistId = specialist.Id.ToString(),
+            account = new
+            {
+                id = specialist.Id.ToString(),
+                email = specialist.Email,
+                role = "specialist",
+                firstName = specialist.FirstName,
+                lastName = specialist.LastName,
+                middleName = specialist.MiddleName,
+                phone = specialist.Phone,
+                city = specialist.City,
+                about = specialist.Details?.About ?? "",
+                specialistId = specialist.Id.ToString(),
+                specialistSlug = specialist.Slug,
+                applicationId = id.ToString(),
+                createdAt = specialist.CreatedAt.ToString("o"),
+                createdBy = reviewedBy,
+                isBlocked = false
+            },
             temporaryPassword = result.Value.TemporaryPassword
         });
     }

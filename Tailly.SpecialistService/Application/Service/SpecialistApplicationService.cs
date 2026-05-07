@@ -208,9 +208,19 @@ public class SpecialistApplicationService : ISpecialistApplicationService
 
     public async Task<Result<SpecialistApplication, Error>> CreateAsync(SpecialistApplication application)
     {
-        var hasActive = await _applicationRepository.HasActiveApplicationAsync(application.Email);
-        if (hasActive)
+        var hasActiveOrApproved = await _applicationRepository.HasPendingOrApprovedApplicationAsync(application.Email);
+        if (hasActiveOrApproved)
+        {
+            _logger.LogWarning("User already has pending or approved application. Email: {Email}", application.Email);
             return Result.Failure<SpecialistApplication, Error>(SpecialistApplicationErrors.ApplicationAlreadyExists);
+        }
+
+        var specialistExists = await _specialistRepository.ExistsByEmailAsync(application.Email);
+        if (specialistExists)
+        {
+            _logger.LogWarning("Specialist with this email already exists. Email: {Email}", application.Email);
+            return Result.Failure<SpecialistApplication, Error>(SpecialistApplicationErrors.SpecialistAlreadyExists);
+        }
 
         application.CreatedAt = DateTime.UtcNow;
         application.UpdatedAt = DateTime.UtcNow;

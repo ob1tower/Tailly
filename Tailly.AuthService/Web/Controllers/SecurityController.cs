@@ -113,8 +113,7 @@ public class SecurityController : ControllerBase
         if (userId == null)
             return Unauthorized();
 
-        var result = await _userSecurityService.ConfirmEmailChangeAsync(userId.Value, request.RequestId,
-                                                                request.NewEmail, request.Code);
+        var result = await _userSecurityService.ConfirmEmailChangeAsync(userId.Value, request.RequestId, request.NewEmail, request.Code);
 
         if (result.IsFailure)
             return BadRequest(result.Error);
@@ -155,7 +154,7 @@ public class SecurityController : ControllerBase
         if (userId == null)
             return Unauthorized();
 
-        var result = await _userSecurityService.ConfirmEmailChangeAsync(
+        var result = await _userSecurityService.ConfirmEmailAdminChangeAsync(
             userId.Value,
             payload.Code);
 

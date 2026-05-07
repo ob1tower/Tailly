@@ -17,15 +17,12 @@ namespace Tailly.AuthService.Web.Controllers;
 public class AccountDeletionController : ControllerBase
 {
     private readonly IAccountDeletionService _service;
-    private readonly RestoreRequestValidator _restoreRequestValidator;
     private readonly DeletionRequestValidator _deletionValidator;
 
-    public AccountDeletionController(IAccountDeletionService service, 
-                                     RestoreRequestValidator restoreRequestValidator, 
+    public AccountDeletionController(IAccountDeletionService service,  
                                      DeletionRequestValidator deletionValidator)
     {
         _service = service;
-        _restoreRequestValidator = restoreRequestValidator;
         _deletionValidator = deletionValidator;
     }
 
@@ -47,9 +44,6 @@ public class AccountDeletionController : ControllerBase
         if (userId == null)
             return Unauthorized();
 
-        if (!string.Equals(request.UserId, userId.Value.ToString(), StringComparison.OrdinalIgnoreCase))
-            return Forbid();
-
         var roleClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role);
         if (roleClaim == null || !Enum.TryParse<RoleType>(roleClaim.Value, true, out var role))
             return BadRequest(AuthErrors.InvalidRole);
@@ -70,48 +64,18 @@ public class AccountDeletionController : ControllerBase
     }
 
     /// <summary>
-    /// Get a preview of account recovery using a token.
+    /// Restore an account using a token.
     /// </summary>
     /// <param name="token">Recovery token.</param>
     [AllowAnonymous]
     [EnableRateLimiting("account-restore")]
-    [HttpGet("account/deletion/restore-preview")]
-    public async Task<IActionResult> GetRestorePreview([FromQuery] string token)
+    [HttpGet("account/deletion/restore")]
+    public async Task<IActionResult> Restore([FromQuery] string token)
     {
         if (string.IsNullOrWhiteSpace(token))
             return BadRequest(AuthErrors.InvalidVerificationToken);
 
-        var result = await _service.GetRestorePreviewAsync(token);
-
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-
-        var (email, roleStr, restoreUntil) = result.Value;
-
-        return Ok(new RestorePreviewResponse
-        {
-            Email = email,
-            RoleLabel = roleStr.Equals("specialist", StringComparison.OrdinalIgnoreCase)
-                ? "Специалист"
-                : "Клиент",
-            RestoreDeadlineIso = restoreUntil
-        });
-    }
-
-    /// <summary>
-    /// Restore an account using a token.
-    /// </summary>
-    /// <param name="request">Recovery token.</param>
-    [AllowAnonymous]
-    [EnableRateLimiting("account-restore")]
-    [HttpPost("account/deletion/restore")]
-    public async Task<IActionResult> Restore([FromBody] RestoreAccountByTokenRequest request)
-    {
-        var validationResult = await _restoreRequestValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
-            return BadRequest(ErrorFormatter.Deserialize(validationResult.Errors));
-
-        var result = await _service.RestoreAsync(request.Token);
+        var result = await _service.RestoreAsync(token);
 
         if (result.IsFailure)
             return BadRequest(result.Error);
