@@ -1,4 +1,5 @@
-﻿using Tailly.SpecialistService.Core.Enums;
+﻿using Tailly.SpecialistService.Application.Dtos.Responses.Home;
+using Tailly.SpecialistService.Core.Enums;
 using Tailly.SpecialistService.Core.Models.Reviews;
 using Tailly.SpecialistService.Core.Models.Specialist;
 
@@ -8,8 +9,8 @@ public interface ISpecialistRepository
 {
     Task<Specialist?> GetBySlugAsync(string slug);
     Task<Specialist?> GetByIdAsync(Guid id);
-    Task<Specialist?> GetFullProfileBySlugAsync(string slug);
-    Task<Specialist?> GetFullProfileByIdAsync(Guid id);
+    Task<Specialist?> GetFullProfileBySlugAsync(string slug, ReviewSortType reviewSortType);
+    Task<Specialist?> GetFullProfileByIdAsync(Guid id, ReviewSortType reviewSortType);
     Task UpdateMainInfoAsync(Guid specialistId, string firstName, string lastName, string? middleName,
                              string city, string district, string phone, string? avatarUrl);
     Task UpdateDetailsAsync(Guid specialistId, Details details);
@@ -22,6 +23,7 @@ public interface ISpecialistRepository
     Task<Review?> GetReviewByIdAsync(Guid reviewId);
     Task<bool> SlugExistsAsync(string slug);
     Task AddAsync(Specialist specialist);
+    Task<List<HomeReviewResponse>> GetHomeReviewsAsync(int? rating, int limit, bool requirePhotos, int minTextLength, int minWords);
     Task<bool> HasServiceOfTypeAsync(Guid specialistId, ServiceType serviceType);
     Task<List<Specialist>> SearchAsync(string? cityQuery, string? districtQuery, string? serviceType,
                                        decimal? priceMin, decimal? priceMax, int page, int pageSize);

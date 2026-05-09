@@ -16,4 +16,5 @@ public class ReviewEntity
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public string? ReplyText { get; set; }
     public DateTime? ReplyCreatedAt { get; set; }
+    public List<string> Photos { get; set; } = [];
 }

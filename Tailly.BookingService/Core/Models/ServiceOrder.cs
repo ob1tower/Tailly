@@ -13,7 +13,7 @@ public class ServiceOrder
     public string SpecialistSlug { get; set; } = string.Empty;
     public Guid PetId { get; set; }
     public string PetName { get; set; } = string.Empty;
-    public string ServiceId { get; set; } = string.Empty;
+    public Guid ServiceId { get; set; }
     public string ServiceTitle { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public PriceUnit PriceUnit { get; set; }
@@ -28,4 +28,5 @@ public class ServiceOrder
     public DateTime? CanceledAt { get; set; }
     public string? CancelReason { get; set; }
     public ServiceOrderReview? Review { get; set; }
+    public ServiceOrderServiceSnapshot? ServiceSnapshot { get; set; }
 }

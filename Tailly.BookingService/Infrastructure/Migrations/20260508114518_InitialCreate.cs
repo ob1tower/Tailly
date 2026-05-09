@@ -24,7 +24,7 @@ namespace Tailly.BookingService.Migrations
                     SpecialistSlug = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     PetId = table.Column<Guid>(type: "uuid", nullable: false),
                     PetName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    ServiceId = table.Column<string>(type: "text", nullable: false),
+                    ServiceId = table.Column<Guid>(type: "uuid", nullable: false),
                     ServiceTitle = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
                     Price = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     PriceUnit = table.Column<int>(type: "integer", nullable: false),
@@ -66,6 +66,28 @@ namespace Tailly.BookingService.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ServiceOrderServiceSnapshots",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ServiceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    PriceUnit = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ServiceOrderServiceSnapshots", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ServiceOrderServiceSnapshots_ServiceOrders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "ServiceOrders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_ServiceOrderReviews_OrderId",
                 table: "ServiceOrderReviews",
@@ -97,6 +119,12 @@ namespace Tailly.BookingService.Migrations
                 name: "IX_ServiceOrders_Status",
                 table: "ServiceOrders",
                 column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ServiceOrderServiceSnapshots_OrderId",
+                table: "ServiceOrderServiceSnapshots",
+                column: "OrderId",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -104,6 +132,9 @@ namespace Tailly.BookingService.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ServiceOrderReviews");
+
+            migrationBuilder.DropTable(
+                name: "ServiceOrderServiceSnapshots");
 
             migrationBuilder.DropTable(
                 name: "ServiceOrders");

@@ -58,9 +58,6 @@ public static class ShopErrors
     public static readonly Error PaymentFailed = 
         new("Payment.Failed", "Payment processing failed.");
 
-    public static readonly Error InvalidQuantity =
-        new("Cart.InvalidQuantity", "Quantity must be greater than zero.");
-
     public static readonly Error ItemAlreadyExists =
         new("Cart.ItemAlreadyExists", "Item already exists in cart.");
 

@@ -7,20 +7,13 @@ namespace Tailly.BookingService.Application.Mappers;
 
 public static class ServiceOrderMapper
 {
-    public static CreateServiceOrder ToCreateModel(CreateServiceOrderRequest request)   // ← измени название
+    public static CreateServiceOrder ToCreateModel(CreateServiceOrderRequest request)
     {
         return new CreateServiceOrder
         {
-            ClientName = request.ClientName,
             SpecialistId = request.SpecialistId,
-            SpecialistName = request.SpecialistName,
-            SpecialistSlug = request.SpecialistSlug,
-            PetId = request.PetId,
-            PetName = request.PetName,
             ServiceId = request.ServiceId,
-            ServiceTitle = request.ServiceTitle,
-            Price = request.Price,
-            PriceUnit = ParsePriceUnit(request.PriceUnit),
+            PetId = request.PetId,
             StartAt = request.StartAt,
             EndAt = request.EndAt,
             Comment = request.Comment
@@ -53,7 +46,9 @@ public static class ServiceOrderMapper
             StartedAt = model.StartedAt,
             CompletedAt = model.CompletedAt,
             CanceledAt = model.CanceledAt,
-            CancelReason = model.CancelReason
+            CancelReason = model.CancelReason,
+            Currency = "RUB",
+            HasReview = model.Review != null
         };
     }
 

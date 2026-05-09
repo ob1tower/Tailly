@@ -40,6 +40,10 @@ public class AdminPostController : ControllerBase
     [HttpGet("admin/content/posts")]
     public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, [FromQuery] string? sort = null)
     {
+        var userId = User.GetUserId();
+        if (userId == null)
+            return Unauthorized();
+
         var pagination = new PaginationValidator(page, pageSize);
 
         var result = await _service.GetAdminListAsync(pagination.PageNumber, pagination.PageSize, search, sort);
@@ -49,13 +53,7 @@ public class AdminPostController : ControllerBase
 
         var (posts, total) = result.Value;
 
-        return Ok(new
-        {
-            items = posts.Select(PostMapper.ToResponse),
-            total,
-            page,
-            pageSize
-        });
+        return Ok(posts.Select(PostMapper.ToResponse));
     }
 
     /// <summary>

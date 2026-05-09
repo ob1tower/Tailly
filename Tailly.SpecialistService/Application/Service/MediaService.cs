@@ -48,7 +48,7 @@ public class MediaService : IMediaService
             await using var stream = new FileStream(fullPath, FileMode.Create);
             await file.CopyToAsync(stream);
 
-            var url = $"/uploads/{mediaType}/{specialistId}/{fileName}";
+            var url = $"/specialist-uploads/{mediaType}/{specialistId}/{fileName}";
 
             _logger.LogInformation("File uploaded successfully. SpecialistId: {SpecialistId}, Type: {MediaType}, File: {FileName}",
                 specialistId, mediaType, fileName);

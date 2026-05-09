@@ -21,6 +21,11 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Tailly.SpecialistService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
+USER root
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY --from=build /src/Tailly.SpecialistService/wwwroot ./wwwroot
+RUN mkdir -p /app/wwwroot/uploads \
+    && chmod -R 777 /app/wwwroot
+USER $APP_UID
 ENTRYPOINT ["dotnet", "Tailly.SpecialistService.dll"]

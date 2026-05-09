@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Tailly.SpecialistService.Application.Dtos.Requests.SpecialistApplication;
 using Tailly.SpecialistService.Application.Errors;
 using Tailly.SpecialistService.Application.Mappers;
@@ -29,6 +30,7 @@ public class SpecialistApplicationController : ControllerBase
     /// <param name="request">Specialist application data.</param>
     /// <returns>Application ID.</returns>
     [HttpPost("specialist-applications")]
+    [EnableRateLimiting("specialist-application")]
     public async Task<IActionResult> Create([FromBody] CreateSpecialistApplicationRequest request)
     {
         var validation = await _validator.ValidateAsync(request);

@@ -1,22 +1,22 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tailly.SpecialistService.Application.Dtos.Requests.Media;
-using Tailly.SpecialistService.Application.Errors;
-using Tailly.SpecialistService.Application.Service.Interfaces;
-using Tailly.SpecialistService.Infrastructure.Configurations.Extensions;
+using Tailly.BookingService.Application.Dtos.Requests;
+using Tailly.BookingService.Application.Errors;
+using Tailly.BookingService.Application.Service.Interfaces;
+using Tailly.BookingService.Infrastructure.Configurations.Extensions;
 
-namespace Tailly.SpecialistService.Web.Controllers;
+namespace Tailly.BookingService.Web.Controllers;
 
 [Route("api/[controller]")]
-[Authorize(Roles = "Specialist")]
 [ApiController]
-public class MediaController : ControllerBase
+[Authorize(Roles = "Client")]
+public class BookingMediaController : ControllerBase
 {
     private readonly IMediaService _mediaService;
     private readonly IValidator<UploadMediaRequest> _validator;
 
-    public MediaController(IMediaService mediaService,
+    public BookingMediaController(IMediaService mediaService,
                            IValidator<UploadMediaRequest> validator)
     {
         _mediaService = mediaService;
@@ -24,16 +24,16 @@ public class MediaController : ControllerBase
     }
 
     /// <summary>
-    /// Uploading an image (avatar or photo to the gallery).
+    /// Upload review image.
     /// </summary>
-    /// <param name="file">Image file to upload.</param>
-    /// <param name="mediaType">Type of media: avatar, specialist_gallery.</param>
-    /// <returns>URL of the uploaded file.</returns>
+    /// <param name="file">Image file.</param>
+    /// <param name="mediaType">Media type: reviews.</param>
+    /// <returns>Uploaded file URL.</returns>
     [HttpPost("upload")]
     public async Task<IActionResult> Upload(IFormFile file, [FromQuery] string mediaType)
     {
-        var specialistId = User.GetSpecialistId();
-        if (specialistId == null)
+        var userId = User.GetUserId();
+        if (userId == null)
             return Unauthorized();
 
         var request = new UploadMediaRequest
@@ -46,7 +46,7 @@ public class MediaController : ControllerBase
         if (!validation.IsValid)
             return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
 
-        var result = await _mediaService.UploadAsync(file, mediaType, specialistId.Value);
+        var result = await _mediaService.UploadAsync(file, mediaType, userId.Value);
 
         if (result.IsFailure)
             return BadRequest(result.Error);

@@ -1,5 +1,9 @@
-﻿using Tailly.SpecialistService.Application.Service.Interfaces;
+﻿using Microsoft.Extensions.Options;
+using Tailly.SpecialistService.Application.Dtos.Responses.Home;
+using Tailly.SpecialistService.Application.Service.Interfaces;
+using Tailly.SpecialistService.Core.Enums;
 using Tailly.SpecialistService.Core.Models.Specialist;
+using Tailly.SpecialistService.Infrastructure.Configurations.Options;
 using Tailly.SpecialistService.Infrastructure.Repositories.Interfaces;
 
 namespace Tailly.SpecialistService.Application.Service;
@@ -7,12 +11,15 @@ namespace Tailly.SpecialistService.Application.Service;
 public class SpecialistsService : ISpecialistsService
 {
     private readonly ISpecialistRepository _repository;
+    private readonly ApiSettings _apiSettings;
     private readonly ILogger<SpecialistsService> _logger;
 
     public SpecialistsService(ISpecialistRepository repository,
+                              IOptions<ApiSettings> apiSettings,
                               ILogger<SpecialistsService> logger)
     {
         _repository = repository;
+        _apiSettings = apiSettings.Value;
         _logger = logger;
     }
 
@@ -25,13 +32,32 @@ public class SpecialistsService : ISpecialistsService
         return await _repository.SearchAsync(cityQuery, districtQuery, serviceType, priceMin, priceMax, page, pageSize);
     }
 
-    public async Task<Specialist?> GetFullProfileByIdAsync(Guid id)
+    public async Task<Specialist?> GetFullProfileByIdAsync(Guid id, ReviewSortType reviewSortType)
     {
-        return await _repository.GetFullProfileByIdAsync(id);
+        return await _repository.GetFullProfileByIdAsync(id, reviewSortType);
     }
 
-    public async Task<Specialist?> GetFullProfileBySlugAsync(string slug)
+    public async Task<Specialist?> GetFullProfileBySlugAsync(string slug, ReviewSortType reviewSortType)
     {
-        return await _repository.GetFullProfileBySlugAsync(slug);
+        return await _repository.GetFullProfileBySlugAsync(slug, reviewSortType);
+    }
+
+    public async Task<List<HomeReviewResponse>> GetHomeReviewsAsync(int? rating, int limit, bool requirePhotos, int minTextLength, int minWords)
+    {
+        var reviews = await _repository.GetHomeReviewsAsync(
+            rating,
+            limit,
+            requirePhotos,
+            minTextLength,
+            minWords);
+
+        foreach (var review in reviews)
+        {
+            review.PhotoUrls = review.PhotoUrls
+                .Select(x => $"{_apiSettings.BaseUrl}{x}")
+                .ToList();
+        }
+
+        return reviews;
     }
 }

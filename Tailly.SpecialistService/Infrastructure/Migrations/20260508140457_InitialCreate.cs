@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -141,7 +142,8 @@ namespace Tailly.SpecialistService.Migrations
                     Text = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ReplyText = table.Column<string>(type: "text", nullable: true),
-                    ReplyCreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    ReplyCreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Photos = table.Column<List<string>>(type: "text[]", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -345,9 +347,9 @@ namespace Tailly.SpecialistService.Migrations
                 columns: new[] { "Id", "AvatarUrl", "City", "CompletedOrdersCount", "CreatedAt", "District", "Email", "ExperienceYears", "FirstName", "LastName", "Latitude", "Longitude", "MiddleName", "Phone", "Rating", "RepeatOrdersCount", "ReviewsCount", "Slug", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "/uploads/avatars/anna.jpg", "Москва", 87, new DateTime(2025, 11, 6, 17, 7, 49, 523, DateTimeKind.Utc).AddTicks(752), "Сокольники", "anna@example.com", 5, "Анна", "Смирнова", 55.793100000000003, 37.677799999999998, null, "+79161234567", 4.8m, 24, 42, "anna-petcare", new Guid("438a4a9e-c17b-439d-ab8b-007ed01d2ac8") },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), null, "Москва", 45, new DateTime(2026, 1, 6, 17, 7, 49, 523, DateTimeKind.Utc).AddTicks(794), "Марьино", "dima@example.com", 3, "Дмитрий", "Кузнецов", 55.6494, 37.743000000000002, null, "+79162345678", 4.6m, 12, 28, "dima-dogwalker", new Guid("bcbd93af-e24d-432e-9c48-86d0103bbf28") },
-                    { new Guid("33333333-3333-3333-3333-333333333333"), null, "Санкт-Петербург", 112, new DateTime(2025, 9, 6, 17, 7, 49, 523, DateTimeKind.Utc).AddTicks(810), "Центральный", "maria@example.com", 7, "Мария", "Попова", 59.938600000000001, 30.3141, null, "+79213456789", 4.9m, 35, 67, "maria-grooming", new Guid("2b80396d-b879-4abf-97ff-8b53ce4ccf22") }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "/uploads/avatars/anna.jpg", "Москва", 87, new DateTime(2025, 11, 8, 14, 4, 56, 434, DateTimeKind.Utc).AddTicks(5976), "Сокольники", "anna@example.com", 5, "Анна", "Смирнова", 55.793100000000003, 37.677799999999998, null, "+79161234567", 4.8m, 24, 42, "anna-petcare", new Guid("438a4a9e-c17b-439d-ab8b-007ed01d2ac8") },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), null, "Москва", 45, new DateTime(2026, 1, 8, 14, 4, 56, 434, DateTimeKind.Utc).AddTicks(6021), "Марьино", "dima@example.com", 3, "Дмитрий", "Кузнецов", 55.6494, 37.743000000000002, null, "+79162345678", 4.6m, 12, 28, "dima-dogwalker", new Guid("6fbf4dc8-cf8b-46df-960f-b6d0c6eb7ff9") },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), null, "Санкт-Петербург", 112, new DateTime(2025, 9, 8, 14, 4, 56, 434, DateTimeKind.Utc).AddTicks(6025), "Центральный", "maria@example.com", 7, "Мария", "Попова", 59.938600000000001, 30.3141, null, "+79213456789", 4.9m, 35, 67, "maria-grooming", new Guid("ad0ec355-8d4f-4e96-9663-d497cb48a47a") }
                 });
 
             migrationBuilder.InsertData(
@@ -355,9 +357,9 @@ namespace Tailly.SpecialistService.Migrations
                 columns: new[] { "Id", "SpecialistId", "Timezone" },
                 values: new object[,]
                 {
-                    { new Guid("404a5b56-ca67-4990-aa5e-f85518ad5fda"), new Guid("11111111-1111-1111-1111-111111111111"), "Europe/Moscow" },
-                    { new Guid("d6f8e041-4b55-4507-a4b5-f883c5ff1814"), new Guid("33333333-3333-3333-3333-333333333333"), "Europe/Moscow" },
-                    { new Guid("e4a2f917-2f72-4c75-a32b-873bd451a680"), new Guid("22222222-2222-2222-2222-222222222222"), "Europe/Moscow" }
+                    { new Guid("44733e3a-29f9-4371-a4be-14d6a5e02b16"), new Guid("33333333-3333-3333-3333-333333333333"), "Europe/Moscow" },
+                    { new Guid("c2a498d2-75f5-4846-ad8b-87106e566de4"), new Guid("22222222-2222-2222-2222-222222222222"), "Europe/Moscow" },
+                    { new Guid("c6e0fea6-4b86-4001-be26-29800be5c900"), new Guid("11111111-1111-1111-1111-111111111111"), "Europe/Moscow" }
                 });
 
             migrationBuilder.InsertData(
@@ -375,10 +377,10 @@ namespace Tailly.SpecialistService.Migrations
                 columns: new[] { "Id", "Description", "Name", "Price", "PriceUnit", "SpecialistId" },
                 values: new object[,]
                 {
-                    { new Guid("0d494aa3-066c-4c79-ba5f-ba16b5b0dc62"), "Выгул с элементами дрессировки", 5, 1800m, 1, new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("301a4d2e-af0e-42f1-964b-26d3bb53042c"), "Комфортная передержка в квартире", 2, 2500m, 2, new Guid("11111111-1111-1111-1111-111111111111") },
-                    { new Guid("894585c0-f54a-4831-a229-3af97c373065"), "Полный груминг", 3, 3500m, 3, new Guid("33333333-3333-3333-3333-333333333333") },
-                    { new Guid("9e4dfeba-89fb-472e-8d18-05b3f18426ca"), "Выгул собаки 60 минут", 1, 1200m, 4, new Guid("11111111-1111-1111-1111-111111111111") }
+                    { new Guid("18803d15-7feb-4ba8-9ec3-7b65418d8de7"), "Выгул собаки 60 минут", 1, 1200m, 4, new Guid("11111111-1111-1111-1111-111111111111") },
+                    { new Guid("2d9bcfc7-897e-4b89-a3ea-67fb58d146f4"), "Комфортная передержка в квартире", 2, 2500m, 2, new Guid("11111111-1111-1111-1111-111111111111") },
+                    { new Guid("a0a85b66-ac0f-4604-8727-e6dc052cd174"), "Выгул с элементами дрессировки", 5, 1800m, 1, new Guid("22222222-2222-2222-2222-222222222222") },
+                    { new Guid("fe894bf6-3eb7-4341-b34d-d341e20d2128"), "Полный груминг", 3, 3500m, 3, new Guid("33333333-3333-3333-3333-333333333333") }
                 });
 
             migrationBuilder.InsertData(
@@ -386,8 +388,8 @@ namespace Tailly.SpecialistService.Migrations
                 columns: new[] { "Id", "Alt", "ImageUrl", "Order", "SpecialistId" },
                 values: new object[,]
                 {
-                    { new Guid("97492b9a-7cdc-4d25-8f56-0c6086fa3264"), "Анна на прогулке", "/uploads/gallery/anna2.jpg", 2, new Guid("11111111-1111-1111-1111-111111111111") },
-                    { new Guid("d891fc8d-1c4f-49d8-8bdf-38a8db07dd1a"), "Анна с питомцем", "/uploads/gallery/anna1.jpg", 1, new Guid("11111111-1111-1111-1111-111111111111") }
+                    { new Guid("0e28d891-7e5c-4caa-ad41-d5a44c24df29"), "Анна на прогулке", "/uploads/gallery/anna2.jpg", 2, new Guid("11111111-1111-1111-1111-111111111111") },
+                    { new Guid("4c797f51-5100-4a92-9b5b-67ec2498dc94"), "Анна с питомцем", "/uploads/gallery/anna1.jpg", 1, new Guid("11111111-1111-1111-1111-111111111111") }
                 });
 
             migrationBuilder.InsertData(
@@ -395,8 +397,8 @@ namespace Tailly.SpecialistService.Migrations
                 columns: new[] { "Id", "DetailsId", "PetAge" },
                 values: new object[,]
                 {
-                    { new Guid("7628afe2-19bd-421b-907f-3d955adec9e4"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 3 },
-                    { new Guid("98061f42-aa5f-433a-815a-b3cd3a447d85"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 4 }
+                    { new Guid("24cf62f2-ecec-4b3f-b806-38ba28b6fc78"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 3 },
+                    { new Guid("5934c383-839d-4a8c-8392-feefd2e1ab57"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 4 }
                 });
 
             migrationBuilder.InsertData(
@@ -404,10 +406,10 @@ namespace Tailly.SpecialistService.Migrations
                 columns: new[] { "Id", "DetailsId", "PetSize" },
                 values: new object[,]
                 {
-                    { new Guid("2d505ef4-521e-4be9-a786-13d1b7a9fba6"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), 5 },
-                    { new Guid("872c5a69-22fa-4563-a5c4-1e7714adbd24"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 3 },
-                    { new Guid("f18ec021-f366-4f60-b483-dd8b322e642a"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 2 },
-                    { new Guid("f727f6da-f5f9-4955-aa30-62d81ca8e9ca"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), 4 }
+                    { new Guid("4b4854ad-b0b6-4e72-9439-f5f601f7b9b8"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), 4 },
+                    { new Guid("7abf6d66-d2db-4e2f-b9d8-023e0246da5a"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 3 },
+                    { new Guid("89833d44-ea5f-423d-b19b-9c2e1eb9783b"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 2 },
+                    { new Guid("d3d93b21-7e7e-45e3-a5f1-15e5f707dffd"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), 5 }
                 });
 
             migrationBuilder.InsertData(
@@ -415,11 +417,11 @@ namespace Tailly.SpecialistService.Migrations
                 columns: new[] { "Id", "DetailsId", "PetType" },
                 values: new object[,]
                 {
-                    { new Guid("17d0351f-b708-41b6-a9fd-dd087c178269"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), 1 },
-                    { new Guid("2a8e6135-9e15-4382-ba73-7982ea699eed"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), 2 },
-                    { new Guid("9a50e91e-df52-407a-b737-da3ae70f795b"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), 1 },
-                    { new Guid("aaafa93d-f6b3-44ce-8a15-24a32f31e95f"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 2 },
-                    { new Guid("c820aead-cdc1-4524-bbe5-bd5511bdfdb4"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 1 }
+                    { new Guid("11150932-055f-4f0d-97e8-12c88e1179e6"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 1 },
+                    { new Guid("3aa32ec3-f085-4337-a9fe-409e34b63245"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), 1 },
+                    { new Guid("65b9f374-92bc-4d00-9b77-0ba77916ff91"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), 1 },
+                    { new Guid("ac496664-f005-4d33-ae0e-d05bf2adf112"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 2 },
+                    { new Guid("f2cc3f03-70f2-4524-b7a3-62f29eb1dcf7"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), 2 }
                 });
 
             migrationBuilder.CreateIndex(

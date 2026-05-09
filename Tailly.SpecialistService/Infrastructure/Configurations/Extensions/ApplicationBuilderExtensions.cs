@@ -10,7 +10,8 @@ public static class ApplicationBuilderExtensions
         app.UseHttpsRedirection();
         app.UseSwaggerSetup();
         app.UseRouting();
-        //app.UseRateLimiter();
+        app.UseRateLimiter();
+        app.UseStaticFiles();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();

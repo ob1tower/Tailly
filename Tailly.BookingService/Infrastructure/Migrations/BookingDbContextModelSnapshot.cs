@@ -2,7 +2,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Tailly.BookingService.Infrastructure.DataAccess;
@@ -12,11 +11,9 @@ using Tailly.BookingService.Infrastructure.DataAccess;
 namespace Tailly.BookingService.Migrations
 {
     [DbContext(typeof(BookingDbContext))]
-    [Migration("20260503124123_InitialCreate")]
-    partial class InitialCreate
+    partial class BookingDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,9 +78,8 @@ namespace Tailly.BookingService.Migrations
                     b.Property<int>("PriceUnit")
                         .HasColumnType("integer");
 
-                    b.Property<string>("ServiceId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ServiceTitle")
                         .IsRequired()
@@ -162,6 +158,36 @@ namespace Tailly.BookingService.Migrations
                     b.ToTable("ServiceOrderReviews");
                 });
 
+            modelBuilder.Entity("Tailly.BookingService.Core.Entities.ServiceOrderServiceSnapshotEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("PriceUnit")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("ServiceOrderServiceSnapshots");
+                });
+
             modelBuilder.Entity("Tailly.BookingService.Core.Entities.ServiceOrderReviewEntity", b =>
                 {
                     b.HasOne("Tailly.BookingService.Core.Entities.ServiceOrderEntity", "Order")
@@ -173,9 +199,22 @@ namespace Tailly.BookingService.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("Tailly.BookingService.Core.Entities.ServiceOrderServiceSnapshotEntity", b =>
+                {
+                    b.HasOne("Tailly.BookingService.Core.Entities.ServiceOrderEntity", "Order")
+                        .WithOne("ServiceSnapshot")
+                        .HasForeignKey("Tailly.BookingService.Core.Entities.ServiceOrderServiceSnapshotEntity", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("Tailly.BookingService.Core.Entities.ServiceOrderEntity", b =>
                 {
                     b.Navigation("Review");
+
+                    b.Navigation("ServiceSnapshot");
                 });
 #pragma warning restore 612, 618
         }

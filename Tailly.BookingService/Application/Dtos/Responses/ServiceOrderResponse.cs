@@ -11,7 +11,7 @@ public sealed class ServiceOrderResponse
     public string SpecialistSlug { get; set; } = default!;
     public Guid PetId { get; set; }
     public string PetName { get; set; } = default!;
-    public string ServiceId { get; set; } = default!;
+    public Guid ServiceId { get; set; }
     public string ServiceTitle { get; set; } = default!;
     public decimal Price { get; set; }
     public string PriceUnit { get; set; } = default!;
@@ -25,4 +25,6 @@ public sealed class ServiceOrderResponse
     public DateTime? CompletedAt { get; set; }
     public DateTime? CanceledAt { get; set; }
     public string? CancelReason { get; set; }
+    public string Currency { get; set; } = "RUB";
+    public bool HasReview { get; set; }
 }

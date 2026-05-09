@@ -1,4 +1,5 @@
-﻿using Tailly.ClientProfileService.Core.Models;
+﻿using Tailly.ClientProfileService.Core.Entities;
+using Tailly.ClientProfileService.Core.Models;
 
 namespace Tailly.ClientProfileService.Infrastructure.Repositories.Interfaces;
 
@@ -9,4 +10,5 @@ public interface IPetRepository
     Task<List<Pet>> GetByClientIdAsync(Guid clientId);
     Task<Pet?> GetByIdAsync(Guid id);
     Task UpdateAsync(Pet pet);
+    Task<PetEntity?> GetEntityByIdAsync(Guid id);
 }

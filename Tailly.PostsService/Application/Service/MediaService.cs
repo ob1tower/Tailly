@@ -1,4 +1,5 @@
-﻿using Tailly.PostsService.Application.Service.Interfaces;
+﻿using Microsoft.AspNetCore.Mvc.Formatters;
+using Tailly.PostsService.Application.Service.Interfaces;
 
 namespace Tailly.PostsService.Application.Service;
 
@@ -66,7 +67,7 @@ public class MediaService : IMediaService
             using var stream = new FileStream(filePath, FileMode.Create);
             await file.CopyToAsync(stream);
 
-            var url = $"/uploads/{folder}/{fileName}";
+            var url = $"/post-uploads/{folder}/{fileName}";
 
             _logger.LogInformation("File uploaded: {Url}", url);
 

@@ -13,4 +13,5 @@ public class Review
     public DateTime CreatedAt { get; set; }
     public string? ReplyText { get; set; }
     public DateTime? ReplyCreatedAt { get; set; }
+    public List<string> Photos { get; set; } = [];
 }

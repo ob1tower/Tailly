@@ -102,34 +102,42 @@ public static class SpecialistResponseMapper
         };
     }
 
-    public static object ToShortResponse(Specialist specialist)
+    public static SpecialistListItemResponse ToShortResponse(Specialist specialist)
     {
-        return new
-        {
-            id = specialist.Id,
-            slug = specialist.Slug,
-
-            main = new
+        var services = specialist.Services?
+            .GroupBy(s => s.Name)
+            .Select(g => new ServiceShortResponse
             {
-                firstName = specialist.FirstName ?? "",
-                lastName = specialist.LastName ?? "",
-                avatarUrl = specialist.AvatarUrl ?? "",
-                city = specialist.City ?? ""
-            },
-
-            stats = new
-            {
-                rating = specialist.Rating,
-                reviewsCount = specialist.ReviewsCount
-            },
-
-            services = specialist.Services?
-            .Select(s => new
-            {
-                name = SpecialistEnumMapper.MapServiceType(s.Name),
-                price = s.Price
+                ServiceId = SpecialistEnumMapper.MapServiceType(g.Key),
+                PetTypes = [],
+                PriceFrom = g.Min(x => x.Price),
+                PriceTo = g.Count() > 1 ? g.Max(x => x.Price) : null,
+                DurationMinutes = null,
+                Note = null
             })
-            .ToList() ?? []
+            .ToList() ?? [];
+
+        return new SpecialistListItemResponse
+        {
+            Id = specialist.Id,
+            Name = $"{specialist.FirstName} {specialist.LastName}".Trim(),
+            AvatarUrl = specialist.AvatarUrl,
+            City = specialist.City ?? "",
+            District = specialist.District ?? "",
+            Description = specialist.Details?.About,
+            Rating = specialist.Rating,
+            ReviewsCount = specialist.ReviewsCount,
+            ExperienceYears = specialist.ExperienceYears,
+
+            Location = (specialist.Latitude.HasValue && specialist.Longitude.HasValue)
+                ? new LocationResponse
+                {
+                    Lat = specialist.Latitude.Value,
+                    Lon = specialist.Longitude.Value
+                }
+                : new LocationResponse(),
+
+            Services = services
         };
     }
 
@@ -191,8 +199,16 @@ public static class SpecialistResponseMapper
             ServiceTitle = review.ServiceTitle ?? "",
             PetName = review.PetName ?? "",
             CreatedAt = review.CreatedAt,
-            ReplyText = review.ReplyText ?? "",
-            ReplyCreatedAt = review.ReplyCreatedAt
+
+            Photos = review.Photos?.ToList() ?? [],
+
+            SpecialistReply = !string.IsNullOrWhiteSpace(review.ReplyText)
+            ? new ReviewReplyResponse
+            {
+                Text = review.ReplyText,
+                CreatedAt = review.ReplyCreatedAt ?? DateTime.UtcNow
+            }
+            : null
         };
     }
 
