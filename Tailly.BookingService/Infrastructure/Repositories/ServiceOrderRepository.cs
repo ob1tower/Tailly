@@ -101,8 +101,35 @@ public class ServiceOrderRepository : IServiceOrderRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task AddReviewAsync(Guid orderId, ServiceOrderReview review)
+    {
+        var entity = new ServiceOrderReviewEntity
+        {
+            Id = review.Id,
+            OrderId = orderId,
+            Rating = review.Rating,
+            Text = review.Text,
+            Photos = review.Photos ?? [],
+            CreatedAt = review.CreatedAt
+        };
+
+        await _context.ServiceOrderReviews.AddAsync(entity);
+
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<bool> ExistsAsync(Guid id)
     {
         return await _context.ServiceOrders.AnyAsync(x => x.Id == id);
+    }
+
+    public async Task<int> CountCompletedOrdersAsync(Guid clientId, Guid specialistId, Guid serviceId)
+    {
+        return await _context.ServiceOrders
+            .CountAsync(x =>
+                x.ClientId == clientId &&
+                x.SpecialistId == specialistId &&
+                x.ServiceId == serviceId &&
+                x.Status == OrderStatus.Completed);
     }
 }

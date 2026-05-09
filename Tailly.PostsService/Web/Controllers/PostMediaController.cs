@@ -7,11 +7,11 @@ namespace Tailly.PostsService.Web.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(Roles = "Admin,SuperAdmin")]
-public class MediaController : ControllerBase
+public class PostMediaController : ControllerBase
 {
     private readonly IMediaService _mediaService;
 
-    public MediaController(IMediaService mediaService)
+    public PostMediaController(IMediaService mediaService)
     {
         _mediaService = mediaService;
     }

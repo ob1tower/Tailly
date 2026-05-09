@@ -2,6 +2,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Tailly.SpecialistService.Application.Dtos.Requests.Reviews;
 using Tailly.SpecialistService.Application.Dtos.Requests.Services;
 using Tailly.SpecialistService.Application.Dtos.Requests.Specialist;
@@ -16,6 +17,7 @@ namespace Tailly.SpecialistService.Web.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[EnableRateLimiting("specialist-actions")]
 public class SpecialistProfileController : ControllerBase
 {
     private readonly ISpecialistProfileService _service;

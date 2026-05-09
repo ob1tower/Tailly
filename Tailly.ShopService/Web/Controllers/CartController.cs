@@ -67,10 +67,11 @@ public class CartController : ControllerBase
     /// <summary>
     /// Adds a product to the cart.
     /// </summary>
-    /// <param name="request">Product ID and quantity to add.</param>
-    [HttpPost("carts/items/add")]
+    /// <param name="productId">ID of the product to add.</param>
+    /// <param name="request">Quantity of the product to add.</param>
+    [HttpPost("carts/items/add/{productId:guid}")]
     [EnableRateLimiting("cart")]
-    public async Task<IActionResult> AddItem([FromBody] AddToCartRequest request)
+    public async Task<IActionResult> AddItem(Guid productId, [FromBody] AddToCartRequest request)
     {
         var validation = await _addValidator.ValidateAsync(request);
 
@@ -79,7 +80,7 @@ public class CartController : ControllerBase
 
         var (userId, sessionId) = HttpContext.ResolveIdentity();
 
-        var result = await _cartService.AddItemAsync(userId, sessionId, request.ProductId, request.Quantity);
+        var result = await _cartService.AddItemAsync(userId, sessionId, productId, request.Quantity);
 
         if (result.IsFailure)
             return BadRequest(result.Error);
@@ -110,10 +111,11 @@ public class CartController : ControllerBase
     /// <summary>
     /// Updates quantity of an item in the cart.
     /// </summary>
-    /// <param name="request">Product ID and new quantity.</param>
-    [HttpPut("carts/items/update")]
+    /// <param name="productId">ID of the product to update.</param>
+    /// <param name="request">New quantity for the cart item.</param>
+    [HttpPut("carts/items/update/{productId:guid}")]
     [EnableRateLimiting("cart")]
-    public async Task<IActionResult> UpdateItem([FromBody] UpdateCartItemRequest request)
+    public async Task<IActionResult> UpdateItem(Guid productId, [FromBody] UpdateCartItemRequest request)
     {
         var validation = await _updateValidator.ValidateAsync(request);
 
@@ -122,7 +124,7 @@ public class CartController : ControllerBase
 
         var (userId, sessionId) = HttpContext.ResolveIdentity();
 
-        var result = await _cartService.UpdateItemAsync(userId, sessionId, request.ProductId, request.Quantity);
+        var result = await _cartService.UpdateItemAsync(userId, sessionId, productId, request.Quantity);
 
         if (result.IsFailure)
             return BadRequest(result.Error);

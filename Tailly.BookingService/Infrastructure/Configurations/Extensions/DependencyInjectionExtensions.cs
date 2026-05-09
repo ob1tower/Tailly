@@ -30,8 +30,8 @@ public static class DependencyInjectionExtensions
         services.AddJwtAuthentication();
         services.AddSecurityAndCore();
         services.AddFluentValidationSetup();
-        services.AddApplicationRepositories();
         services.AddRabbitMq(configuration);
+        services.AddApplicationRepositories();
 
         return services;
     }
@@ -104,6 +104,16 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IServiceOrderService, ServiceOrderService>();
         services.AddScoped<IMediaService, MediaService>();
 
+        services.AddHttpClient("specialist", client =>
+        {
+            client.BaseAddress = new Uri("http://specialist:8080");
+        });
+
+        services.AddHttpClient("client-profile", client =>
+        {
+            client.BaseAddress = new Uri("http://clientprofile:8080");
+        });
+
         return services;
     }
 
@@ -116,8 +126,7 @@ public static class DependencyInjectionExtensions
 
     private static IServiceCollection AddFluentValidationSetup(this IServiceCollection services)
     {
-        services.AddValidatorsFromAssemblyContaining<MediaUploadValidator>();
-        services.AddValidatorsFromAssemblyContaining<MediaMultipleUploadValidator>();
+        services.AddValidatorsFromAssemblyContaining<UploadMediaRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<CreateServiceOrderRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<LeaveReviewRequestValidator>();
 
@@ -128,7 +137,6 @@ public static class DependencyInjectionExtensions
     {
         services.AddMassTransit(x =>
         {
-            //x.AddConsumer<SpecialistUserLinkedConsumer>();
             x.UsingRabbitMq((context, cfg) =>
             {
                 var settings = configuration.GetSection("RabbitMq").Get<RabbitMqSettings>()

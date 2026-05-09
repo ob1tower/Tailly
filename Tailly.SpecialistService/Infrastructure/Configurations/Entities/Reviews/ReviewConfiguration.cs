@@ -27,6 +27,9 @@ public class ReviewConfiguration : IEntityTypeConfiguration<ReviewEntity>
         builder.Property(x => x.Rating)
                .IsRequired();
 
+        builder.Property(x => x.Photos)
+               .HasColumnType("text[]");
+
         builder.HasIndex(x => x.SpecialistId);
     }
 }

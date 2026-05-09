@@ -57,6 +57,18 @@ public static class ServiceOrderEntityMapper
             };
         }
 
+        if (model.ServiceSnapshot != null)
+        {
+            entity.ServiceSnapshot = new ServiceOrderServiceSnapshotEntity
+            {
+                OrderId = model.Id,
+                ServiceId = model.ServiceSnapshot.ServiceId,
+                Title = model.ServiceSnapshot.Title,
+                Price = model.ServiceSnapshot.Price,
+                PriceUnit = model.ServiceSnapshot.PriceUnit
+            };
+        }
+
         return entity;
     }
 
@@ -105,6 +117,14 @@ public static class ServiceOrderEntityMapper
                 Text = entity.Review.Text,
                 Photos = entity.Review.Photos ?? new List<string>(),
                 CreatedAt = entity.Review.CreatedAt
+            },
+
+            ServiceSnapshot = entity.ServiceSnapshot == null ? null : new ServiceOrderServiceSnapshot
+            {
+                ServiceId = entity.ServiceSnapshot.ServiceId,
+                Title = entity.ServiceSnapshot.Title,
+                Price = entity.ServiceSnapshot.Price,
+                PriceUnit = entity.ServiceSnapshot.PriceUnit
             }
         };
     }

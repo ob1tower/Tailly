@@ -1,4 +1,5 @@
-﻿using Tailly.SpecialistService.Core.Entities.Calendar;
+﻿using Tailly.SpecialistService.Application.Dtos.Responses.Home;
+using Tailly.SpecialistService.Core.Entities.Calendar;
 using Tailly.SpecialistService.Core.Entities.Details;
 using Tailly.SpecialistService.Core.Entities.Gallery;
 using Tailly.SpecialistService.Core.Entities.Reviews;
@@ -120,7 +121,8 @@ public static class SpecialistEntityMapper
             Text = entity.Text,
             CreatedAt = entity.CreatedAt,
             ReplyText = entity.ReplyText,
-            ReplyCreatedAt = entity.ReplyCreatedAt
+            ReplyCreatedAt = entity.ReplyCreatedAt,
+            Photos = entity.Photos ?? []
         };
     }
 
@@ -262,6 +264,23 @@ public static class SpecialistEntityMapper
                     DefaultDurationMinutes =
                         entity.BookingSettings.DefaultDurationMinutes
                 }
+        };
+    }
+
+    public static HomeReviewResponse ToHomeReview(ReviewEntity entity)
+    {
+        return new HomeReviewResponse
+        {
+            Id = entity.Id,
+            CreatedAtIso = entity.CreatedAt.ToString("O"),
+            Rating = entity.Rating,
+            Text = entity.Text,
+            PetName = entity.PetName,
+            OwnerName = entity.AuthorName,
+            SitterId = entity.SpecialistId,
+            SitterName = $"{entity.Specialist.FirstName} {entity.Specialist.LastName}",
+            ServiceTitle = entity.ServiceTitle,
+            PhotoUrls = entity.Photos
         };
     }
 }

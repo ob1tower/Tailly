@@ -88,3 +88,11 @@ public enum CalendarDayStatus
     Available = 1,
     PartiallyBooked
 }
+
+public enum ReviewSortType
+{
+    Newest = 1,
+    Oldest,
+    RatingAsc,
+    RatingDesc
+}

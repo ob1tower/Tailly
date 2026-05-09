@@ -55,6 +55,11 @@ public class ServiceOrderConfiguration : IEntityTypeConfiguration<ServiceOrderEn
         builder.HasIndex(x => x.Status);
         builder.HasIndex(x => x.CreatedAt);
 
+        builder.HasOne(x => x.ServiceSnapshot)
+               .WithOne(x => x.Order)
+               .HasForeignKey<ServiceOrderServiceSnapshotEntity>(x => x.OrderId)
+               .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasOne(x => x.Review)
                .WithOne(x => x.Order)
                .HasForeignKey<ServiceOrderReviewEntity>(x => x.OrderId)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Tailly.SpecialistService.Application.Dtos.Responses.Home;
 using Tailly.SpecialistService.Core.Entities.Details;
 using Tailly.SpecialistService.Core.Entities.Gallery;
 using Tailly.SpecialistService.Core.Entities.Specialist;
@@ -26,7 +27,8 @@ public class SpecialistRepository : ISpecialistRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Slug == slug);
 
-        if (entity == null) return null;
+        if (entity == null) 
+            return null;
 
         return SpecialistEntityMapper.ToModel(entity);
     }
@@ -37,27 +39,66 @@ public class SpecialistRepository : ISpecialistRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
 
-        if (entity == null) return null;
+        if (entity == null) 
+            return null;
 
         return SpecialistEntityMapper.ToModel(entity);
     }
 
-    public async Task<Specialist?> GetFullProfileBySlugAsync(string slug)
+    public async Task<Specialist?> GetFullProfileBySlugAsync(string slug, ReviewSortType reviewSortType)
     {
         var entity = await LoadFullProfileQuery()
             .FirstOrDefaultAsync(x => x.Slug == slug);
 
-        if (entity == null) return null;
+        if (entity == null) 
+            return null;
+
+        entity.Reviews = reviewSortType switch
+        {
+            ReviewSortType.Newest =>
+                entity.Reviews.OrderByDescending(x => x.CreatedAt).ToList(),
+
+            ReviewSortType.Oldest =>
+                entity.Reviews.OrderBy(x => x.CreatedAt).ToList(),
+
+            ReviewSortType.RatingAsc =>
+                entity.Reviews.OrderBy(x => x.Rating).ToList(),
+
+            ReviewSortType.RatingDesc =>
+                entity.Reviews.OrderByDescending(x => x.Rating).ToList(),
+
+            _ =>
+                entity.Reviews.OrderByDescending(x => x.CreatedAt).ToList()
+        };
 
         return SpecialistEntityMapper.ToFullModel(entity);
     }
 
-    public async Task<Specialist?> GetFullProfileByIdAsync(Guid id)
+    public async Task<Specialist?> GetFullProfileByIdAsync(Guid id, ReviewSortType reviewSortType)
     {
         var entity = await LoadFullProfileQuery()
             .FirstOrDefaultAsync(x => x.Id == id);
 
-        if (entity == null) return null;
+        if (entity == null) 
+            return null;
+
+        entity.Reviews = reviewSortType switch
+        {
+            ReviewSortType.Newest =>
+                entity.Reviews.OrderByDescending(x => x.CreatedAt).ToList(),
+
+            ReviewSortType.Oldest =>
+                entity.Reviews.OrderBy(x => x.CreatedAt).ToList(),
+
+            ReviewSortType.RatingAsc =>
+                entity.Reviews.OrderBy(x => x.Rating).ToList(),
+
+            ReviewSortType.RatingDesc =>
+                entity.Reviews.OrderByDescending(x => x.Rating).ToList(),
+
+            _ =>
+                entity.Reviews.OrderByDescending(x => x.CreatedAt).ToList()
+        };
 
         return SpecialistEntityMapper.ToFullModel(entity);
     }
@@ -82,7 +123,8 @@ public class SpecialistRepository : ISpecialistRepository
         string? middleName, string city, string district, string phone, string? avatarUrl)
     {
         var entity = await _context.Specialists.FirstOrDefaultAsync(x => x.Id == specialistId);
-        if (entity == null) return;
+        if (entity == null) 
+            return;
 
         SpecialistEntityMapper.MapMainInfoToEntity(entity, firstName, lastName, middleName, city, district, phone, avatarUrl);
         await _context.SaveChangesAsync();
@@ -203,7 +245,8 @@ public class SpecialistRepository : ISpecialistRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == serviceId);
 
-        if (entity == null) return null;
+        if (entity == null) 
+            return null;
 
         return SpecialistEntityMapper.ToServiceModel(entity);
     }
@@ -218,7 +261,8 @@ public class SpecialistRepository : ISpecialistRepository
     public async Task UpdateServiceAsync(ServiceOffer service)
     {
         var entity = await _context.Services.FirstOrDefaultAsync(s => s.Id == service.Id);
-        if (entity == null) return;
+        if (entity == null) 
+            return;
 
         SpecialistEntityMapper.UpdateServiceEntity(entity, service);
         await _context.SaveChangesAsync();
@@ -237,7 +281,8 @@ public class SpecialistRepository : ISpecialistRepository
     public async Task AddReviewReplyAsync(Guid reviewId, string replyText)
     {
         var entity = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == reviewId);
-        if (entity == null) return;
+        if (entity == null) 
+            return;
 
         entity.ReplyText = replyText;
         entity.ReplyCreatedAt = DateTime.UtcNow;
@@ -250,7 +295,8 @@ public class SpecialistRepository : ISpecialistRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(r => r.Id == reviewId);
 
-        if (entity == null) return null;
+        if (entity == null) 
+            return null;
 
         return SpecialistEntityMapper.ToReviewModel(entity);
     }
@@ -315,5 +361,49 @@ public class SpecialistRepository : ISpecialistRepository
         return await _context.Specialists
             .AsNoTracking()
             .AnyAsync(s => s.Email.ToLower() == email.ToLower());
+    }
+
+    public async Task<List<HomeReviewResponse>> GetHomeReviewsAsync(int? rating, int limit, bool requirePhotos, int minTextLength, int minWords)
+    {
+        var query = _context.Reviews
+            .Include(x => x.Specialist)
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (rating.HasValue)
+        {
+            query = query.Where(x => x.Rating == rating.Value);
+        }
+
+        if (requirePhotos)
+        {
+            query = query.Where(x => x.Photos.Any());
+        }
+
+        if (minTextLength > 0)
+        {
+            query = query.Where(x =>
+                x.Text.Length >= minTextLength);
+        }
+
+        var reviews = await _context.Reviews
+            .Include(x => x.Specialist)
+            .AsNoTracking()
+            .ToListAsync();
+
+        if (minWords > 0)
+        {
+            reviews = reviews
+                .Where(x =>
+                    x.Text.Split(
+                        ' ',
+                        StringSplitOptions.RemoveEmptyEntries
+                    ).Length >= minWords)
+                .ToList();
+        }
+
+        return reviews
+            .Select(SpecialistEntityMapper.ToHomeReview)
+            .ToList();
     }
 }

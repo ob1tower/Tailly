@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Tailly.BookingService.Core.Entities;
 
@@ -14,11 +15,18 @@ public class ServiceOrderReviewConfiguration : IEntityTypeConfiguration<ServiceO
                .HasMaxLength(2000)
                .IsRequired();
 
+        var photosComparer = new ValueComparer<List<string>>(
+            (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+            c => c.ToList()
+        );
+
         builder.Property(x => x.Photos)
-       .HasConversion(
-           v => string.Join(";", v),
-           v => v.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList())
-       .HasDefaultValueSql("'{}'");
+               .HasConversion(
+                   v => string.Join(";", v),
+                   v => v.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList())
+               .HasDefaultValueSql("'{}'")
+               .Metadata.SetValueComparer(photosComparer);
 
         builder.Property(x => x.CreatedAt)
                .IsRequired();

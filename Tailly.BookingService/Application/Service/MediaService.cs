@@ -1,63 +1,79 @@
-﻿using Tailly.BookingService.Application.Service.Interfaces;
-using Tailly.BookingService.Core.Models;
+﻿using CSharpFunctionalExtensions;
+using Tailly.BookingService.Application.Errors;
+using Tailly.BookingService.Application.Service.Interfaces;
+using Tailly.BookingService.Core.Common;
 
 namespace Tailly.BookingService.Application.Service;
 
 public class MediaService : IMediaService
 {
-    private readonly IWebHostEnvironment _env;
+    private readonly IWebHostEnvironment _environment;
     private readonly ILogger<MediaService> _logger;
 
-    private const long MaxFileSize = 5 * 1024 * 1024;
-    private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
-
-    public MediaService(IWebHostEnvironment env, ILogger<MediaService> logger)
+    public MediaService(IWebHostEnvironment environment,
+                        ILogger<MediaService> logger)
     {
-        _env = env;
+        _environment = environment;
         _logger = logger;
     }
 
-    public async Task<UploadResult> SaveAsync(IFormFile file, string folder = "reviews")
+    public async Task<Result<string, Error>> UploadAsync(IFormFile file, string? mediaType, Guid clientId)
     {
-        if (file == null || file.Length == 0)
-            throw new ArgumentException("File is empty");
-
-        if (file.Length > MaxFileSize)
-            throw new ArgumentException("File is too large");
-
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (!AllowedExtensions.Contains(extension))
-            throw new ArgumentException("Invalid file type");
-
-        var rootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-        var uploadsPath = Path.Combine(rootPath, "uploads", folder);
-
-        if (!Directory.Exists(uploadsPath))
-            Directory.CreateDirectory(uploadsPath);
-
-        var fileName = $"{Guid.NewGuid()}{extension}";
-        var fullPath = Path.Combine(uploadsPath, fileName);
-
-        await using var stream = new FileStream(fullPath, FileMode.Create);
-        await file.CopyToAsync(stream);
-
-        var url = $"/uploads/{folder}/{fileName}";
-
-        _logger.LogInformation("File uploaded: {Url}", url);
-
-        return new UploadResult { Url = url, FileName = fileName };
-    }
-
-    public async Task<List<UploadResult>> SaveMultipleAsync(IEnumerable<IFormFile> files, string folder = "reviews")
-    {
-        var results = new List<UploadResult>();
-
-        foreach (var file in files)
+        if (file == null)
         {
-            var result = await SaveAsync(file, folder);
-            results.Add(result);
+            return Result.Failure<string, Error>(MediaErrors.InvalidFile);
         }
 
-        return results;
+        try
+        {
+            var rootPath = _environment.WebRootPath;
+
+            if (string.IsNullOrWhiteSpace(rootPath))
+            {
+                rootPath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot");
+            }
+
+            var uploadsFolder = Path.Combine(
+                rootPath,
+                "uploads",
+                mediaType!,
+                clientId.ToString());
+
+            Directory.CreateDirectory(uploadsFolder);
+
+            var extension = Path.GetExtension(file.FileName)
+                .ToLowerInvariant();
+
+            var fileName = $"{Guid.NewGuid()}{extension}";
+
+            var fullPath = Path.Combine(
+                uploadsFolder,
+                fileName);
+
+            await using var stream = new FileStream(fullPath, FileMode.Create);
+
+            await file.CopyToAsync(stream);
+
+            var url = $"/booking-uploads/{mediaType}/{clientId}/{fileName}";
+
+            _logger.LogInformation(
+                "File uploaded successfully. ClientId: {ClientId}, MediaType: {MediaType}, FileName: {FileName}",
+                clientId,
+                mediaType,
+                fileName);
+
+            return Result.Success<string, Error>(url);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to upload file for client {ClientId}",
+                clientId);
+
+            return Result.Failure<string, Error>(MediaErrors.UploadFailed);
+        }
     }
 }

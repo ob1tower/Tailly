@@ -63,12 +63,6 @@ public class CartService : ICartService
 
     public async Task<Result> AddItemAsync(Guid? userId, Guid? sessionId, Guid productId, int quantity)
     {
-        if (quantity <= 0)
-        {
-            _logger.LogWarning("AddItem failed. Invalid quantity: {Quantity} for product {ProductId}", quantity, productId);
-            return Result.Failure(ShopErrors.InvalidQuantity.Description);
-        }
-
         var product = await _productRepository.GetByIdAsync(productId);
         if (product == null)
         {
@@ -108,12 +102,6 @@ public class CartService : ICartService
 
     public async Task<Result> UpdateItemAsync(Guid? userId, Guid? sessionId, Guid productId, int quantity)
     {
-        if (quantity <= 0)
-        {
-            _logger.LogWarning("UpdateItem failed. Invalid quantity: {Quantity}", quantity);
-            return Result.Failure(ShopErrors.InvalidQuantity.Description);
-        }
-
         var cartResult = await GetCartAsync(userId, sessionId);
         if (cartResult.IsFailure)
             return Result.Failure(cartResult.Error.Description);

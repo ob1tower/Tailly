@@ -5,9 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Globalization;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
+using Tailly.SpecialistService.Application.Dtos.Common;
 using Tailly.SpecialistService.Application.Service;
 using Tailly.SpecialistService.Application.Service.Interfaces;
 using Tailly.SpecialistService.Application.Validators.SpecialistApplication;
@@ -28,7 +31,7 @@ public static class DependencyInjectionExtensions
     {
         services.AddJsonSettings();
         services.AddControllers();
-        //services.AddFixedRateLimiter();
+        services.AddFixedRateLimiter();
         services.AddSwaggerSetup();
         services.AddPostgres(configuration);
         services.AddOptions(configuration);
@@ -70,6 +73,9 @@ public static class DependencyInjectionExtensions
         services.Configure<JwtOptions>(
             configuration.GetSection("JwtConfig"));
 
+        services.Configure<ApiSettings>(
+            configuration.GetSection("ApiSettings"));
+
         return services;
     }
 
@@ -106,11 +112,104 @@ public static class DependencyInjectionExtensions
         return services;
     }
 
+    private static IServiceCollection AddFixedRateLimiter(this IServiceCollection services)
+    {
+        services.AddRateLimiter(options =>
+        {
+            options.GlobalLimiter = PartitionedRateLimiter
+                .Create<HttpContext, string>(context =>
+                {
+                    var key = context.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                           ?? context.Connection.RemoteIpAddress?.ToString()
+                           ?? "anonymous";
+
+                    return RateLimitPartition.GetFixedWindowLimiter(
+                        key,
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 100,
+                            QueueLimit = 10,
+                            Window = TimeSpan.FromSeconds(10),
+                            AutoReplenishment = true
+                        });
+                });
+
+            options.AddPolicy("specialist-application", context =>
+            {
+                var ip = context.Connection.RemoteIpAddress?.ToString() ?? "anon";
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    $"specialist-app:{ip}",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 5,
+                        Window = TimeSpan.FromMinutes(10),
+                        QueueLimit = 0
+                    });
+            });
+
+            options.AddPolicy("specialist-actions", context =>
+            {
+                var specialistId = context.User.FindFirstValue("specialistId")
+                                   ?? context.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                                   ?? "unknown";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    $"specialist:{specialistId}",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 30,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 0
+                    });
+            });
+
+            options.AddPolicy("admin-actions", context =>
+            {
+                var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "admin";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    $"admin:{userId}",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 60,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 0
+                    });
+            });
+
+            options.OnRejected = async (context, _) =>
+            {
+                if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out TimeSpan retryAfter))
+                {
+                    context.HttpContext.Response.Headers.RetryAfter =
+                        ((int)retryAfter.TotalSeconds).ToString(NumberFormatInfo.InvariantInfo);
+
+                    context.HttpContext.Response.Headers.Append("X-Limit-Remaining", "0");
+                }
+
+                var response = new ExceptionResponse
+                {
+                    StatusCode = StatusCodes.Status429TooManyRequests,
+                    Message = "Too many requests. Please try again later."
+                };
+
+                context.HttpContext.Response.ContentType = "application/json";
+                context.HttpContext.Response.StatusCode = response.StatusCode;
+
+                await context.HttpContext.Response.WriteAsJsonAsync(response, CancellationToken.None);
+            };
+        });
+
+        return services;
+    }
+
     private static IServiceCollection AddRabbitMq(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddMassTransit(x =>
         {
             x.AddConsumer<SpecialistUserLinkedConsumer>();
+            x.AddConsumer<ReviewCreatedConsumer>();
+            x.AddConsumer<OrderCompletedConsumer>();
             x.UsingRabbitMq((context, cfg) =>
             {
                 var settings = configuration.GetSection("RabbitMq").Get<RabbitMqSettings>()

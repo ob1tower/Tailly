@@ -15,8 +15,10 @@ public class BookingDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new ServiceOrderConfiguration());
         modelBuilder.ApplyConfiguration(new ServiceOrderReviewConfiguration());
+        modelBuilder.ApplyConfiguration(new ServiceOrderReviewConfiguration());
     }
 
     public DbSet<ServiceOrderEntity> ServiceOrders { get; set; }
     public DbSet<ServiceOrderReviewEntity> ServiceOrderReviews { get; set; }
+    public DbSet<ServiceOrderServiceSnapshotEntity> ServiceOrderServiceSnapshots { get; set; }
 }

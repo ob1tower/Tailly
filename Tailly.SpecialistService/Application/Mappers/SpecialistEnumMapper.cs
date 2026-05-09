@@ -200,4 +200,13 @@ public static class SpecialistEnumMapper
             _ => unit.Value.ToString().ToLower()
         };
     }
+
+    public static ReviewSortType ParseReviewSortType(string? sort) => sort?.ToLowerInvariant() switch
+    {
+        "newest" => ReviewSortType.Newest,
+        "oldest" => ReviewSortType.Oldest,
+        "rating_asc" => ReviewSortType.RatingAsc,
+        "rating_desc" => ReviewSortType.RatingDesc,
+        _ => ReviewSortType.Newest
+    };
 }

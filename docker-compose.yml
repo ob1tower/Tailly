@@ -49,6 +49,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    volumes:
+      - client_uploads:/app/wwwroot/uploads
 
   shop:
     build:
@@ -77,6 +79,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    volumes:
+      - post_uploads:/app/wwwroot/uploads
 
   specialist:
     build:
@@ -91,6 +95,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    volumes:
+      - specialist_uploads:/app/wwwroot/uploads
 
   booking:
     build:
@@ -105,6 +111,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    volumes:
+      - booking_uploads:/app/wwwroot/uploads
 
   db:
     image: postgres:17-alpine
@@ -154,3 +162,7 @@ services:
 volumes:
   db_data:
   redis_data:
+  client_uploads:
+  post_uploads:
+  specialist_uploads:
+  booking_uploads:

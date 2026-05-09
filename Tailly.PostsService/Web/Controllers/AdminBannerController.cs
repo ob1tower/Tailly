@@ -6,6 +6,7 @@ using Tailly.PostsService.Application.Errors;
 using Tailly.PostsService.Application.Mappers;
 using Tailly.PostsService.Application.Service.Interfaces;
 using Tailly.PostsService.Application.Validators;
+using Tailly.PostsService.Infrastructure.Configurations.Extensions;
 
 namespace Tailly.PostsService.Web.Controllers;
 
@@ -33,6 +34,10 @@ public class AdminBannerController : ControllerBase
     [HttpGet("admin/content/banners")]
     public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, [FromQuery] string? sort = null)
     {
+        var userId = User.GetUserId();
+        if (userId == null)
+            return Unauthorized();
+
         var pagination = new PaginationValidator(page, pageSize);
 
         var result = await _service.GetListAsync(pagination.PageNumber, pagination.PageSize, search, sort);
@@ -42,13 +47,7 @@ public class AdminBannerController : ControllerBase
 
         var (banners, total) = result.Value;
 
-        return Ok(new
-        {
-            items = banners.Select(BannerMapper.ToResponse),
-            total,
-            page = pagination.PageNumber,
-            pageSize = pagination.PageSize
-        });
+        return Ok(banners.Select(BannerMapper.ToResponse));
     }
 
     /// <summary>
@@ -62,6 +61,10 @@ public class AdminBannerController : ControllerBase
         var validation = await _validator.ValidateAsync(request);
         if (!validation.IsValid)
             return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
+
+        var userId = User.GetUserId();
+        if (userId == null)
+            return Unauthorized();
 
         var banner = BannerMapper.ToModel(request);
 
@@ -86,6 +89,10 @@ public class AdminBannerController : ControllerBase
         if (!validation.IsValid)
             return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
 
+        var userId = User.GetUserId();
+        if (userId == null)
+            return Unauthorized();
+
         var banner = BannerMapper.ToModel(request, id);
 
         var result = await _service.UpdateAsync(banner);
@@ -104,6 +111,10 @@ public class AdminBannerController : ControllerBase
     [HttpDelete("admin/content/banners/{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
+        var userId = User.GetUserId();
+        if (userId == null)
+            return Unauthorized();
+
         var result = await _service.DeleteAsync(id);
 
         if (result.IsFailure)

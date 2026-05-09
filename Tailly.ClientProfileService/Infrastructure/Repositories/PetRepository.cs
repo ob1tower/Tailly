@@ -139,4 +139,12 @@ public class PetRepository : IPetRepository
         _context.Pets.Remove(entity);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<PetEntity?> GetEntityByIdAsync(Guid id)
+    {
+        return await _context.Pets
+            .Include(x => x.ClientProfile)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id);
+    }
 }

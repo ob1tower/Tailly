@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Tailly.SpecialistService.Application.Dtos.Requests.SpecialistApplication;
 using Tailly.SpecialistService.Application.Errors;
 using Tailly.SpecialistService.Application.Mappers;
@@ -14,6 +15,7 @@ namespace Tailly.SpecialistService.Web.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(Roles = "Admin,SuperAdmin")]
+[EnableRateLimiting("admin-actions")]
 public class AdminSpecialistApplicationController : ControllerBase
 {
     private readonly ISpecialistApplicationService _service;

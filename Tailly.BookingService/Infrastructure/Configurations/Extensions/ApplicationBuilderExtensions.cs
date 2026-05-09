@@ -9,6 +9,7 @@ public static class ApplicationBuilderExtensions
         app.UseExceptionHandlerMiddleware();
         app.UseHttpsRedirection();
         app.UseSwaggerSetup();
+        app.UseStaticFiles();
         app.UseAuthentication();
         app.UseAuthorization();
         //app.UseRateLimiter();

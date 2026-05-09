@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Tailly.PostsService.Application.Mappers;
 using Tailly.PostsService.Application.Service.Interfaces;
 using Tailly.PostsService.Application.Validators;
+using Tailly.PostsService.Infrastructure.Configurations.Extensions;
 
 namespace Tailly.PostsService.Web.Controllers;
 
@@ -30,7 +31,6 @@ public class PostController : ControllerBase
     [EnableRateLimiting("public")]
     public async Task<IActionResult> GetList([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null, [FromQuery] string? tag = null, [FromQuery] string? sort = null)
     {
-
         var pagination = new PaginationValidator(page, pageSize);
 
         var result = await _service.GetListAsync(

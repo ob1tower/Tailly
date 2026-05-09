@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Tailly.SpecialistService.Application.Mappers;
 using Tailly.SpecialistService.Application.Service.Interfaces;
 using Tailly.SpecialistService.Application.Validators;
+using Tailly.SpecialistService.Core.Enums;
 using static Tailly.SpecialistService.Application.Mappers.SpecialistResponseMapper;
 
 namespace Tailly.SpecialistService.Web.Controllers;
@@ -47,11 +49,14 @@ public class SpecialistController : ControllerBase
     /// Returns full specialist page by slug.
     /// </summary>
     /// <param name="slug">Specialist slug.</param>
-    /// <returns>Specialist data</returns>
+    /// <param name="reviewSort">Review sort: newest, oldest, rating_asc, rating_desc.</param>
+    /// <returns>Specialist data.</returns>
     [HttpGet("specialists/{slug}")]
-    public async Task<IActionResult> GetBySlug([FromRoute] string slug)
+    public async Task<IActionResult> GetBySlug([FromRoute] string slug, [FromQuery] string? reviewSort = null)
     {
-        var specialist = await _service.GetFullProfileBySlugAsync(slug);
+        var reviewSortType = SpecialistEnumMapper.ParseReviewSortType(reviewSort);
+
+        var specialist = await _service.GetFullProfileBySlugAsync(slug, reviewSortType);
 
         if (specialist == null)
             return NotFound();
@@ -64,11 +69,14 @@ public class SpecialistController : ControllerBase
     /// Returns full specialist page by ID.
     /// </summary>
     /// <param name="id">Specialist ID.</param>
+    /// <param name="reviewSort">Review sort: newest, oldest, rating_asc, rating_desc.</param>
     /// <returns>Specialist data.</returns>
     [HttpGet("specialists/{id:guid}")]
-    public async Task<IActionResult> GetById([FromRoute] Guid id)
+    public async Task<IActionResult> GetById([FromRoute] Guid id, [FromQuery] string? reviewSort = null)
     {
-        var specialist = await _service.GetFullProfileByIdAsync(id);
+        var reviewSortType = SpecialistEnumMapper.ParseReviewSortType(reviewSort);
+
+        var specialist = await _service.GetFullProfileByIdAsync(id, reviewSortType);
 
         if (specialist == null)
             return NotFound();

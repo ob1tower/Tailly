@@ -10,6 +10,6 @@ public sealed class ReviewResponse
     public string ServiceTitle { get; set; } = default!;
     public string PetName { get; set; } = default!;
     public DateTime CreatedAt { get; set; }
-    public string ReplyText { get; set; } = default!;
-    public DateTime? ReplyCreatedAt { get; set; }
+    public List<string> Photos { get; set; } = [];
+    public ReviewReplyResponse? SpecialistReply { get; set; }
 }
