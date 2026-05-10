@@ -19,10 +19,8 @@ public class PetEntity
     public string Notes { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
     public Guid ClientId { get; set; }
     public ClientProfileEntity ClientProfile { get; set; } = default!;
-
     public Guid? BreedId { get; set; }
     public BreedEntity? Breed { get; set; } = default!;
 }

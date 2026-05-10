@@ -305,26 +305,6 @@ namespace Tailly.SpecialistService.Migrations
                         .IsUnique();
 
                     b.ToTable("Calendars");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("c6e0fea6-4b86-4001-be26-29800be5c900"),
-                            SpecialistId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            Timezone = "Europe/Moscow"
-                        },
-                        new
-                        {
-                            Id = new Guid("c2a498d2-75f5-4846-ad8b-87106e566de4"),
-                            SpecialistId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            Timezone = "Europe/Moscow"
-                        },
-                        new
-                        {
-                            Id = new Guid("44733e3a-29f9-4371-a4be-14d6a5e02b16"),
-                            SpecialistId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            Timezone = "Europe/Moscow"
-                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.DetailsEntity", b =>
@@ -353,32 +333,6 @@ namespace Tailly.SpecialistService.Migrations
                         .IsUnique();
 
                     b.ToTable("Details");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            About = "Люблю животных, имею двух своих собак. Занимаюсь выгулом и передержкой уже более 5 лет.",
-                            HasChildrenUnderTen = 2,
-                            HousingType = 1,
-                            SpecialistId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            About = "Профессиональный выгульщик с опытом работы с крупными породами.",
-                            HasChildrenUnderTen = 1,
-                            HousingType = 2,
-                            SpecialistId = new Guid("22222222-2222-2222-2222-222222222222")
-                        },
-                        new
-                        {
-                            Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            About = "Профессиональный грумер собак и кошек с 7-летним стажем.",
-                            HasChildrenUnderTen = 3,
-                            HousingType = 1,
-                            SpecialistId = new Guid("33333333-3333-3333-3333-333333333333")
-                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.PetAgeEntity", b =>
@@ -398,20 +352,6 @@ namespace Tailly.SpecialistService.Migrations
                     b.HasIndex("DetailsId");
 
                     b.ToTable("PetAges");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("24cf62f2-ecec-4b3f-b806-38ba28b6fc78"),
-                            DetailsId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            PetAge = 3
-                        },
-                        new
-                        {
-                            Id = new Guid("5934c383-839d-4a8c-8392-feefd2e1ab57"),
-                            DetailsId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            PetAge = 4
-                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.PetSizeEntity", b =>
@@ -431,32 +371,6 @@ namespace Tailly.SpecialistService.Migrations
                     b.HasIndex("DetailsId");
 
                     b.ToTable("PetSizes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("89833d44-ea5f-423d-b19b-9c2e1eb9783b"),
-                            DetailsId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            PetSize = 2
-                        },
-                        new
-                        {
-                            Id = new Guid("7abf6d66-d2db-4e2f-b9d8-023e0246da5a"),
-                            DetailsId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            PetSize = 3
-                        },
-                        new
-                        {
-                            Id = new Guid("4b4854ad-b0b6-4e72-9439-f5f601f7b9b8"),
-                            DetailsId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            PetSize = 4
-                        },
-                        new
-                        {
-                            Id = new Guid("d3d93b21-7e7e-45e3-a5f1-15e5f707dffd"),
-                            DetailsId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            PetSize = 5
-                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Details.PetTypeEntity", b =>
@@ -476,38 +390,6 @@ namespace Tailly.SpecialistService.Migrations
                     b.HasIndex("DetailsId");
 
                     b.ToTable("PetTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11150932-055f-4f0d-97e8-12c88e1179e6"),
-                            DetailsId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            PetType = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("ac496664-f005-4d33-ae0e-d05bf2adf112"),
-                            DetailsId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                            PetType = 2
-                        },
-                        new
-                        {
-                            Id = new Guid("3aa32ec3-f085-4337-a9fe-409e34b63245"),
-                            DetailsId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                            PetType = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("65b9f374-92bc-4d00-9b77-0ba77916ff91"),
-                            DetailsId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            PetType = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("f2cc3f03-70f2-4524-b7a3-62f29eb1dcf7"),
-                            DetailsId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                            PetType = 2
-                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Gallery.SpecialistGalleryEntity", b =>
@@ -537,24 +419,6 @@ namespace Tailly.SpecialistService.Migrations
                     b.HasIndex("SpecialistId", "Order");
 
                     b.ToTable("SpecialistGalleries");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("4c797f51-5100-4a92-9b5b-67ec2498dc94"),
-                            Alt = "Анна с питомцем",
-                            ImageUrl = "/uploads/gallery/anna1.jpg",
-                            Order = 1,
-                            SpecialistId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            Id = new Guid("0e28d891-7e5c-4caa-ad41-d5a44c24df29"),
-                            Alt = "Анна на прогулке",
-                            ImageUrl = "/uploads/gallery/anna2.jpg",
-                            Order = 2,
-                            SpecialistId = new Guid("11111111-1111-1111-1111-111111111111")
-                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Reviews.ReviewEntity", b =>
@@ -638,44 +502,6 @@ namespace Tailly.SpecialistService.Migrations
                     b.HasIndex("SpecialistId");
 
                     b.ToTable("Services");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("18803d15-7feb-4ba8-9ec3-7b65418d8de7"),
-                            Description = "Выгул собаки 60 минут",
-                            Name = 1,
-                            Price = 1200m,
-                            PriceUnit = 4,
-                            SpecialistId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            Id = new Guid("2d9bcfc7-897e-4b89-a3ea-67fb58d146f4"),
-                            Description = "Комфортная передержка в квартире",
-                            Name = 2,
-                            Price = 2500m,
-                            PriceUnit = 2,
-                            SpecialistId = new Guid("11111111-1111-1111-1111-111111111111")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0a85b66-ac0f-4604-8727-e6dc052cd174"),
-                            Description = "Выгул с элементами дрессировки",
-                            Name = 5,
-                            Price = 1800m,
-                            PriceUnit = 1,
-                            SpecialistId = new Guid("22222222-2222-2222-2222-222222222222")
-                        },
-                        new
-                        {
-                            Id = new Guid("fe894bf6-3eb7-4341-b34d-d341e20d2128"),
-                            Description = "Полный груминг",
-                            Name = 3,
-                            Price = 3500m,
-                            PriceUnit = 3,
-                            SpecialistId = new Guid("33333333-3333-3333-3333-333333333333")
-                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Specialist.SpecialistEntity", b =>
@@ -763,69 +589,6 @@ namespace Tailly.SpecialistService.Migrations
                         .IsUnique();
 
                     b.ToTable("Specialists");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            AvatarUrl = "/uploads/avatars/anna.jpg",
-                            City = "Москва",
-                            CompletedOrdersCount = 87,
-                            CreatedAt = new DateTime(2025, 11, 8, 14, 4, 56, 434, DateTimeKind.Utc).AddTicks(5976),
-                            District = "Сокольники",
-                            Email = "anna@example.com",
-                            ExperienceYears = 5,
-                            FirstName = "Анна",
-                            LastName = "Смирнова",
-                            Latitude = 55.793100000000003,
-                            Longitude = 37.677799999999998,
-                            Phone = "+79161234567",
-                            Rating = 4.8m,
-                            RepeatOrdersCount = 24,
-                            ReviewsCount = 42,
-                            Slug = "anna-petcare",
-                            UserId = new Guid("438a4a9e-c17b-439d-ab8b-007ed01d2ac8")
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            City = "Москва",
-                            CompletedOrdersCount = 45,
-                            CreatedAt = new DateTime(2026, 1, 8, 14, 4, 56, 434, DateTimeKind.Utc).AddTicks(6021),
-                            District = "Марьино",
-                            Email = "dima@example.com",
-                            ExperienceYears = 3,
-                            FirstName = "Дмитрий",
-                            LastName = "Кузнецов",
-                            Latitude = 55.6494,
-                            Longitude = 37.743000000000002,
-                            Phone = "+79162345678",
-                            Rating = 4.6m,
-                            RepeatOrdersCount = 12,
-                            ReviewsCount = 28,
-                            Slug = "dima-dogwalker",
-                            UserId = new Guid("6fbf4dc8-cf8b-46df-960f-b6d0c6eb7ff9")
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            City = "Санкт-Петербург",
-                            CompletedOrdersCount = 112,
-                            CreatedAt = new DateTime(2025, 9, 8, 14, 4, 56, 434, DateTimeKind.Utc).AddTicks(6025),
-                            District = "Центральный",
-                            Email = "maria@example.com",
-                            ExperienceYears = 7,
-                            FirstName = "Мария",
-                            LastName = "Попова",
-                            Latitude = 59.938600000000001,
-                            Longitude = 30.3141,
-                            Phone = "+79213456789",
-                            Rating = 4.9m,
-                            RepeatOrdersCount = 35,
-                            ReviewsCount = 67,
-                            Slug = "maria-grooming",
-                            UserId = new Guid("ad0ec355-8d4f-4e96-9663-d497cb48a47a")
-                        });
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarAvailabilityWindowEntity", b =>

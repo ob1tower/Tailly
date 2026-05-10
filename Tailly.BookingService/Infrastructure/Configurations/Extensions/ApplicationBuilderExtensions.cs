@@ -12,7 +12,7 @@ public static class ApplicationBuilderExtensions
         app.UseStaticFiles();
         app.UseAuthentication();
         app.UseAuthorization();
-        //app.UseRateLimiter();
+        app.UseRateLimiter();
         app.MapControllers();
 
         return app;

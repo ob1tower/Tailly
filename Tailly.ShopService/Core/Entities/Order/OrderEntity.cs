@@ -21,4 +21,5 @@ public class OrderEntity
     public PickupPointEntity? PickupPoint { get; set; }
     public ICollection<OrderItemEntity> Items { get; set; } = [];
     public OrderAddressEntity? Address { get; set; }
+    public bool CompletionEmailSent { get; set; }
 }

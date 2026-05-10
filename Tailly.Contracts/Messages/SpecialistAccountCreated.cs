@@ -12,6 +12,6 @@ public record SpecialistAccountCreated
     public string Phone { get; init; } = string.Empty;
     public string City { get; init; } = string.Empty;
     public string About { get; init; } = string.Empty;
-    public string TemporaryPassword { get; init; } = string.Empty;
+    public string? TemporaryPassword { get; init; }
     public string CreatedByAdminId { get; init; } = string.Empty;
 }

@@ -10,7 +10,7 @@ public class ClientProfileEntity
     public string Phone { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string? CityId { get; set; }
+    public string? District { get; set; }
     public string? AvatarUrl { get; set; }
-
     public ICollection<PetEntity> Pets { get; set; } = [];
 }

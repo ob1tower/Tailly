@@ -708,6 +708,31 @@
       "UpstreamPathTemplate": "/me/orders/products/{orderId}/confirm",
       "UpstreamHttpMethod": [ "POST" ]
     },
+    {
+      "DownstreamPathTemplate": "/api/ShopMedia/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "shop",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/shop/media/{everything}",
+      "UpstreamHttpMethod": [ "POST" ],
+      "FileUpload": true
+    },
+    {
+      "DownstreamPathTemplate": "/uploads/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "shop",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/shop-uploads/{everything}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
     // =============================================
     // ==================== POSTSSERVICE ====================
     // =============================================
@@ -873,7 +898,7 @@
       "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/api/ClientProfile/me",
+      "DownstreamPathTemplate": "/api/ClientProfile/me/profile",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -882,10 +907,10 @@
         }
       ],
       "UpstreamPathTemplate": "/me/profile",
-      "UpstreamHttpMethod": [ "GET", "PUT" ]
+      "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/api/ClientProfile/me/{everything}",
+      "DownstreamPathTemplate": "/api/ClientProfile/me/profile/main",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -893,11 +918,23 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/me/profile/{everything}",
+      "UpstreamPathTemplate": "/me/profile/main",
       "UpstreamHttpMethod": [ "PUT" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Pet",
+      "DownstreamPathTemplate": "/api/ClientProfile/me/profile/contacts",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "clientprofile",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/profile/contacts",
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Pet/me/pets",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -906,10 +943,10 @@
         }
       ],
       "UpstreamPathTemplate": "/me/pets",
-      "UpstreamHttpMethod": [ "GET", "POST" ]
+      "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Pet/{id}",
+      "DownstreamPathTemplate": "/api/Pet/me/pets/add",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -917,11 +954,23 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/me/pets/{id}",
+      "UpstreamPathTemplate": "/me/pets",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Pet/me/pets/{petId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "clientprofile",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/me/pets/{petId}",
       "UpstreamHttpMethod": [ "PUT", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/api/Breed",
+      "DownstreamPathTemplate": "/api/Breed/pets/breeds",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -1151,10 +1200,10 @@
         }
       ],
       "UpstreamPathTemplate": "/me/orders/services",
-      "UpstreamHttpMethod": [ "GET", "POST" ]
+      "UpstreamHttpMethod": [ "GET" ]
     },
     {
-      "DownstreamPathTemplate": "/api/ServiceOrder/me/orders/services/{orderId}",
+      "DownstreamPathTemplate": "/api/ServiceOrder/me/orders/services/add",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -1162,8 +1211,8 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/me/orders/services/{orderId}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamPathTemplate": "/me/orders/services",
+      "UpstreamHttpMethod": [ "POST" ]
     },
     {
       "DownstreamPathTemplate": "/api/ServiceOrder/me/orders/services/{orderId}/confirm",

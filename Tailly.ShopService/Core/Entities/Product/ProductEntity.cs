@@ -15,6 +15,12 @@ public class ProductEntity
     public int StockQuantity { get; set; }
     public decimal Rating { get; set; }
     public int ReviewsCount { get; set; }
+    public string? Brand { get; set; }
+    public string? CountryOfOrigin { get; set; }
+    public string? ForWhom { get; set; }
+    public string? Purpose { get; set; }
+    public string? PetSize { get; set; }
+    public string? Material { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<ProductReviewEntity> Reviews { get; set; } = [];

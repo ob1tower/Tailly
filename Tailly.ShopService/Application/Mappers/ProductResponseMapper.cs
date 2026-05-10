@@ -25,6 +25,15 @@ public static class ProductResponseMapper
             ReviewsCount = product.ReviewsCount,
             IsAvailable = product.IsAvailable,
             StockQuantity = product.StockQuantity,
+            Characteristics = new ProductCharacteristicsResponse
+            {
+                Brand = product.Brand,
+                CountryOfOrigin = product.CountryOfOrigin,
+                ForWhom = product.ForWhom,
+                Purpose = product.Purpose,
+                PetSize = product.PetSize,
+                Material = product.Material
+            },
             CreatedAt = product.CreatedAt,
             UpdatedAt = product.UpdatedAt,
 
@@ -53,6 +62,13 @@ public static class ProductResponseMapper
             Rating = review.Rating,
             Text = review.Text,
             CreatedAt = review.CreatedAt,
+
+            Images = review.Images.Select(x => new ProductReviewImageResponse
+            {
+                Id = x.Id.ToString(),
+                Url = x.Url
+            }).ToList(),
+
             siteReply = review.Reply?.ToResponse()   // временно буква
         };
     }
@@ -93,6 +109,15 @@ public static class ProductResponseMapper
             ReviewsCount = product.ReviewsCount,
             IsAvailable = product.IsAvailable,
             StockQuantity = product.StockQuantity,
+            Characteristics = new ProductCharacteristicsResponse
+            {
+                Brand = product.Brand,
+                CountryOfOrigin = product.CountryOfOrigin,
+                ForWhom = product.ForWhom,
+                Purpose = product.Purpose,
+                PetSize = product.PetSize,
+                Material = product.Material
+            },
 
             Images = product.Images.Take(1).Select(i => i.ToResponse()).ToList()
         };

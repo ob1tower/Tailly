@@ -37,3 +37,11 @@ public enum ProductSort
     RatingDesc,
     Newest
 }
+
+public enum ReviewSortType
+{
+    Newest = 1,
+    Oldest,
+    Positive,
+    Negative
+}

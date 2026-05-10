@@ -12,7 +12,7 @@ namespace Tailly.SpecialistService.Application.Mappers;
 
 public static class SpecialistResponseMapper
 {
-    public static SpecialistProfileResponse ToResponse(Specialist specialist)
+    public static SpecialistProfileResponse ToResponse(Specialist specialist, bool canViewPrivateContacts = false)
     {
         return new SpecialistProfileResponse
         {
@@ -26,8 +26,15 @@ public static class SpecialistResponseMapper
                 MiddleName = specialist.MiddleName ?? "",
                 City = specialist.City ?? "",
                 District = specialist.District ?? "",
-                Phone = specialist.Phone ?? "",
-                Email = specialist.Email ?? "",
+
+                Phone = canViewPrivateContacts
+                ? specialist.Phone ?? ""
+                : "",
+
+                Email = canViewPrivateContacts
+                ? specialist.Email ?? ""
+                : "",
+
                 AvatarUrl = specialist.AvatarUrl ?? ""
             },
 
@@ -109,7 +116,7 @@ public static class SpecialistResponseMapper
             .Select(g => new ServiceShortResponse
             {
                 ServiceId = SpecialistEnumMapper.MapServiceType(g.Key),
-                PetTypes = [],
+                PetTypes = specialist.Details?.PetTypes?.Select(SpecialistEnumMapper.MapPetType).Distinct().ToList() ?? [],
                 PriceFrom = g.Min(x => x.Price),
                 PriceTo = g.Count() > 1 ? g.Max(x => x.Price) : null,
                 DurationMinutes = null,
@@ -121,10 +128,10 @@ public static class SpecialistResponseMapper
         {
             Id = specialist.Id,
             Name = $"{specialist.FirstName} {specialist.LastName}".Trim(),
-            AvatarUrl = specialist.AvatarUrl,
+            AvatarUrl = specialist.AvatarUrl ?? "",
             City = specialist.City ?? "",
             District = specialist.District ?? "",
-            Description = specialist.Details?.About,
+            Description = specialist.Details?.About ?? "",
             Rating = specialist.Rating,
             ReviewsCount = specialist.ReviewsCount,
             ExperienceYears = specialist.ExperienceYears,

@@ -34,6 +34,7 @@ public class ClientProfileRepository : IClientProfileRepository
             Phone = entity.Phone,
             City = entity.City,
             CityId = entity.CityId,
+            District = entity.District,
             AvatarUrl = entity.AvatarUrl
         };
     }
@@ -50,6 +51,7 @@ public class ClientProfileRepository : IClientProfileRepository
             Phone = profile.Phone,
             City = profile.City,
             CityId = profile.CityId,
+            District = profile.District,
             AvatarUrl = profile.AvatarUrl
         };
 
@@ -71,6 +73,7 @@ public class ClientProfileRepository : IClientProfileRepository
         entity.Phone = profile.Phone;
         entity.City = profile.City;
         entity.CityId = profile.CityId;
+        entity.District = profile.District;
         entity.AvatarUrl = profile.AvatarUrl;
 
         await _context.SaveChangesAsync();

@@ -21,4 +21,5 @@ public class Order
     public PickupPoint? PickupPoint { get; set; }
     public OrderAddress? Address { get; set; }
     public List<OrderItem> Items { get; set; } = [];
+    public bool CompletionEmailSent { get; set; }
 }

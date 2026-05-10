@@ -39,8 +39,6 @@ public class SpecialistDbContext : DbContext
         modelBuilder.ApplyConfiguration(new CalendarAvailabilityWindowConfiguration());
         modelBuilder.ApplyConfiguration(new CalendarBookedSlotConfiguration());
         modelBuilder.ApplyConfiguration(new CalendarBookingSettingsConfiguration());
-
-        SpecialistSeedData.Seed(modelBuilder);
     }
 
     public DbSet<SpecialistApplicationEntity> SpecialistApplications { get; set; }

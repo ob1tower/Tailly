@@ -8,4 +8,5 @@ public sealed class ProductReviewResponse
     public string Text { get; set; } = default!;
     public DateTime CreatedAt { get; set; }
     public ProductReviewReplyResponse? siteReply { get; set; } // ВРЕМЕННО
+    public List<ProductReviewImageResponse> Images { get; set; } = [];
 }

@@ -23,13 +23,13 @@ public class SpecialistsService : ISpecialistsService
         _logger = logger;
     }
 
-    public async Task<List<Specialist>> SearchAsync(string? cityQuery, string? districtQuery,
-           string? serviceType, decimal? priceMin, decimal? priceMax, int page, int pageSize)
+    public async Task<List<Specialist>> SearchAsync(string? cityQuery, string? districtQuery, string? serviceType, string? petType, int? experienceFrom, bool onlyWithReviews, string? sort, decimal? priceMin, decimal? priceMax, int page, int pageSize)
     {
-        _logger.LogInformation("Searching specialists. City: {City}, District: {District}, ServiceType: {ServiceType}, Page: {Page}",
-            cityQuery, districtQuery, serviceType, page);
+        _logger.LogInformation("Searching specialists. " + "City: {City}, District: {District}, ServiceType: {ServiceType}, " + "PetType: {PetType}, ExperienceFrom: {ExperienceFrom}, " +
+                               "OnlyWithReviews: {OnlyWithReviews}, Sort: {Sort}, " + "PriceMin: {PriceMin}, PriceMax: {PriceMax}, Page: {Page}",
+                               cityQuery, districtQuery, serviceType, petType, experienceFrom, onlyWithReviews, sort, priceMin, priceMax, page);
 
-        return await _repository.SearchAsync(cityQuery, districtQuery, serviceType, priceMin, priceMax, page, pageSize);
+        return await _repository.SearchAsync(cityQuery, districtQuery, serviceType, petType, experienceFrom, onlyWithReviews, sort, priceMin, priceMax, page, pageSize);
     }
 
     public async Task<Specialist?> GetFullProfileByIdAsync(Guid id, ReviewSortType reviewSortType)

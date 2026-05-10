@@ -73,7 +73,8 @@ public class OrderRepository : IOrderRepository
 
         existingEntity.Status = order.Status;
         existingEntity.EstimatedDeliveryDate = order.EstimatedDeliveryDate;
-        existingEntity.TotalPrice = order.TotalPrice; 
+        existingEntity.TotalPrice = order.TotalPrice;
+        existingEntity.CompletionEmailSent = order.CompletionEmailSent;
 
         await _context.SaveChangesAsync();
     }
@@ -81,5 +82,18 @@ public class OrderRepository : IOrderRepository
     public async Task<bool> ExistsAsync(Guid id)
     {
         return await _context.Orders.AnyAsync(o => o.Id == id);
+    }
+
+    public async Task<List<Order>> GetAllAsync()
+    {
+        var entities = await _context.Orders
+            .Include(o => o.Items)
+            .Include(o => o.Address)
+            .Include(o => o.PickupPoint)
+            .AsNoTracking()
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+
+        return entities.Select(OrderEntityMapper.ToDomain).ToList();
     }
 }

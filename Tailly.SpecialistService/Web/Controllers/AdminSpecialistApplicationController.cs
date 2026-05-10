@@ -182,7 +182,7 @@ public class AdminSpecialistApplicationController : ControllerBase
 
         var specialist = result.Value.Specialist;
 
-        return Ok(new
+        var response = new
         {
             account = new
             {
@@ -201,8 +201,18 @@ public class AdminSpecialistApplicationController : ControllerBase
                 createdAt = specialist.CreatedAt.ToString("o"),
                 createdBy = reviewedBy,
                 isBlocked = false
-            },
-            temporaryPassword = result.Value.TemporaryPassword
-        });
+            }
+        };
+
+        if (!string.IsNullOrWhiteSpace(result.Value.TemporaryPassword))
+        {
+            return Ok(new
+            {
+                response.account,
+                temporaryPassword = result.Value.TemporaryPassword
+            });
+        }
+
+        return Ok(response);
     }
 }

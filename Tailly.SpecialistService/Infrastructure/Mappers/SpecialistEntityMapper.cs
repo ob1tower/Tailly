@@ -36,7 +36,24 @@ public static class SpecialistEntityMapper
             RepeatOrdersCount = entity.RepeatOrdersCount,
             Latitude = entity.Latitude,
             Longitude = entity.Longitude,
-            CreatedAt = entity.CreatedAt
+            CreatedAt = entity.CreatedAt,
+            Details = entity.Details != null ? new Details
+            {
+                HousingType = entity.Details.HousingType,
+                HasChildrenUnderTen = entity.Details.HasChildrenUnderTen,
+                About = entity.Details.About,
+                PetSizes = entity.Details.PetSizes?.Select(x => x.PetSize).ToList() ?? [],
+                PetAges = entity.Details.PetAges?.Select(x => x.PetAge).ToList() ?? [],
+                PetTypes = entity.Details.PetTypes?.Select(x => x.PetType).ToList() ?? []
+            } : new Details
+            {
+                About = "",
+                PetSizes = [],
+                PetAges = [],
+                PetTypes = []
+            },
+
+            Services = entity.Services?.Select(ToServiceModel).ToList() ?? new()
         };
     }
 

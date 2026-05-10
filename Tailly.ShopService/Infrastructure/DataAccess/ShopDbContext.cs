@@ -29,6 +29,7 @@ public class ShopDbContext : DbContext
         modelBuilder.ApplyConfiguration(new CartConfiguration());
         modelBuilder.ApplyConfiguration(new CartItemConfiguration());
         modelBuilder.ApplyConfiguration(new FavoriteConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductReviewImageConfiguration());
 
         ProductSeedData.Seed(modelBuilder);
         PickupPointSeedData.Seed(modelBuilder);
@@ -46,4 +47,5 @@ public class ShopDbContext : DbContext
     public DbSet<CartEntity> Carts { get; set; }
     public DbSet<CartItemEntity> CartItems { get; set; }
     public DbSet<FavoriteEntity> Favorites { get; set; }
+    public DbSet<ProductReviewImageEntity> ProductReviewImages { get; set; }
 }

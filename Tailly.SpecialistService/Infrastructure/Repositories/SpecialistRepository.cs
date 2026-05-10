@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tailly.SpecialistService.Application.Dtos.Responses.Home;
+using Tailly.SpecialistService.Application.Mappers;
 using Tailly.SpecialistService.Core.Entities.Details;
 using Tailly.SpecialistService.Core.Entities.Gallery;
 using Tailly.SpecialistService.Core.Entities.Specialist;
@@ -315,35 +316,93 @@ public class SpecialistRepository : ISpecialistRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<Specialist>> SearchAsync(string? cityQuery, string? districtQuery,
-        string? serviceType, decimal? priceMin, decimal? priceMax, int page, int pageSize)
+    public async Task<List<Specialist>> SearchAsync(string? cityQuery, string? districtQuery, string? serviceType, string? petType, int? experienceFrom, bool onlyWithReviews, string? sort, decimal? priceMin, decimal? priceMax, int page, int pageSize)
     {
         var query = _context.Specialists
             .Include(x => x.Services)
+            .Include(x => x.Details!).ThenInclude(x => x.PetTypes)
+            .Include(x => x.Details!).ThenInclude(x => x.PetSizes)
+            .Include(x => x.Details!).ThenInclude(x => x.PetAges)
             .AsNoTracking()
             .AsQueryable();
 
+        query = query.Where(x => x.Services.Any());
+
         if (!string.IsNullOrWhiteSpace(cityQuery))
-            query = query.Where(x => x.City.Contains(cityQuery));
-
-        if (!string.IsNullOrWhiteSpace(districtQuery))
-            query = query.Where(x => x.District.Contains(districtQuery));
-
-        if (!string.IsNullOrWhiteSpace(serviceType) || priceMin.HasValue || priceMax.HasValue)
         {
-            query = query.Where(x => x.Services.Any(s =>
-                (!string.IsNullOrWhiteSpace(serviceType) ? s.Name.ToString() == serviceType : true) &&
-                (!priceMin.HasValue || s.Price >= priceMin.Value) &&
-                (!priceMax.HasValue || s.Price <= priceMax.Value)));
+            query = query.Where(x =>
+                x.City.Contains(cityQuery));
         }
 
+        if (!string.IsNullOrWhiteSpace(districtQuery))
+        {
+            query = query.Where(x =>
+                x.District.Contains(districtQuery));
+        }
+
+        if (!string.IsNullOrWhiteSpace(serviceType)
+            || priceMin.HasValue
+            || priceMax.HasValue)
+        {
+            query = query.Where(x =>
+                x.Services.Any(s =>
+                    (!string.IsNullOrWhiteSpace(serviceType)
+                        ? s.Name.ToString() == serviceType
+                        : true)
+                    &&
+                    (!priceMin.HasValue
+                        || s.Price >= priceMin.Value)
+                    &&
+                    (!priceMax.HasValue
+                        || s.Price <= priceMax.Value)
+                ));
+        }
+
+        if (!string.IsNullOrWhiteSpace(petType))
+        {
+            var parsedPetType =
+                SpecialistEnumMapper.ParsePetType(petType);
+
+            query = query.Where(x =>
+                x.Details != null &&
+                x.Details.PetTypes.Any(p =>
+                    p.PetType == parsedPetType));
+        }
+
+        if (experienceFrom.HasValue)
+        {
+            query = query.Where(x =>
+                x.ExperienceYears >= experienceFrom.Value);
+        }
+
+        if (onlyWithReviews)
+        {
+            query = query.Where(x =>
+                x.ReviewsCount > 0);
+        }
+
+        query = SpecialistEnumMapper.ParseSort(sort) switch
+        {
+            SpecialistSort.PriceAsc =>
+                query.OrderBy(x =>
+                    x.Services.Min(s => s.Price)),
+
+            SpecialistSort.PriceDesc =>
+                query.OrderByDescending(x =>
+                    x.Services.Max(s => s.Price)),
+
+            _ =>
+                query.OrderByDescending(x => x.Rating)
+        };
+
         var specialists = await query
-            .OrderByDescending(x => x.Rating)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
-        return specialists.Select(SpecialistEntityMapper.ToModel).ToList();
+        return specialists
+            .Select(SpecialistEntityMapper.ToModel)
+            .ToList();
     }
 
     public async Task<bool> HasServiceOfTypeAsync(Guid specialistId, ServiceType serviceType)

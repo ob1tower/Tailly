@@ -7,6 +7,7 @@ public class UpdateClientProfileContactsRequestValidator: AbstractValidator<Upda
 {
     private const int MAX_CITY_LENGTH = 200;
     private const int MAX_PHONE_LENGTH = 20;
+    private const int MAX_DISTRICT_LENGTH = 100;
 
     public UpdateClientProfileContactsRequestValidator()
     {
@@ -23,5 +24,10 @@ public class UpdateClientProfileContactsRequestValidator: AbstractValidator<Upda
         RuleFor(r => r.CityId)
             .MaximumLength(50)
             .When(r => r.CityId != null);
+
+        RuleFor(r => r.District)
+            .MaximumLength(MAX_DISTRICT_LENGTH)
+            .When(r => !string.IsNullOrWhiteSpace(r.District))
+            .WithMessage($"District must not exceed {MAX_DISTRICT_LENGTH} characters.");
     }
 }

@@ -11,5 +11,6 @@ public sealed class ClientProfileResponse
     public string Phone { get; set; } = default!;
     public string City { get; set; } = default!;
     public string? CityId { get; set; }
+    public string? District { get; set; }
     public string AvatarUrl { get; set; } = default!;
 }

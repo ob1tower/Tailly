@@ -19,6 +19,7 @@ public static class OrderEntityMapper
             PaymentMethod = order.PaymentMethod,
             EstimatedDeliveryDate = order.EstimatedDeliveryDate,
             CreatedAt = order.CreatedAt,
+            CompletionEmailSent = order.CompletionEmailSent,
 
             RecipientFirstName = order.RecipientFirstName,
             RecipientLastName = order.RecipientLastName,
@@ -70,6 +71,7 @@ public static class OrderEntityMapper
             PaymentMethod = entity.PaymentMethod,
             EstimatedDeliveryDate = entity.EstimatedDeliveryDate,
             CreatedAt = entity.CreatedAt,
+            CompletionEmailSent = entity.CompletionEmailSent,
 
             RecipientFirstName = entity.RecipientFirstName,
             RecipientLastName = entity.RecipientLastName,

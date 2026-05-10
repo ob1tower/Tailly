@@ -42,6 +42,10 @@ public class ClientProfileEntityConfiguration : IEntityTypeConfiguration<ClientP
 
         builder.HasIndex(x => x.CityId);
 
+        builder.Property(x => x.District)
+               .HasMaxLength(100)
+               .IsRequired(false);
+
         builder.Property(x => x.AvatarUrl)
                .HasMaxLength(500)
                .IsRequired(false);

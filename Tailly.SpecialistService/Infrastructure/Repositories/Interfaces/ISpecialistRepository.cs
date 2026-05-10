@@ -25,6 +25,5 @@ public interface ISpecialistRepository
     Task AddAsync(Specialist specialist);
     Task<List<HomeReviewResponse>> GetHomeReviewsAsync(int? rating, int limit, bool requirePhotos, int minTextLength, int minWords);
     Task<bool> HasServiceOfTypeAsync(Guid specialistId, ServiceType serviceType);
-    Task<List<Specialist>> SearchAsync(string? cityQuery, string? districtQuery, string? serviceType,
-                                       decimal? priceMin, decimal? priceMax, int page, int pageSize);
+    Task<List<Specialist>> SearchAsync(string? cityQuery, string? districtQuery, string? serviceType, string? petType, int? experienceFrom, bool onlyWithReviews, string? sort, decimal? priceMin, decimal? priceMax, int page, int pageSize);
 }

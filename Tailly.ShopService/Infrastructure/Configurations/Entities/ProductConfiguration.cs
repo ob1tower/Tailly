@@ -35,6 +35,24 @@ public class ProductConfiguration : IEntityTypeConfiguration<ProductEntity>
         builder.Property(x => x.Rating)
                .HasColumnType("decimal(3,2)");
 
+        builder.Property(x => x.Brand)
+               .HasMaxLength(100);
+
+        builder.Property(x => x.CountryOfOrigin)
+               .HasMaxLength(100);
+
+        builder.Property(x => x.ForWhom)
+               .HasMaxLength(100);
+
+        builder.Property(x => x.Purpose)
+               .HasMaxLength(200);
+
+        builder.Property(x => x.PetSize)
+               .HasMaxLength(100);
+
+        builder.Property(x => x.Material)
+               .HasMaxLength(200);
+
         builder.Property(x => x.CreatedAt)
                .IsRequired();
 

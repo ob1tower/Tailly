@@ -177,6 +177,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IAccountDeletionService, AccountDeletionService>();
         services.AddScoped<ISuperAdminService, SuperAdminService>();
         services.AddScoped<IAdminProfileService, AdminProfileService>();
+        services.AddScoped<SpecialistTemporaryPasswordService>();
 
         return services;
     }
@@ -392,6 +393,8 @@ public static class DependencyInjectionExtensions
             x.AddConsumer<EmailConsumer>();
             x.AddConsumer<SpecialistAccountCreatedConsumer>();
             x.AddConsumer<UserProfileUpdatedConsumer>();
+            x.AddConsumer<OrderCreatedEmailConsumer>();
+            x.AddConsumer<OrderCompletedEmailConsumer>();
 
             x.UsingRabbitMq((context, cfg) =>
             {
@@ -417,6 +420,26 @@ public static class DependencyInjectionExtensions
                 cfg.ReceiveEndpoint("specialist-account-created", e =>
                 {
                     e.ConfigureConsumer<SpecialistAccountCreatedConsumer>(context);
+
+                    e.UseMessageRetry(r =>
+                    {
+                        r.Interval(3, TimeSpan.FromSeconds(5));
+                    });
+                });
+
+                cfg.ReceiveEndpoint("order-created-email", e =>
+                {
+                    e.ConfigureConsumer<OrderCreatedEmailConsumer>(context);
+
+                    e.UseMessageRetry(r =>
+                    {
+                        r.Interval(3, TimeSpan.FromSeconds(5));
+                    });
+                });
+
+                cfg.ReceiveEndpoint("order-completed-email", e =>
+                {
+                    e.ConfigureConsumer<OrderCompletedEmailConsumer>(context);
 
                     e.UseMessageRetry(r =>
                     {

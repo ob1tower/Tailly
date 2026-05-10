@@ -89,4 +89,28 @@ public static class ShopMapper
         PickupProvider.Cdek => "cdek",
         _ => "cdek"
     };
+
+    public static string MapReviewSort(ReviewSortType sort) => sort switch
+    {
+        ReviewSortType.Newest => "newest",
+        ReviewSortType.Oldest => "oldest",
+        ReviewSortType.Positive => "positive",
+        ReviewSortType.Negative => "negative",
+        _ => "newest"
+    };
+
+    public static ReviewSortType ParseReviewSort(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return ReviewSortType.Newest;
+
+        return value.Trim().ToLowerInvariant() switch
+        {
+            "newest" => ReviewSortType.Newest,
+            "oldest" => ReviewSortType.Oldest,
+            "positive" => ReviewSortType.Positive,
+            "negative" => ReviewSortType.Negative,
+            _ => ReviewSortType.Newest
+        };
+    }
 }

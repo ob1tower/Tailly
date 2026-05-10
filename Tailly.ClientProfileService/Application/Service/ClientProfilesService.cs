@@ -88,6 +88,9 @@ public class ClientProfilesService : IClientProfilesService
         if (!string.IsNullOrWhiteSpace(profile.CityId))
             existing.CityId = profile.CityId;
 
+        if (!string.IsNullOrWhiteSpace(profile.District))
+            existing.District = profile.District;
+
         await _repository.UpdateAsync(existing);
 
         _logger.LogInformation("Profile contacts updated for user {UserId}", userId);

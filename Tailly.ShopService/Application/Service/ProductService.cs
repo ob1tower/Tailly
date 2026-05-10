@@ -29,31 +29,32 @@ public class ProductService : IProductService
         _logger = logger;
     }
 
-    public async Task<Result<Product, Error>> GetBySlugAsync(string slug)
+    public async Task<Result<Product, Error>> GetBySlugAsync(string slug, ReviewSortType reviewSort)
     {
         if (string.IsNullOrWhiteSpace(slug))
         {
             _logger.LogWarning("GetBySlugAsync called with empty or whitespace slug.");
+
             return Result.Failure<Product, Error>(ShopErrors.InvalidSlug);
         }
 
         var trimmedSlug = slug.Trim();
 
-        var product = await _productRepository.GetBySlugAsync(trimmedSlug);
+        var product = await _productRepository.GetBySlugAsync(trimmedSlug, reviewSort);
 
         if (product == null)
         {
             _logger.LogWarning("Product not found by slug: {Slug}", trimmedSlug);
+
             return Result.Failure<Product, Error>(ShopErrors.ProductNotFound);
         }
 
         product.ReviewsCount = product.Reviews.Count;
 
-        product.Rating = product.Reviews.Count == 0
-            ? 0
-            : Math.Round(product.Reviews.Average(r => (decimal)r.Rating), 1);
+        product.Rating = product.Reviews.Count == 0 ? 0 : Math.Round(product.Reviews.Average(r => (decimal)r.Rating), 1);
 
         _logger.LogInformation("Product retrieved successfully by slug: {Slug} - {Title}", trimmedSlug, product.Title);
+
         return Result.Success<Product, Error>(product);
     }
 
@@ -142,7 +143,7 @@ public class ProductService : IProductService
         var reply = new ProductReviewReply
         {
             Id = Guid.NewGuid(),
-            AuthorName = "Tailly Shop",
+            AuthorName = "Tailly",
             Text = replyText.Trim(),
             CreatedAt = DateTime.UtcNow
         };
@@ -157,6 +158,7 @@ public class ProductService : IProductService
     public async Task<Result> CreateReviewAsync(Guid userId, ProductReview review)
     {
         var order = await _orderRepository.GetByIdAsync(review.OrderId);
+
         if (order == null || order.OwnerUserId != userId)
             return Result.Failure(ShopErrors.OrderNotFound.Description);
 
@@ -187,6 +189,7 @@ public class ProductService : IProductService
         review.AuthorName = userFullName;
         review.Text = review.Text.Trim();
         review.CreatedAt = DateTime.UtcNow;
+        review.Images ??= [];
 
         await _productRepository.AddReviewAsync(review);
 
