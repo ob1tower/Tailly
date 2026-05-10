@@ -65,6 +65,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    volumes:
+      - shop_uploads:/app/wwwroot/uploads
 
   posts:
     build:
@@ -166,3 +168,4 @@ volumes:
   post_uploads:
   specialist_uploads:
   booking_uploads:
+  shop_uploads:

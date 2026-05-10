@@ -25,6 +25,12 @@ public static class ProductEntityMapper
             ReviewsCount = entity.ReviewsCount,
             IsAvailable = entity.IsAvailable,
             StockQuantity = entity.StockQuantity,
+            Brand = entity.Brand,
+            CountryOfOrigin = entity.CountryOfOrigin,
+            ForWhom = entity.ForWhom,
+            Purpose = entity.Purpose,
+            PetSize = entity.PetSize,
+            Material = entity.Material,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
 
@@ -42,6 +48,12 @@ public static class ProductEntityMapper
                 Rating = r.Rating,
                 Text = r.Text,
                 CreatedAt = r.CreatedAt,
+
+                Images = r.Images.Select(i => new ProductReviewImage
+                {
+                    Id = i.Id,
+                    Url = i.Url
+                }).ToList(),
 
                 Reply = r.Reply == null ? null : new ProductReviewReply
                 {
@@ -76,6 +88,13 @@ public static class ProductEntityMapper
             Rating = entity.Rating,
             Text = entity.Text,
             CreatedAt = entity.CreatedAt,
+
+            Images = entity.Images.Select(i => new ProductReviewImage
+            {
+                Id = i.Id,
+                Url = i.Url
+            }).ToList(),
+
             Reply = entity.Reply?.ToDomain()
         };
     }

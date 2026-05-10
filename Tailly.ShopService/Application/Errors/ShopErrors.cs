@@ -16,6 +16,9 @@ public static class ShopErrors
     public static readonly Error InvalidPriceRange =
         new("Product.InvalidPriceRange", "Minimum price cannot be greater than maximum price.");
 
+    public static readonly Error ProductOutOfStock =
+        new("Product.OutOfStock", "Product is out of stock.");
+
     public static readonly Error PickupPointNotFound =
         new("PickupPoint.NotFound", "Pickup point not found.");
 

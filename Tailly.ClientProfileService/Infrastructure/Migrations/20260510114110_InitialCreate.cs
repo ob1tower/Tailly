@@ -39,6 +39,7 @@ namespace Tailly.ClientProfileService.Migrations
                     Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     City = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     CityId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    District = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     AvatarUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
@@ -90,20 +91,20 @@ namespace Tailly.ClientProfileService.Migrations
                 columns: new[] { "Id", "Description", "Title", "Type" },
                 values: new object[,]
                 {
-                    { new Guid("06febfb9-8c1e-473f-a4f8-9180fcd9f7bb"), null, "Лев", 5 },
-                    { new Guid("157aa2cd-7cca-4653-acf5-30d2d3b31019"), null, "Рэгдолл", 2 },
-                    { new Guid("1e05f6b1-a905-4b97-9aec-858904573f36"), null, "Корелла", 3 },
-                    { new Guid("2b415f4b-9698-45e5-b582-d67c9e7e88cf"), null, "Волнистый попугай", 3 },
-                    { new Guid("2d47440e-69ff-4364-b5ba-9ecd604255b9"), null, "Баран", 5 },
-                    { new Guid("3d604913-3ade-44aa-bb3f-3b7660a84ade"), null, "Шотландская вислоухая", 2 },
-                    { new Guid("78df31ee-dec8-4ef1-af30-78f256c5a09b"), null, "Корги", 1 },
-                    { new Guid("7d17f57c-2fce-4038-9932-e5a0e799203b"), null, "Хаски", 1 },
-                    { new Guid("93faa429-0ad0-404d-b023-09a72a797d6b"), null, "Мейн-кун", 2 },
-                    { new Guid("a6ec99c7-be94-4046-8531-d8e6578faaf9"), null, "Немецкая овчарка", 1 },
-                    { new Guid("bf34adf6-b6b8-4d7b-8ad7-059e61779959"), null, "Лабрадор", 1 },
-                    { new Guid("d769028b-25cb-4fce-b62e-f56f9522181a"), null, "Французский бульдог", 1 },
-                    { new Guid("f660d9e9-5450-43b5-a86a-dbb07d51d113"), null, "Британская короткошерстная", 2 },
-                    { new Guid("f70bbcf4-5791-4d6f-9121-5732c2ca31b1"), null, "Сиамская", 2 }
+                    { new Guid("0532630b-bbe8-4a9c-93ec-9665e3c583d7"), null, "Корги", 1 },
+                    { new Guid("0afc029f-2bac-4b5a-9663-054c089658c6"), null, "Сиамская", 2 },
+                    { new Guid("110d4844-2c68-4b28-afcc-e198a6e384b3"), null, "Лев", 5 },
+                    { new Guid("1c2e950c-6164-465b-b0ec-0259594c34ae"), null, "Хаски", 1 },
+                    { new Guid("37990fe4-6b76-475f-a378-98eea7acbc26"), null, "Французский бульдог", 1 },
+                    { new Guid("4dd3be4e-dc09-45bd-b12e-1ed59fbd90bd"), null, "Британская короткошерстная", 2 },
+                    { new Guid("75a77134-6b6f-40e1-a642-a3a4cd0b2fce"), null, "Немецкая овчарка", 1 },
+                    { new Guid("7c19145a-7818-4beb-8800-f3cff753eb60"), null, "Рэгдолл", 2 },
+                    { new Guid("80596eed-28f8-4961-8fd5-9d0eba0bd06c"), null, "Шотландская вислоухая", 2 },
+                    { new Guid("9a0fdece-deb0-43b7-81ef-0d6adb6c82ef"), null, "Баран", 5 },
+                    { new Guid("a3815616-d7df-4403-be61-455e9728b2bf"), null, "Корелла", 3 },
+                    { new Guid("be045962-4d3a-4cf5-8414-12613419bb2a"), null, "Лабрадор", 1 },
+                    { new Guid("d4302ee8-7b5d-4a29-a572-f3587404e6e4"), null, "Мейн-кун", 2 },
+                    { new Guid("d44c9777-1298-4cae-9d72-2fcf80af9c19"), null, "Волнистый попугай", 3 }
                 });
 
             migrationBuilder.CreateIndex(

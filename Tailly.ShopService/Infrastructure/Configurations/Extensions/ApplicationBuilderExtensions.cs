@@ -11,6 +11,7 @@ public static class ApplicationBuilderExtensions
         app.UseSwaggerSetup();
         app.UseRouting();
         app.UseRateLimiter();
+        app.UseStaticFiles();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();

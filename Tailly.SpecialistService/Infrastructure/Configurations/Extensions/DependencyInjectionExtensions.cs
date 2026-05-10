@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text;
@@ -13,6 +14,7 @@ using System.Threading.RateLimiting;
 using Tailly.SpecialistService.Application.Dtos.Common;
 using Tailly.SpecialistService.Application.Service;
 using Tailly.SpecialistService.Application.Service.Interfaces;
+using Tailly.SpecialistService.Application.Service.Security;
 using Tailly.SpecialistService.Application.Validators.SpecialistApplication;
 using Tailly.SpecialistService.Application.Validators.SpecialistProfile;
 using Tailly.SpecialistService.Infrastructure.Configurations.Constants;
@@ -33,6 +35,7 @@ public static class DependencyInjectionExtensions
         services.AddControllers();
         services.AddFixedRateLimiter();
         services.AddSwaggerSetup();
+        services.AddRedis(configuration);
         services.AddPostgres(configuration);
         services.AddOptions(configuration);
         services.AddJwtAuthentication();
@@ -79,12 +82,28 @@ public static class DependencyInjectionExtensions
         return services;
     }
 
+    private static IServiceCollection AddRedis(this IServiceCollection services,
+                                               IConfiguration configuration)
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString(ConnectionStrings.Redis);
+        });
+
+        services.AddSingleton<IConnectionMultiplexer>(_ =>
+            ConnectionMultiplexer.Connect(
+                configuration.GetConnectionString(ConnectionStrings.Redis)!));
+
+        return services;
+    }
+
     private static IServiceCollection AddSecurityAndCore(this IServiceCollection services)
     {
         services.AddScoped<ISpecialistApplicationService, SpecialistApplicationService>();
         services.AddScoped<ISpecialistsService, SpecialistsService>();
         services.AddScoped<IMediaService, MediaService>();
         services.AddScoped<ISpecialistProfileService, SpecialistProfileService>();
+        services.AddScoped<SpecialistTemporaryPasswordService>();
 
         return services;
     }

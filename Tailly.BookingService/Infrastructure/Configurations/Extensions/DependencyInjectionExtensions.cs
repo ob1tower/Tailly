@@ -5,8 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Globalization;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
+using Tailly.BookingService.Application.Dtos.Common;
 using Tailly.BookingService.Application.Service;
 using Tailly.BookingService.Application.Service.Interfaces;
 using Tailly.BookingService.Application.Validators;
@@ -23,7 +27,7 @@ public static class DependencyInjectionExtensions
                                                       IConfiguration configuration)
     {
         services.AddJsonSettings();
-        //services.AddFixedRateLimiter();
+        services.AddFixedRateLimiter();
         services.AddSwaggerSetup();
         services.AddPostgres(configuration);
         services.AddOptions(configuration);
@@ -129,6 +133,86 @@ public static class DependencyInjectionExtensions
         services.AddValidatorsFromAssemblyContaining<UploadMediaRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<CreateServiceOrderRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<LeaveReviewRequestValidator>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddFixedRateLimiter(this IServiceCollection services)
+    {
+        services.AddRateLimiter(options =>
+        {
+            options.GlobalLimiter = PartitionedRateLimiter
+                .Create<HttpContext, string>(context =>
+                {
+                    var key = context.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                           ?? context.Connection.RemoteIpAddress?.ToString()
+                           ?? "anonymous";
+
+                    return RateLimitPartition.GetFixedWindowLimiter(
+                        key,
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 100,
+                            QueueLimit = 10,
+                            Window = TimeSpan.FromSeconds(10),
+                            AutoReplenishment = true
+                        });
+                });
+
+            options.AddPolicy("service-orders", context =>
+            {
+                var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                             ?? "anon";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    $"orders:{userId}",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 20,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueLimit = 0,
+                        AutoReplenishment = true
+                    });
+            });
+
+            options.AddPolicy("reviews", context =>
+            {
+                var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                             ?? "anon";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    $"reviews:{userId}",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 5,
+                        Window = TimeSpan.FromMinutes(10),
+                        QueueLimit = 0,
+                        AutoReplenishment = true
+                    });
+            });
+
+            options.OnRejected = async (context, _) =>
+            {
+                if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out TimeSpan retryAfter))
+                {
+                    context.HttpContext.Response.Headers.RetryAfter =
+                        ((int)retryAfter.TotalSeconds).ToString(NumberFormatInfo.InvariantInfo);
+
+                    context.HttpContext.Response.Headers.Append("X-Limit-Remaining", "0");
+                }
+
+                var response = new ExceptionResponse
+                {
+                    StatusCode = StatusCodes.Status429TooManyRequests,
+                    Message = "Too many requests. Please try again later."
+                };
+
+                context.HttpContext.Response.ContentType = "application/json";
+                context.HttpContext.Response.StatusCode = response.StatusCode;
+
+                await context.HttpContext.Response.WriteAsJsonAsync(response, CancellationToken.None);
+            };
+        });
 
         return services;
     }

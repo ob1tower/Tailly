@@ -13,14 +13,6 @@ public class CreateProductReviewRequestValidator : AbstractValidator<CreateProdu
 
     public CreateProductReviewRequestValidator()
     {
-        RuleFor(x => x.ProductId)
-            .NotEqual(Guid.Empty)
-            .WithMessage("Product ID is required.");
-
-        RuleFor(x => x.OrderId)
-            .NotEqual(Guid.Empty)
-            .WithMessage("Order ID is required.");
-
         RuleFor(x => x.Rating)
             .InclusiveBetween(MIN_RATING, MAX_RATING)
             .WithMessage($"Rating must be between {MIN_RATING} and {MAX_RATING}.");

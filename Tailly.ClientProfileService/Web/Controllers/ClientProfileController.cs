@@ -37,7 +37,7 @@ public class ClientProfileController : ControllerBase
     /// Returns profile information for the authenticated user.
     /// </remarks>
     /// <returns>Client profile data.</returns>
-    [HttpGet("me")]
+    [HttpGet("me/profile")]
     public async Task<IActionResult> Get()
     {
         var userId = User.GetUserId();
@@ -64,7 +64,7 @@ public class ClientProfileController : ControllerBase
     /// </summary>
     /// <param name="request">Main profile data to update.</param>
     /// <returns>Updated client profile.</returns>
-    [HttpPut("me/main")]
+    [HttpPut("me/profile/main")]
     public async Task<IActionResult> UpdateMain([FromBody] UpdateClientProfileMainRequest request)
     {
         var userId = User.GetUserId();
@@ -102,7 +102,7 @@ public class ClientProfileController : ControllerBase
     /// </summary>
     /// <param name="request">Contact details to update.</param>
     /// <returns>Updated client profile.</returns>
-    [HttpPut("me/contacts")]
+    [HttpPut("me/profile/contacts")]
     public async Task<IActionResult> UpdateContacts([FromBody] UpdateClientProfileContactsRequest request)
     {
         var userId = User.GetUserId();

@@ -12,7 +12,7 @@ using Tailly.AuthService.Infrastructure.DataAccess;
 namespace Tailly.AuthService.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20260503133127_InitialCreate")]
+    [Migration("20260510180144_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

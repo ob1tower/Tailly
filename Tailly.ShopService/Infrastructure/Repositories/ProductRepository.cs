@@ -22,25 +22,75 @@ public class ProductRepository : IProductRepository
         var entity = await _context.Products
             .Include(p => p.Category)
             .Include(p => p.Images)
-            .Include(p => p.Reviews)
-            .ThenInclude(r => r.Reply)       
+            .Include(p => p.Reviews).ThenInclude(r => r.Reply)
+            .Include(p => p.Reviews).ThenInclude(r => r.Images)
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id);
 
         return entity == null ? null : ProductEntityMapper.ToDomain(entity);
     }
 
-    public async Task<Product?> GetBySlugAsync(string slug)
+    public async Task<Product?> GetBySlugAsync(string slug, ReviewSortType reviewSort)
     {
-        var entity = await _context.Products
+        var query = _context.Products
             .Include(p => p.Category)
             .Include(p => p.Images)
-            .Include(p => p.Reviews)
-            .ThenInclude(r => r.Reply)
             .AsNoTracking()
+            .AsQueryable();
+
+        query = reviewSort switch
+        {
+            ReviewSortType.Newest =>
+                query.Include(p => p.Reviews
+                    .OrderByDescending(r => r.CreatedAt))
+                    .ThenInclude(r => r.Reply)
+                    .Include(p => p.Reviews
+                        .OrderByDescending(r => r.CreatedAt))
+                    .ThenInclude(r => r.Images),
+
+            ReviewSortType.Oldest =>
+                query.Include(p => p.Reviews
+                    .OrderBy(r => r.CreatedAt))
+                    .ThenInclude(r => r.Reply)
+                    .Include(p => p.Reviews
+                        .OrderBy(r => r.CreatedAt))
+                    .ThenInclude(r => r.Images),
+
+            ReviewSortType.Positive =>
+                query.Include(p => p.Reviews
+                    .OrderByDescending(r => r.Rating)
+                    .ThenByDescending(r => r.CreatedAt))
+                    .ThenInclude(r => r.Reply)
+                    .Include(p => p.Reviews
+                        .OrderByDescending(r => r.Rating)
+                        .ThenByDescending(r => r.CreatedAt))
+                    .ThenInclude(r => r.Images),
+
+            ReviewSortType.Negative =>
+                query.Include(p => p.Reviews
+                    .OrderBy(r => r.Rating)
+                    .ThenByDescending(r => r.CreatedAt))
+                    .ThenInclude(r => r.Reply)
+                    .Include(p => p.Reviews
+                        .OrderBy(r => r.Rating)
+                        .ThenByDescending(r => r.CreatedAt))
+                    .ThenInclude(r => r.Images),
+
+            _ =>
+                query.Include(p => p.Reviews
+                    .OrderByDescending(r => r.CreatedAt))
+                    .ThenInclude(r => r.Reply)
+                    .Include(p => p.Reviews
+                        .OrderByDescending(r => r.CreatedAt))
+                    .ThenInclude(r => r.Images)
+        };
+
+        var entity = await query
             .FirstOrDefaultAsync(p => p.Slug == slug);
 
-        return entity == null ? null : ProductEntityMapper.ToDomain(entity);
+        return entity == null
+            ? null
+            : ProductEntityMapper.ToDomain(entity);
     }
 
     public async Task<List<Product>> GetByIdsAsync(List<Guid> ids)
@@ -78,6 +128,8 @@ public class ProductRepository : IProductRepository
         if (categoryIds != null && categoryIds.Any())
         {
             var categoryGuids = categoryIds
+                .SelectMany(x => x.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                .Select(x => x.Trim())
                 .Select(id => Guid.TryParse(id, out var guid) ? guid : Guid.Empty)
                 .Where(g => g != Guid.Empty)
                 .ToList();
@@ -147,6 +199,7 @@ public class ProductRepository : IProductRepository
     {
         var entity = await _context.ProductReviews
             .Include(r => r.Reply)
+            .Include(r => r.Images)
             .AsNoTracking()
             .FirstOrDefaultAsync(r => r.Id == reviewId);
 
@@ -179,7 +232,13 @@ public class ProductRepository : IProductRepository
             AuthorName = review.AuthorName,
             Rating = review.Rating,
             Text = review.Text,
-            CreatedAt = review.CreatedAt
+            CreatedAt = review.CreatedAt,
+
+            Images = review.Images.Select(x => new ProductReviewImageEntity
+            {
+                Id = x.Id,
+                Url = x.Url
+            }).ToList()
         };
 
         _context.ProductReviews.Add(entity);
@@ -192,5 +251,18 @@ public class ProductRepository : IProductRepository
             .AnyAsync(r => r.UserId == userId &&
                            r.OrderId == orderId &&
                            r.ProductId == productId);
+    }
+
+    public async Task UpdateStockAsync(Guid productId, int stockQuantity)
+    {
+        var entity = await _context.Products
+            .FirstOrDefaultAsync(x => x.Id == productId);
+
+        if (entity == null)
+            return;
+
+        entity.StockQuantity = stockQuantity;
+
+        await _context.SaveChangesAsync();
     }
 }

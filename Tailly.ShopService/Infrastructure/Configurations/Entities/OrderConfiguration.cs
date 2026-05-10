@@ -30,6 +30,10 @@ public class OrderConfiguration : IEntityTypeConfiguration<OrderEntity>
         builder.Property(x => x.CreatedAt)
                .IsRequired();
 
+        builder.Property(x => x.CompletionEmailSent)
+               .IsRequired()
+               .HasDefaultValue(false);
+
         builder.Property(x => x.RecipientFirstName)
                .HasMaxLength(100)
                .IsRequired();

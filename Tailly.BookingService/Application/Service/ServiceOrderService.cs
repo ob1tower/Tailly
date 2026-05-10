@@ -165,19 +165,6 @@ public class ServiceOrderService : IServiceOrderService
         return Result.Success<ServiceOrder, Error>(order);
     }
 
-    public async Task<Result<ServiceOrder, Error>> GetByIdAsync(Guid orderId, Guid? clientId, Guid? specialistId)
-    {
-        var order = await _orderRepository.GetByIdAsync(orderId);
-
-        if (order == null)
-            return Result.Failure<ServiceOrder, Error>(BookingErrors.OrderNotFound);
-
-        if (order.ClientId != clientId && order.SpecialistId != specialistId)
-            return Result.Failure<ServiceOrder, Error>(BookingErrors.Forbidden);
-
-        return Result.Success<ServiceOrder, Error>(order);
-    }
-
     public async Task<Result<List<ServiceOrder>, Error>> GetMyOrdersAsync(Guid clientId, string? statusFilter = null, int page = 1, int limit = 20)
     {
         var orders = await _orderRepository.GetByClientIdAsync(clientId, statusFilter, page, limit);

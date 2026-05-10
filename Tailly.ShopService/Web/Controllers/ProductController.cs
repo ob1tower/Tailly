@@ -39,7 +39,7 @@ public class ProductController : ControllerBase
     /// <param name="minPrice">Minimum price filter.</param>
     /// <param name="maxPrice">Maximum price filter.</param>
     /// <param name="onlyAvailable">Show only available products (default: false).</param>
-    /// <param name="sort">Sorting mode: popular, price-asc, price-desc, rating-desc, newest (default: newest).</param>
+    /// <param name="sort">Sort: popular, price-asc, price-desc, rating-desc, newest.</param>
     /// <param name="page">Page number (default: 1).</param>
     /// <param name="limit">Number of items per page (default: 20, max: 100).</param>
     /// <returns>Paginated list of products and total count.</returns>
@@ -106,14 +106,18 @@ public class ProductController : ControllerBase
     }
 
     /// <summary>
-    /// Gets a single product by its SEO-friendly slug.
+    /// Gets a single product by slug.
     /// </summary>
-    /// <param name="slug">SEO-friendly URL slug of the product.</param>
+    /// <param name="slug">Unique product slug.</param>
+    /// <param name="reviewSort">Review sort type: newest, oldest, positive, negative.</param>
+    /// <returns>Product details with reviews.</returns>
     [HttpGet("products/{slug}")]
     [EnableRateLimiting("product")]
-    public async Task<IActionResult> GetBySlug(string slug)
+    public async Task<IActionResult> GetBySlug(string slug, [FromQuery] string? reviewSort)
     {
-        var result = await _productService.GetBySlugAsync(slug);
+        var sort = ShopMapper.ParseReviewSort(reviewSort);
+
+        var result = await _productService.GetBySlugAsync(slug, sort);
 
         if (result.IsFailure)
             return NotFound(result.Error);
@@ -146,7 +150,9 @@ public class ProductController : ControllerBase
     /// <summary>
     /// Creates a new product review.
     /// </summary>
-    /// <param name="request">Review data including product, order, rating, and text.</param>
+    /// <param name="productId">Product identifier.</param>
+    /// <param name="orderId">Order identifier.</param>
+    /// <param name="request">Review data including rating, text, and images.</param>
     /// <remarks>
     /// The user must be authenticated and have a completed order containing the product.
     /// Only one review per product per order is allowed.
@@ -155,7 +161,7 @@ public class ProductController : ControllerBase
     [Authorize(Roles = "Client, Specialist")]
     [HttpPost("reviews")]
     [EnableRateLimiting("reviews")]
-    public async Task<IActionResult> CreateReview([FromBody] CreateProductReviewRequest request)
+    public async Task<IActionResult> CreateReview(Guid productId, Guid orderId, [FromBody] CreateProductReviewRequest request)
     {
         var userId = User.GetUserId();
         if (userId == null)
@@ -167,10 +173,16 @@ public class ProductController : ControllerBase
 
         var review = new ProductReview
         {
-            ProductId = request.ProductId,
-            OrderId = request.OrderId,
+            ProductId = productId,
+            OrderId = orderId,
             Rating = request.Rating,
-            Text = request.Text
+            Text = request.Text,
+
+            Images = request.Images.Select(x => new ProductReviewImage
+            {
+                Id = Guid.NewGuid(),
+                Url = x
+            }).ToList()
         };
 
         var result = await _productService.CreateReviewAsync(userId.Value, review);

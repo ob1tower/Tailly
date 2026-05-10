@@ -1,4 +1,5 @@
 ﻿using MassTransit;
+using Tailly.AuthService.Application.Service.Security;
 using Tailly.AuthService.Application.Service.Security.Interfaces;
 using Tailly.AuthService.Core.Enums;
 using Tailly.AuthService.Core.Models;
@@ -13,16 +14,19 @@ public class SpecialistAccountCreatedConsumer : IConsumer<SpecialistAccountCreat
     private readonly IUsersRepository _usersRepository;
     private readonly IPasswordHashingService _passwordHasher;
     private readonly IEmailSender _emailSender;
+    private readonly SpecialistTemporaryPasswordService _temporaryPasswordService;
     private readonly ILogger<SpecialistAccountCreatedConsumer> _logger;
 
     public SpecialistAccountCreatedConsumer(IUsersRepository usersRepository,
                                             IPasswordHashingService passwordHasher,
                                             IEmailSender emailSender,
+                                            SpecialistTemporaryPasswordService temporaryPasswordService,
                                             ILogger<SpecialistAccountCreatedConsumer> logger)
     {
         _usersRepository = usersRepository;
         _passwordHasher = passwordHasher;
         _emailSender = emailSender;
+        _temporaryPasswordService = temporaryPasswordService;
         _logger = logger;
     }
 
@@ -90,6 +94,9 @@ public class SpecialistAccountCreatedConsumer : IConsumer<SpecialistAccountCreat
                 var temporaryPassword = !string.IsNullOrEmpty(message.TemporaryPassword)
                     ? message.TemporaryPassword
                     : "Temp" + Guid.NewGuid().ToString("N").Substring(0, 8);
+
+                await _temporaryPasswordService.SaveAsync(message.SpecialistId, temporaryPassword);
+
                 var passwordHash = _passwordHasher.HashPassword(temporaryPassword);
 
                 var user = new User

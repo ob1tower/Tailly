@@ -3,6 +3,7 @@ using Tailly.SpecialistService.Application.Mappers;
 using Tailly.SpecialistService.Application.Service.Interfaces;
 using Tailly.SpecialistService.Application.Validators;
 using Tailly.SpecialistService.Core.Enums;
+using Tailly.SpecialistService.Infrastructure.Configurations.Extensions;
 using static Tailly.SpecialistService.Application.Mappers.SpecialistResponseMapper;
 
 namespace Tailly.SpecialistService.Web.Controllers;
@@ -24,12 +25,16 @@ public class SpecialistController : ControllerBase
     /// <param name="cityQuery">City filter.</param>
     /// <param name="districtQuery">District filter.</param>
     /// <param name="serviceType">Service type filter (walking, boarding, grooming, training, photoshoot).</param>
+    /// <param name="petType">Pet type filter (dog, cat, bird, rodent, rabbit, reptile, fish, amphibian).</param>
+    /// <param name="experienceFrom">Minimum experience in years.</param>
+    /// <param name="onlyWithReviews">Show only specialists with reviews.</param>
+    /// <param name="sort">Sort type (rating, price-asc, price-desc).</param>
     /// <param name="priceMin">Minimum price.</param>
     /// <param name="priceMax">Maximum price.</param>
     /// <param name="page">Page number (default: 1).</param>
     /// <param name="limit">Items per page (default: 20).</param>
     [HttpGet("specialists")]
-    public async Task<IActionResult> GetAll([FromQuery] string? cityQuery = null, [FromQuery] string? districtQuery = null, [FromQuery] string? serviceType = null, [FromQuery] decimal? priceMin = null, [FromQuery] decimal? priceMax = null, [FromQuery] int page = 1, [FromQuery] int limit = 20)
+    public async Task<IActionResult> GetAll([FromQuery] string? cityQuery = null, [FromQuery] string? districtQuery = null, [FromQuery] string? serviceType = null, [FromQuery] string? petType = null, [FromQuery] int? experienceFrom = null, [FromQuery] bool onlyWithReviews = false, [FromQuery] string? sort = null, [FromQuery] decimal? priceMin = null, [FromQuery] decimal? priceMax = null, [FromQuery] int page = 1, [FromQuery] int limit = 20)
     {
         var pagination = new PaginationValidator(page, limit);
 
@@ -37,6 +42,10 @@ public class SpecialistController : ControllerBase
             cityQuery,
             districtQuery,
             serviceType,
+            petType,
+            experienceFrom,
+            onlyWithReviews,
+            sort,
             priceMin,
             priceMax,
             pagination.PageNumber,
@@ -61,7 +70,15 @@ public class SpecialistController : ControllerBase
         if (specialist == null)
             return NotFound();
 
-        var response = ToResponse(specialist);
+        var currentUserId = User.GetUserId();
+
+        var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+
+        var canViewPrivateContacts = isAdmin || (currentUserId.HasValue &&
+            specialist.UserId == currentUserId.Value);
+
+        var response = ToResponse(specialist, canViewPrivateContacts);
+
         return Ok(response);
     }
 
@@ -81,7 +98,15 @@ public class SpecialistController : ControllerBase
         if (specialist == null)
             return NotFound();
 
-        var response = ToResponse(specialist);
+        var currentUserId = User.GetUserId();
+
+        var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+
+        var canViewPrivateContacts = isAdmin || (currentUserId.HasValue &&
+            specialist.UserId == currentUserId.Value);
+
+        var response = ToResponse(specialist, canViewPrivateContacts);
+
         return Ok(response);
     }
 }

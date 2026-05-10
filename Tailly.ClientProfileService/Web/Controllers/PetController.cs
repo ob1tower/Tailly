@@ -30,7 +30,7 @@ public class PetController : ControllerBase
     /// Retrieves all pets for the current user.
     /// </summary>
     /// <returns>List of user's pets.</returns>
-    [HttpGet]
+    [HttpGet("me/pets")]
     public async Task<IActionResult> GetAll()
     {
         var userId = User.GetUserId();
@@ -54,7 +54,7 @@ public class PetController : ControllerBase
     /// </summary>
     /// <param name="request">Pet data.</param>
     /// <returns>Created pet.</returns>
-    [HttpPost]
+    [HttpPost("me/pets/add")]
     public async Task<IActionResult> Create([FromBody] UpsertPetRequest request)
     {
         var userId = User.GetUserId();
@@ -82,11 +82,11 @@ public class PetController : ControllerBase
     /// <summary>
     /// Updates an existing pet.
     /// </summary>
-    /// <param name="id">Pet identifier.</param>
+    /// <param name="petId">Pet identifier.</param>
     /// <param name="request">Updated pet data.</param>
     /// <returns>Operation result.</returns>
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpsertPetRequest request)
+    [HttpPut("me/pets/{petId:guid}")]
+    public async Task<IActionResult> Update(Guid petId, [FromBody] UpsertPetRequest request)
     {
         var userId = User.GetUserId();
         if (userId == null)
@@ -97,7 +97,7 @@ public class PetController : ControllerBase
             return BadRequest(ErrorFormatter.Deserialize(validation.Errors));
 
         var pet = PetDtoMapper.ToModel(request);
-        pet.Id = id;
+        pet.Id = petId;
 
         var result = await _service.UpdateAsync(userId.Value, pet);
 
@@ -118,16 +118,16 @@ public class PetController : ControllerBase
     /// <summary>
     /// Deletes a pet.
     /// </summary>
-    /// <param name="id">Pet identifier.</param>
+    /// <param name="petId">Pet identifier.</param>
     /// <returns>Operation result.</returns>
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
+    [HttpDelete("me/pets/{petId:guid}")]
+    public async Task<IActionResult> Delete(Guid petId)
     {
         var userId = User.GetUserId();
         if (userId == null)
             return Unauthorized();
 
-        var result = await _service.DeleteAsync(userId.Value, id);
+        var result = await _service.DeleteAsync(userId.Value, petId);
 
         if (result.IsFailure)
         {

@@ -20,14 +20,12 @@ public static class ServiceOrderMapper
         };
     }
 
-    public static ServiceOrderResponse ToResponse(ServiceOrder model)
+    public static ClientServiceOrderResponse ToClientResponse(ServiceOrder model)
     {
-        return new ServiceOrderResponse
+        return new ClientServiceOrderResponse
         {
             Id = model.Id,
             Number = model.Number,
-            ClientId = model.ClientId,
-            ClientName = model.ClientName,
             SpecialistId = model.SpecialistId,
             SpecialistName = model.SpecialistName,
             SpecialistSlug = model.SpecialistSlug,
@@ -40,7 +38,31 @@ public static class ServiceOrderMapper
             StartAt = model.StartAt,
             EndAt = model.EndAt,
             Comment = model.Comment,
-            Status = MapStatus(model.Status),           
+            Status = MapStatus(model.Status),
+            CreatedAt = model.CreatedAt,
+            Currency = "RUB",
+            HasReview = model.Review != null
+        };
+    }
+
+    public static SpecialistServiceOrderResponse ToSpecialistResponse(ServiceOrder model)
+    {
+        return new SpecialistServiceOrderResponse
+        {
+            Id = model.Id,
+            Number = model.Number,
+            ClientId = model.ClientId,
+            ClientName = model.ClientName,
+            PetId = model.PetId,
+            PetName = model.PetName,
+            ServiceId = model.ServiceId,
+            ServiceTitle = model.ServiceTitle,
+            Price = model.Price,
+            PriceUnit = MapPriceUnit(model.PriceUnit),
+            StartAt = model.StartAt,
+            EndAt = model.EndAt,
+            Comment = model.Comment,
+            Status = MapStatus(model.Status),
             CreatedAt = model.CreatedAt,
             ConfirmedAt = model.ConfirmedAt,
             StartedAt = model.StartedAt,
@@ -61,19 +83,6 @@ public static class ServiceOrderMapper
         OrderStatus.Canceled => "canceled",
         _ => status.ToString().ToLowerInvariant()
     };
-
-    private static PriceUnit ParsePriceUnit(string? value)
-    {
-        return value?.ToLowerInvariant() switch
-        {
-            "hour" => PriceUnit.Hour,
-            "day" => PriceUnit.Day,
-            "service" => PriceUnit.Service,
-            "walk" => PriceUnit.Walk,
-            "visit" => PriceUnit.Visit,
-            _ => PriceUnit.Service
-        };
-    }
 
     private static string MapPriceUnit(PriceUnit unit) => unit switch
     {

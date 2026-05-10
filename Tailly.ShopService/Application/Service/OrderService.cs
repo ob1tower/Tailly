@@ -1,4 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
+using MassTransit;
+using Tailly.Contracts.Messages;
 using Tailly.ShopService.Application.Errors;
 using Tailly.ShopService.Application.Helpers;
 using Tailly.ShopService.Application.Service.Interfaces;
@@ -17,16 +19,19 @@ public class OrderService : IOrderService
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
     private readonly IPickupPointRepository _pickupPointRepository;
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<OrderService> _logger;
 
     public OrderService(IOrderRepository orderRepository,
                         IProductRepository productRepository,
                         IPickupPointRepository pickupPointRepository,
+                        IPublishEndpoint publishEndpoint,
                         ILogger<OrderService> logger)
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
         _pickupPointRepository = pickupPointRepository;
+        _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
 
@@ -68,10 +73,23 @@ public class OrderService : IOrderService
         foreach (var cartItem in cartItems)
         {
             var product = await _productRepository.GetByIdAsync(cartItem.ProductId);
+
             if (product == null)
             {
-                _logger.LogWarning("CreateOrder failed: product {ProductId} not found", cartItem.ProductId);
+                _logger.LogWarning(
+                    "CreateOrder failed: product {ProductId} not found",
+                    cartItem.ProductId);
+
                 return Result.Failure<Order, Error>(ShopErrors.ProductNotFound);
+            }
+
+            if (product.StockQuantity < cartItem.Quantity)
+            {
+                _logger.LogWarning(
+                    "CreateOrder failed: not enough stock for product {ProductId}",
+                    cartItem.ProductId);
+
+                return Result.Failure<Order, Error>(ShopErrors.ProductOutOfStock);
             }
 
             var lineTotal = product.Price * cartItem.Quantity;
@@ -89,6 +107,12 @@ public class OrderService : IOrderService
             });
 
             totalPrice += lineTotal;
+
+            product.StockQuantity -= cartItem.Quantity;
+
+            await _productRepository.UpdateStockAsync(
+                product.Id,
+                product.StockQuantity);
         }
 
         PickupPoint? pickupPoint = null;
@@ -141,6 +165,23 @@ public class OrderService : IOrderService
 
         await _orderRepository.AddAsync(order);
 
+        await _publishEndpoint.Publish(new OrderCreatedEmailRequest
+        {
+            OrderId = order.Id,
+            Email = order.RecipientEmail,
+            FullName = $"{order.RecipientFirstName} {order.RecipientLastName}",
+            OrderNumber = order.Number,
+            TotalPrice = order.TotalPrice,
+
+            Items = order.Items.Select(x => new OrderEmailItem
+            {
+                Title = x.ProductTitle,
+                Quantity = x.Quantity,
+                Price = x.Price,
+                LineTotal = x.LineTotal
+            }).ToList()
+        });
+
         _logger.LogInformation("Order {OrderId} successfully created for user {UserId}", order.Id, userId);
 
         return Result.Success<Order, Error>(order);
@@ -181,6 +222,20 @@ public class OrderService : IOrderService
             return Result.Failure(ShopErrors.OrderCannotBeCancelled.Description);
 
         await _orderRepository.CancelAsync(orderId);
+
+        foreach (var item in order.Items)
+        {
+            var product = await _productRepository.GetByIdAsync(item.ProductId);
+
+            if (product == null)
+                continue;
+
+            product.StockQuantity += item.Quantity;
+
+            await _productRepository.UpdateStockAsync(
+                product.Id,
+                product.StockQuantity);
+        }
 
         _logger.LogInformation("Order {OrderId} cancelled by user {UserId}", orderId, userId);
 

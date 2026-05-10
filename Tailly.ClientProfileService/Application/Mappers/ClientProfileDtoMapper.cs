@@ -15,10 +15,11 @@ public static class ClientProfileDtoMapper
             Email = email ?? "",
             FirstName = p.FirstName,
             LastName = p.LastName,
-            MiddleName = p.MiddleName,
+            MiddleName = p.MiddleName ?? string.Empty,
             Phone = p.Phone,
             City = p.City,
             CityId = p.CityId,
+            District = p.District,
             AvatarUrl = p.AvatarUrl ?? string.Empty
         };
     }
@@ -33,6 +34,7 @@ public static class ClientProfileDtoMapper
             Phone = request.Phone,
             City = request.City,
             CityId = request.CityId,
+            District = request.District,
             AvatarUrl = request.AvatarUrl
         };
     }
@@ -54,7 +56,8 @@ public static class ClientProfileDtoMapper
         {
             Phone = request.Phone,
             City = request.City,
-            CityId = request.CityId
+            CityId = request.CityId,
+            District = request.District
         };
     }
 }

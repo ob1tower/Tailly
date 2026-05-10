@@ -10,5 +10,6 @@ public class ProductReview
     public int Rating { get; set; }
     public string Text { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+    public List<ProductReviewImage> Images { get; set; } = [];
     public ProductReviewReply? Reply { get; set; }
 }

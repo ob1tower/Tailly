@@ -21,6 +21,11 @@ public class ProductReviewConfiguration : IEntityTypeConfiguration<ProductReview
         builder.Property(x => x.CreatedAt)
                .IsRequired();
 
+        builder.HasMany(x => x.Images)
+               .WithOne(x => x.Review)
+               .HasForeignKey(x => x.ReviewId)
+               .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasOne(x => x.Product)
                .WithMany(x => x.Reviews)
                .HasForeignKey(x => x.ProductId)

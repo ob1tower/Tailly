@@ -15,6 +15,7 @@ public sealed class ProductResponse
     public int ReviewsCount { get; set; }
     public bool IsAvailable { get; set; }
     public int StockQuantity { get; set; }
+    public ProductCharacteristicsResponse Characteristics { get; set; } = new();
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<ProductImageResponse> Images { get; set; } = [];

@@ -9,5 +9,6 @@ public interface IOrderRepository
     Task<bool> ExistsAsync(Guid id);
     Task<Order?> GetByIdAsync(Guid id);
     Task<List<Order>> GetByUserIdAsync(Guid userId);
+    Task<List<Order>> GetAllAsync();
     Task UpdateAsync(Order order);
 }

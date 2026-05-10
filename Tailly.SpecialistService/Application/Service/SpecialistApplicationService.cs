@@ -4,6 +4,7 @@ using Tailly.Contracts.Messages;
 using Tailly.SpecialistService.Application.Errors;
 using Tailly.SpecialistService.Application.Helpers;
 using Tailly.SpecialistService.Application.Service.Interfaces;
+using Tailly.SpecialistService.Application.Service.Security;
 using Tailly.SpecialistService.Core.Common;
 using Tailly.SpecialistService.Core.Enums;
 using Tailly.SpecialistService.Core.Models.Applications;
@@ -17,16 +18,19 @@ public class SpecialistApplicationService : ISpecialistApplicationService
     private readonly ISpecialistApplicationRepository _applicationRepository;
     private readonly ISpecialistRepository _specialistRepository;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly SpecialistTemporaryPasswordService _temporaryPasswordService;
     private readonly ILogger<SpecialistApplicationService> _logger;
 
     public SpecialistApplicationService(ISpecialistApplicationRepository applicationRepository,
                                         ISpecialistRepository specialistRepository,
                                         IPublishEndpoint publishEndpoint,
+                                        SpecialistTemporaryPasswordService temporaryPasswordService,
                                         ILogger<SpecialistApplicationService> logger)
     {
         _applicationRepository = applicationRepository;
         _specialistRepository = specialistRepository;
         _publishEndpoint = publishEndpoint;
+        _temporaryPasswordService = temporaryPasswordService;
         _logger = logger;
     }
 
@@ -125,19 +129,19 @@ public class SpecialistApplicationService : ISpecialistApplicationService
         return Result.Success();
     }
 
-    public async Task<Result<(Specialist Specialist, string TemporaryPassword), Error>>AttachSpecialistAccountAsync(Guid applicationId, string reviewedByAdminId)
+    public async Task<Result<(Specialist Specialist, string? TemporaryPassword), Error>>AttachSpecialistAccountAsync(Guid applicationId, string reviewedByAdminId)
     {
         var app = await _applicationRepository.GetByIdAsync(applicationId);
         if (app == null)
-            return Result.Failure<(Specialist Specialist, string TemporaryPassword), Error>(SpecialistApplicationErrors.NotFound);
+            return Result.Failure<(Specialist Specialist, string? TemporaryPassword), Error>(SpecialistApplicationErrors.NotFound);
 
         if (app.Status != SpecialistApplicationStatus.Approved)
-            return Result.Failure<(Specialist Specialist, string TemporaryPassword), Error>(SpecialistApplicationErrors.InvalidStatusTransition);
+            return Result.Failure<(Specialist Specialist, string? TemporaryPassword), Error>(SpecialistApplicationErrors.InvalidStatusTransition);
 
         if (app.CreatedSpecialistId.HasValue)
-            return Result.Failure<(Specialist Specialist, string TemporaryPassword), Error>(SpecialistApplicationErrors.SpecialistAlreadyExists);
+            return Result.Failure<(Specialist Specialist, string? TemporaryPassword), Error>(SpecialistApplicationErrors.SpecialistAlreadyExists);
 
-        var temporaryPassword = "Temp" + Guid.NewGuid().ToString("N").Substring(0, 8);
+        string? temporaryPassword = null;
 
         var slug = await SpecialistSlugGenerator.GenerateUniqueSlugAsync(
             app.FirstName, app.LastName, _specialistRepository);
@@ -200,10 +204,19 @@ public class SpecialistApplicationService : ISpecialistApplicationService
             TemporaryPassword = temporaryPassword,
             CreatedByAdminId = reviewedByAdminId
         });
+        
+        await Task.Delay(1500);
+
+        temporaryPassword = await _temporaryPasswordService.GetAsync(specialistId);
+
+        if (!string.IsNullOrWhiteSpace(temporaryPassword))
+        {
+            await _temporaryPasswordService.RemoveAsync(specialistId);
+        }
 
         _logger.LogInformation("SpecialistAccountCreated published for application {ApplicationId}", applicationId);
 
-        return Result.Success<(Specialist, string), Error>((specialist, temporaryPassword));
+        return Result.Success<(Specialist, string?), Error>((specialist, temporaryPassword));
     }
 
     public async Task<Result<SpecialistApplication, Error>> CreateAsync(SpecialistApplication application)

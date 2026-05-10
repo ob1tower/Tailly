@@ -6,7 +6,7 @@ namespace Tailly.SpecialistService.Application.Service.Interfaces;
 
 public interface ISpecialistsService
 {
-    Task<List<Specialist>> SearchAsync(string? cityQuery, string? districtQuery, string? serviceType, decimal? priceMin, decimal? priceMax, int page, int pageSize);
+    Task<List<Specialist>> SearchAsync(string? cityQuery, string? districtQuery, string? serviceType, string? petType, int? experienceFrom, bool onlyWithReviews, string? sort, decimal? priceMin, decimal? priceMax, int page, int pageSize);
     Task<Specialist?> GetFullProfileByIdAsync(Guid id, ReviewSortType reviewSortType);
     Task<Specialist?> GetFullProfileBySlugAsync(string slug, ReviewSortType reviewSortType);
     Task<List<HomeReviewResponse>> GetHomeReviewsAsync(int? rating, int limit, bool requirePhotos, int minTextLength, int minWords);

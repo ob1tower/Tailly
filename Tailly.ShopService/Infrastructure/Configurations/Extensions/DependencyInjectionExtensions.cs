@@ -18,6 +18,7 @@ using Tailly.ShopService.Infrastructure.Configurations.Options;
 using Tailly.ShopService.Infrastructure.DataAccess;
 using Tailly.ShopService.Infrastructure.Repositories;
 using Tailly.ShopService.Infrastructure.Repositories.Interfaces;
+using Tailly.ShopService.Web.BackgroundServices;
 
 namespace Tailly.ShopService.Infrastructure.Configurations.Extensions;
 
@@ -83,6 +84,8 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<IFavoriteService, FavoriteService>();
+        services.AddScoped<IMediaService, MediaService>();
+        services.AddHostedService<OrderCompletionBackgroundService>();
 
         return services;
     }
@@ -105,6 +108,7 @@ public static class DependencyInjectionExtensions
         services.AddValidatorsFromAssemblyContaining<ReplyToReviewRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<CreateProductReviewRequestValidator>();
         services.AddValidatorsFromAssemblyContaining<UpdateItemRequestValidator>();
+        services.AddValidatorsFromAssemblyContaining<UploadMediaRequestValidator>();
 
         return services;
     }

@@ -2,6 +2,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Tailly.BookingService.Application.Dtos.Requests;
 using Tailly.BookingService.Application.Errors;
 using Tailly.BookingService.Application.Mappers;
@@ -44,49 +45,40 @@ public class ServiceOrderController : ControllerBase
             if (specialistId == null)
                 return Unauthorized();
 
-            result = await _service.GetBySpecialistIdAsync(specialistId.Value, status, page, limit);
+            result = await _service.GetBySpecialistIdAsync(
+                specialistId.Value,
+                status,
+                page,
+                limit);
+
+            if (result.IsFailure)
+                return BadRequest(result.Error);
+
+            return Ok(result.Value.Select(ServiceOrderMapper.ToSpecialistResponse));
         }
-        else
-        {
-            var userId = User.GetUserId();
-            if (userId == null)
-                return Unauthorized();
 
-            result = await _service.GetMyOrdersAsync(userId.Value, status, page, limit);
-        }
-
-        if (result.IsFailure)
-            return BadRequest(result.Error);
-
-        return Ok(result.Value.Select(ServiceOrderMapper.ToResponse));
-    }
-
-    /// <summary>
-    /// Receiving the details of a specific order.
-    /// </summary>
-    [HttpGet("me/orders/services/{orderId:guid}")]
-    [Authorize(Roles = "Client,Specialist")]
-    public async Task<IActionResult> GetById(Guid orderId)
-    {
         var userId = User.GetUserId();
-        var specialistId = User.GetSpecialistId();
-
-        if (userId == null && specialistId == null)
+        if (userId == null)
             return Unauthorized();
 
-        var result = await _service.GetByIdAsync(orderId, userId, specialistId);
+        result = await _service.GetMyOrdersAsync(
+            userId.Value,
+            status,
+            page,
+            limit);
 
         if (result.IsFailure)
             return BadRequest(result.Error);
 
-        return Ok(ServiceOrderMapper.ToResponse(result.Value));
+        return Ok(result.Value.Select(ServiceOrderMapper.ToClientResponse));
     }
 
     /// <summary>
     /// Creates a new service order.
     /// </summary>
-    [HttpPost("me/orders/services")]
+    [HttpPost("me/orders/services/add")]
     [Authorize(Roles = "Client")]
+    [EnableRateLimiting("service-orders")]
     public async Task<IActionResult> Create([FromBody] CreateServiceOrderRequest request)
     {
         var validationResult = await _createValidator.ValidateAsync(request);
@@ -107,7 +99,7 @@ public class ServiceOrderController : ControllerBase
         if (result.IsFailure)
             return BadRequest(result.Error);
 
-        return Ok(ServiceOrderMapper.ToResponse(result.Value));
+        return Ok(ServiceOrderMapper.ToClientResponse(result.Value));
     }
 
     /// <summary>
@@ -115,6 +107,7 @@ public class ServiceOrderController : ControllerBase
     /// </summary>
     [HttpPost("me/orders/services/{orderId:guid}/confirm")]
     [Authorize(Roles = "Specialist")]
+    [EnableRateLimiting("service-orders")]
     public async Task<IActionResult> Confirm(Guid orderId)
     {
         var specialistId = User.GetSpecialistId();
@@ -134,6 +127,7 @@ public class ServiceOrderController : ControllerBase
     /// </summary>
     [HttpPost("me/orders/services/{orderId:guid}/start")]
     [Authorize(Roles = "Specialist")]
+    [EnableRateLimiting("service-orders")]
     public async Task<IActionResult> Start(Guid orderId)
     {
         var specialistId = User.GetSpecialistId();
@@ -153,6 +147,7 @@ public class ServiceOrderController : ControllerBase
     /// </summary>
     [HttpPost("me/orders/services/{orderId:guid}/complete")]
     [Authorize(Roles = "Specialist")]
+    [EnableRateLimiting("service-orders")]
     public async Task<IActionResult> Complete(Guid orderId)
     {
         var specialistId = User.GetSpecialistId();
@@ -172,6 +167,7 @@ public class ServiceOrderController : ControllerBase
     /// </summary>
     [HttpPost("me/orders/services/{orderId:guid}/cancel")]
     [Authorize(Roles = "Client,Specialist")]
+    [EnableRateLimiting("service-orders")]
     public async Task<IActionResult> Cancel(Guid orderId, [FromBody] string? reason = null)
     {
         var userId = User.GetUserId();
@@ -191,6 +187,7 @@ public class ServiceOrderController : ControllerBase
     /// </summary>
     [HttpPost("me/orders/services/{orderId:guid}/repeat")]
     [Authorize(Roles = "Client")]
+    [EnableRateLimiting("service-orders")]
     public async Task<IActionResult> Repeat(Guid orderId)
     {
         var userId = User.GetUserId();
@@ -216,6 +213,7 @@ public class ServiceOrderController : ControllerBase
     /// </summary>
     [HttpPost("me/orders/services/{orderId:guid}/review")]
     [Authorize(Roles = "Client")]
+    [EnableRateLimiting("reviews")]
     public async Task<IActionResult> LeaveReview(Guid orderId, [FromBody] LeaveReviewRequest request)
     {
         var validationResult = await _reviewValidator.ValidateAsync(request);

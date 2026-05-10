@@ -15,6 +15,12 @@ public class Product
     public int ReviewsCount { get; set; }
     public bool IsAvailable { get; set; }
     public int StockQuantity { get; set; }
+    public string? Brand { get; set; }
+    public string? CountryOfOrigin { get; set; }
+    public string? ForWhom { get; set; }
+    public string? Purpose { get; set; }
+    public string? PetSize { get; set; }
+    public string? Material { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<ProductImage> Images { get; set; } = [];

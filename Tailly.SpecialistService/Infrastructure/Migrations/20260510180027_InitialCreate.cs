@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace Tailly.SpecialistService.Migrations
 {
     /// <inheritdoc />
@@ -340,88 +338,6 @@ namespace Tailly.SpecialistService.Migrations
                         principalTable: "Details",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                table: "Specialists",
-                columns: new[] { "Id", "AvatarUrl", "City", "CompletedOrdersCount", "CreatedAt", "District", "Email", "ExperienceYears", "FirstName", "LastName", "Latitude", "Longitude", "MiddleName", "Phone", "Rating", "RepeatOrdersCount", "ReviewsCount", "Slug", "UserId" },
-                values: new object[,]
-                {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "/uploads/avatars/anna.jpg", "Москва", 87, new DateTime(2025, 11, 8, 14, 4, 56, 434, DateTimeKind.Utc).AddTicks(5976), "Сокольники", "anna@example.com", 5, "Анна", "Смирнова", 55.793100000000003, 37.677799999999998, null, "+79161234567", 4.8m, 24, 42, "anna-petcare", new Guid("438a4a9e-c17b-439d-ab8b-007ed01d2ac8") },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), null, "Москва", 45, new DateTime(2026, 1, 8, 14, 4, 56, 434, DateTimeKind.Utc).AddTicks(6021), "Марьино", "dima@example.com", 3, "Дмитрий", "Кузнецов", 55.6494, 37.743000000000002, null, "+79162345678", 4.6m, 12, 28, "dima-dogwalker", new Guid("6fbf4dc8-cf8b-46df-960f-b6d0c6eb7ff9") },
-                    { new Guid("33333333-3333-3333-3333-333333333333"), null, "Санкт-Петербург", 112, new DateTime(2025, 9, 8, 14, 4, 56, 434, DateTimeKind.Utc).AddTicks(6025), "Центральный", "maria@example.com", 7, "Мария", "Попова", 59.938600000000001, 30.3141, null, "+79213456789", 4.9m, 35, 67, "maria-grooming", new Guid("ad0ec355-8d4f-4e96-9663-d497cb48a47a") }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Calendars",
-                columns: new[] { "Id", "SpecialistId", "Timezone" },
-                values: new object[,]
-                {
-                    { new Guid("44733e3a-29f9-4371-a4be-14d6a5e02b16"), new Guid("33333333-3333-3333-3333-333333333333"), "Europe/Moscow" },
-                    { new Guid("c2a498d2-75f5-4846-ad8b-87106e566de4"), new Guid("22222222-2222-2222-2222-222222222222"), "Europe/Moscow" },
-                    { new Guid("c6e0fea6-4b86-4001-be26-29800be5c900"), new Guid("11111111-1111-1111-1111-111111111111"), "Europe/Moscow" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Details",
-                columns: new[] { "Id", "About", "HasChildrenUnderTen", "HousingType", "SpecialistId" },
-                values: new object[,]
-                {
-                    { new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "Люблю животных, имею двух своих собак. Занимаюсь выгулом и передержкой уже более 5 лет.", 2, 1, new Guid("11111111-1111-1111-1111-111111111111") },
-                    { new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), "Профессиональный выгульщик с опытом работы с крупными породами.", 1, 2, new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), "Профессиональный грумер собак и кошек с 7-летним стажем.", 3, 1, new Guid("33333333-3333-3333-3333-333333333333") }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Services",
-                columns: new[] { "Id", "Description", "Name", "Price", "PriceUnit", "SpecialistId" },
-                values: new object[,]
-                {
-                    { new Guid("18803d15-7feb-4ba8-9ec3-7b65418d8de7"), "Выгул собаки 60 минут", 1, 1200m, 4, new Guid("11111111-1111-1111-1111-111111111111") },
-                    { new Guid("2d9bcfc7-897e-4b89-a3ea-67fb58d146f4"), "Комфортная передержка в квартире", 2, 2500m, 2, new Guid("11111111-1111-1111-1111-111111111111") },
-                    { new Guid("a0a85b66-ac0f-4604-8727-e6dc052cd174"), "Выгул с элементами дрессировки", 5, 1800m, 1, new Guid("22222222-2222-2222-2222-222222222222") },
-                    { new Guid("fe894bf6-3eb7-4341-b34d-d341e20d2128"), "Полный груминг", 3, 3500m, 3, new Guid("33333333-3333-3333-3333-333333333333") }
-                });
-
-            migrationBuilder.InsertData(
-                table: "SpecialistGalleries",
-                columns: new[] { "Id", "Alt", "ImageUrl", "Order", "SpecialistId" },
-                values: new object[,]
-                {
-                    { new Guid("0e28d891-7e5c-4caa-ad41-d5a44c24df29"), "Анна на прогулке", "/uploads/gallery/anna2.jpg", 2, new Guid("11111111-1111-1111-1111-111111111111") },
-                    { new Guid("4c797f51-5100-4a92-9b5b-67ec2498dc94"), "Анна с питомцем", "/uploads/gallery/anna1.jpg", 1, new Guid("11111111-1111-1111-1111-111111111111") }
-                });
-
-            migrationBuilder.InsertData(
-                table: "PetAges",
-                columns: new[] { "Id", "DetailsId", "PetAge" },
-                values: new object[,]
-                {
-                    { new Guid("24cf62f2-ecec-4b3f-b806-38ba28b6fc78"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 3 },
-                    { new Guid("5934c383-839d-4a8c-8392-feefd2e1ab57"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 4 }
-                });
-
-            migrationBuilder.InsertData(
-                table: "PetSizes",
-                columns: new[] { "Id", "DetailsId", "PetSize" },
-                values: new object[,]
-                {
-                    { new Guid("4b4854ad-b0b6-4e72-9439-f5f601f7b9b8"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), 4 },
-                    { new Guid("7abf6d66-d2db-4e2f-b9d8-023e0246da5a"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 3 },
-                    { new Guid("89833d44-ea5f-423d-b19b-9c2e1eb9783b"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 2 },
-                    { new Guid("d3d93b21-7e7e-45e3-a5f1-15e5f707dffd"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), 5 }
-                });
-
-            migrationBuilder.InsertData(
-                table: "PetTypes",
-                columns: new[] { "Id", "DetailsId", "PetType" },
-                values: new object[,]
-                {
-                    { new Guid("11150932-055f-4f0d-97e8-12c88e1179e6"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 1 },
-                    { new Guid("3aa32ec3-f085-4337-a9fe-409e34b63245"), new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), 1 },
-                    { new Guid("65b9f374-92bc-4d00-9b77-0ba77916ff91"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), 1 },
-                    { new Guid("ac496664-f005-4d33-ae0e-d05bf2adf112"), new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), 2 },
-                    { new Guid("f2cc3f03-70f2-4524-b7a3-62f29eb1dcf7"), new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), 2 }
                 });
 
             migrationBuilder.CreateIndex(
