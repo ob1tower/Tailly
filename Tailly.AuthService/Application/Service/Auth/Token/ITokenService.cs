@@ -2,11 +2,10 @@
 using Tailly.AuthService.Core.Common;
 using Tailly.AuthService.Core.Models;
 
-namespace Tailly.AuthService.Application.Service.Auth.Token
+namespace Tailly.AuthService.Application.Service.Auth.Token;
+
+public interface ITokenService
 {
-    public interface ITokenService
-    {
-        Task<Result> LogoutAsync(string refreshToken);
-        Task<Result<AuthResult, Error>> RefreshTokenAsync(string refreshToken);
-    }
+    Task<Result> LogoutAsync(string refreshToken);
+    Task<Result<AuthResult, Error>> RefreshTokenAsync(string refreshToken);
 }

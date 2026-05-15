@@ -80,15 +80,6 @@ public static class SpecialistEnumMapper
         _ => "walking"
     };
 
-    public static string MapBookingMode(BookingMode mode) => mode switch
-    {
-        BookingMode.FixedSlot => "fixed_slot",
-        BookingMode.TimeRange => "time_range",
-        BookingMode.MultiDayStay => "multi_day_stay",
-        BookingMode.OpenRequest => "open_request",
-        _ => "fixed_slot"
-    };
-
     public static string MapApplicationStatus(SpecialistApplicationStatus value) => value switch
     {
         SpecialistApplicationStatus.Pending => "pending_review",
@@ -208,5 +199,20 @@ public static class SpecialistEnumMapper
         "rating_asc" => ReviewSortType.RatingAsc,
         "rating_desc" => ReviewSortType.RatingDesc,
         _ => ReviewSortType.Newest
+    };
+
+    public static string MapCalendarDayStatus(CalendarDayStatus value) => value switch
+    {
+        CalendarDayStatus.Available => "available",
+        CalendarDayStatus.FullyBooked => "fully_booked",
+        CalendarDayStatus.DayOff => "day_off",
+        _ => "available"
+    };
+
+    public static CalendarDayStatus ParseCalendarDayStatus(string? value) => value?.ToLowerInvariant() switch
+    {
+        "fully_booked" => CalendarDayStatus.FullyBooked,
+        "day_off" => CalendarDayStatus.DayOff,
+        _ => CalendarDayStatus.Available
     };
 }

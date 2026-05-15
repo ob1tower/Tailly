@@ -6,7 +6,7 @@ namespace Tailly.BookingService.Application.Service.Interfaces;
 
 public interface IServiceOrderService
 {
-    Task<Result> CancelAsync(Guid orderId, Guid clientId, string? reason = null);
+    Task<Result> CancelAsync(Guid orderId, Guid userId, Guid? specialistId = null, string? reason = null);
     Task<Result> CompleteAsync(Guid orderId, Guid specialistId);
     Task<Result> ConfirmAsync(Guid orderId, Guid specialistId);
     Task<Result<List<ServiceOrder>, Error>> GetBySpecialistIdAsync(Guid specialistId, string? statusFilter = null, int page = 1, int limit = 20);

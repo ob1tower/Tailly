@@ -40,6 +40,7 @@ public static class ServiceOrderMapper
             Comment = model.Comment,
             Status = MapStatus(model.Status),
             CreatedAt = model.CreatedAt,
+            CancelReason = model.CancelReason,
             Currency = "RUB",
             HasReview = model.Review != null
         };

@@ -2,8 +2,8 @@
 
 public sealed class CalendarResponse
 {
-    public string Timezone { get; set; } = "Europe/Moscow";
+    public Guid Id { get; set; }
     public List<AvailabilityWindowResponse> AvailabilityWindows { get; set; } = [];
-    public List<ManualOverrideResponse> DayOverrides { get; set; } = [];
+    public List<DayOverrideResponse> DayOverrides { get; set; } = [];
     public List<BookedSlotResponse> BookedSlots { get; set; } = [];
 }

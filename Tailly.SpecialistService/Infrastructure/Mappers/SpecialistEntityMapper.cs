@@ -1,11 +1,9 @@
 ﻿using Tailly.SpecialistService.Application.Dtos.Responses.Home;
-using Tailly.SpecialistService.Core.Entities.Calendar;
 using Tailly.SpecialistService.Core.Entities.Details;
 using Tailly.SpecialistService.Core.Entities.Gallery;
 using Tailly.SpecialistService.Core.Entities.Reviews;
 using Tailly.SpecialistService.Core.Entities.Services;
 using Tailly.SpecialistService.Core.Entities.Specialist;
-using Tailly.SpecialistService.Core.Models.Calendars;
 using Tailly.SpecialistService.Core.Models.Gallery;
 using Tailly.SpecialistService.Core.Models.Reviews;
 using Tailly.SpecialistService.Core.Models.Specialist;
@@ -84,7 +82,7 @@ public static class SpecialistEntityMapper
 
         if (entity.Calendar != null)
         {
-            model.Calendar = ToCalendarModel(entity.Calendar);
+            model.Calendar = CalendarEntityMapper.ToModel(entity.Calendar);
         }
 
         return model;
@@ -229,58 +227,6 @@ public static class SpecialistEntityMapper
                     })
                     .ToList()
             }
-        };
-    }
-
-    public static Calendar ToCalendarModel(CalendarEntity entity)
-    {
-        return new Calendar
-        {
-            Id = entity.Id,
-            SpecialistId = entity.SpecialistId,
-            Timezone = entity.Timezone,
-
-            DayOverrides = entity.DayOverrides?
-                .Select(x => new CalendarDayOverride
-                {
-                    Id = x.Id,
-                    Date = x.Date,
-                    Status = x.Status
-                })
-                .ToList() ?? [],
-
-            BookedSlots = entity.BookedSlots?
-                .Select(x => new CalendarBookedSlot
-                {
-                    Id = x.Id,
-                    Date = x.Date,
-                    StartTime = x.StartTime,
-                    EndTime = x.EndTime,
-                    OrderId = x.OrderId
-                })
-                .ToList() ?? [],
-
-            AvailabilityWindows = entity.AvailabilityWindows?
-                .Select(x => new CalendarAvailabilityWindow
-                {
-                    Id = x.Id,
-                    Date = x.Date,
-                    StartTime = x.StartTime,
-                    EndTime = x.EndTime,
-                    Comment = x.Comment
-                })
-                .ToList() ?? [],
-
-            BookingSettings = entity.BookingSettings == null
-                ? null
-                : new CalendarBookingSettings
-                {
-                    DayStartTime = entity.BookingSettings.DayStartTime,
-                    DayEndTime = entity.BookingSettings.DayEndTime,
-                    SlotStepMinutes = entity.BookingSettings.SlotStepMinutes,
-                    DefaultDurationMinutes =
-                        entity.BookingSettings.DefaultDurationMinutes
-                }
         };
     }
 

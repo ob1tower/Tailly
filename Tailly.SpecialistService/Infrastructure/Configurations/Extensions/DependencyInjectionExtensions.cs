@@ -104,6 +104,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IMediaService, MediaService>();
         services.AddScoped<ISpecialistProfileService, SpecialistProfileService>();
         services.AddScoped<SpecialistTemporaryPasswordService>();
+        services.AddScoped<ICalendarService, CalendarService>();
 
         return services;
     }
@@ -112,6 +113,7 @@ public static class DependencyInjectionExtensions
     {
         services.AddScoped<ISpecialistApplicationRepository, SpecialistApplicationRepository>();
         services.AddScoped<ISpecialistRepository, SpecialistRepository>();
+        services.AddScoped<ICalendarRepository, CalendarRepository>();
 
         return services;
     }

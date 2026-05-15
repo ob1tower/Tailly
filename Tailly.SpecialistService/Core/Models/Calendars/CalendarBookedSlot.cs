@@ -8,4 +8,5 @@ public class CalendarBookedSlot
     public TimeOnly StartTime { get; set; }
     public TimeOnly EndTime { get; set; }
     public Guid? OrderId { get; set; }
+    public Guid? ServiceId { get; set; }
 }

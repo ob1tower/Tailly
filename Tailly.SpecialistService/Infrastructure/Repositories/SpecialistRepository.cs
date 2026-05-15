@@ -37,6 +37,7 @@ public class SpecialistRepository : ISpecialistRepository
     public async Task<Specialist?> GetByIdAsync(Guid id)
     {
         var entity = await _context.Specialists
+            .Include(x => x.Services)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -116,7 +117,6 @@ public class SpecialistRepository : ISpecialistRepository
             .Include(x => x.Calendar!).ThenInclude(c => c.DayOverrides)
             .Include(x => x.Calendar!).ThenInclude(c => c.BookedSlots)
             .Include(x => x.Calendar!).ThenInclude(c => c.AvailabilityWindows)
-            .Include(x => x.Calendar!).ThenInclude(c => c.BookingSettings)
             .AsNoTracking();
     }
 

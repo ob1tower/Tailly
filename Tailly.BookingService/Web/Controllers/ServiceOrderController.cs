@@ -171,10 +171,13 @@ public class ServiceOrderController : ControllerBase
     public async Task<IActionResult> Cancel(Guid orderId, [FromBody] string? reason = null)
     {
         var userId = User.GetUserId();
-        if (userId == null) 
+
+        if (userId == null)
             return Unauthorized();
 
-        var result = await _service.CancelAsync(orderId, userId.Value, reason);
+        var specialistId = User.GetSpecialistId();
+
+        var result = await _service.CancelAsync(orderId, userId.Value, specialistId, reason);
 
         if (result.IsFailure)
             return BadRequest(result.Error);

@@ -38,41 +38,14 @@ public static class SpecialistResponseMapper
                 AvatarUrl = specialist.AvatarUrl ?? ""
             },
 
-            Calendar = specialist.Calendar != null
-                ? new CalendarResponse
-                {
-                    AvailabilityWindows = specialist.Calendar.AvailabilityWindows?
-                        .Select(x => new AvailabilityWindowResponse
-                        {
-                            Date = x.Date.ToString("yyyy-MM-dd"),
-                            StartTime = x.StartTime.ToString("HH:mm"),
-                            EndTime = x.EndTime.ToString("HH:mm")
-                        })
-                        .ToList() ?? [],
-
-                    DayOverrides = specialist.Calendar.DayOverrides?
-                        .Select(x => new ManualOverrideResponse
-                        {
-                            Date = x.Date.ToString("yyyy-MM-dd"),
-                            Status = x.Status.ToString().ToLower()
-                        })
-                        .ToList() ?? [],
-
-                    BookedSlots = specialist.Calendar.BookedSlots?
-                        .Select(x => new BookedSlotResponse
-                        {
-                            Date = x.Date.ToString("yyyy-MM-dd"),
-                            StartTime = x.StartTime.ToString("HH:mm"),
-                            EndTime = x.EndTime.ToString("HH:mm")
-                        })
-                        .ToList() ?? []
-                }
-                : new CalendarResponse
-                {
-                    AvailabilityWindows = [],
-                    DayOverrides = [],
-                    BookedSlots = []
-                },
+            Calendar = specialist.Calendar != null 
+            ? CalendarMapper.ToResponse(specialist.Calendar)
+            : new CalendarResponse
+            {
+                AvailabilityWindows = [],
+                DayOverrides = [],
+                BookedSlots = []
+            },
 
             Stats = new SpecialistStatsResponse
             {

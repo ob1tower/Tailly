@@ -84,4 +84,7 @@ public static class BookingErrors
 
     public static readonly Error InvalidPrice =
         new("Order.InvalidPrice", "Invalid price.");
+
+    public static readonly Error TimeUnavailable =
+        new("Order.TimeUnavailable", "Selected time slot is unavailable.");
 }

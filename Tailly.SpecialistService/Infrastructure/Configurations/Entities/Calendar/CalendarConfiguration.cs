@@ -21,9 +21,5 @@ public class CalendarConfiguration : IEntityTypeConfiguration<CalendarEntity>
         builder.HasMany(x => x.AvailabilityWindows)
             .WithOne(x => x.Calendar)
             .HasForeignKey(x => x.CalendarId);
-
-        builder.HasOne(x => x.BookingSettings)
-            .WithOne(x => x.Calendar)
-            .HasForeignKey<CalendarBookingSettingsEntity>(x => x.CalendarId);
     }
 }

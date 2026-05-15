@@ -91,8 +91,7 @@ namespace Tailly.SpecialistService.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    SpecialistId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Timezone = table.Column<string>(type: "text", nullable: false)
+                    SpecialistId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -206,7 +205,7 @@ namespace Tailly.SpecialistService.Migrations
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
                     StartTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
                     EndTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
-                    Comment = table.Column<string>(type: "text", nullable: true)
+                    ServiceId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -228,35 +227,14 @@ namespace Tailly.SpecialistService.Migrations
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
                     StartTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
                     EndTime = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uuid", nullable: true)
+                    OrderId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ServiceId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CalendarBookedSlots", x => x.Id);
                     table.ForeignKey(
                         name: "FK_CalendarBookedSlots_Calendars_CalendarId",
-                        column: x => x.CalendarId,
-                        principalTable: "Calendars",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CalendarBookingSettings",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CalendarId = table.Column<Guid>(type: "uuid", nullable: false),
-                    DayStartTime = table.Column<string>(type: "text", nullable: false),
-                    DayEndTime = table.Column<string>(type: "text", nullable: false),
-                    SlotStepMinutes = table.Column<int>(type: "integer", nullable: false),
-                    DefaultDurationMinutes = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CalendarBookingSettings", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CalendarBookingSettings_Calendars_CalendarId",
                         column: x => x.CalendarId,
                         principalTable: "Calendars",
                         principalColumn: "Id",
@@ -351,12 +329,6 @@ namespace Tailly.SpecialistService.Migrations
                 columns: new[] { "CalendarId", "Date" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CalendarBookingSettings_CalendarId",
-                table: "CalendarBookingSettings",
-                column: "CalendarId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_CalendarDayOverrides_CalendarId_Date",
                 table: "CalendarDayOverrides",
                 columns: new[] { "CalendarId", "Date" });
@@ -438,9 +410,6 @@ namespace Tailly.SpecialistService.Migrations
 
             migrationBuilder.DropTable(
                 name: "CalendarBookedSlots");
-
-            migrationBuilder.DropTable(
-                name: "CalendarBookingSettings");
 
             migrationBuilder.DropTable(
                 name: "CalendarDayOverrides");
