@@ -18,6 +18,7 @@ public sealed class ClientServiceOrderResponse
     public string? Comment { get; set; }
     public string Status { get; set; } = default!;
     public DateTime CreatedAt { get; set; }
+    public string? CancelReason { get; set; }
     public bool HasReview { get; set; }
     public string Currency { get; set; } = "RUB";
 }

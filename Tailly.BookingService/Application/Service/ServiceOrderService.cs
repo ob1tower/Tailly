@@ -112,6 +112,27 @@ public class ServiceOrderService : IServiceOrderService
             return Result.Failure<ServiceOrder, Error>(BookingErrors.InvalidClient);
         }
 
+        var availabilityResponse = await specialistClient.PostAsJsonAsync("/internal/calendar/check-availability",
+            new
+            {
+                model.SpecialistId,
+                model.ServiceId,
+                model.StartAt,
+                EndAt = model.EndAt ?? model.StartAt.AddHours(1)
+            });
+
+        if (!availabilityResponse.IsSuccessStatusCode)
+        {
+            return Result.Failure<ServiceOrder, Error>(BookingErrors.TimeUnavailable);
+        }
+
+        var availabilityData = await availabilityResponse.Content.ReadFromJsonAsync<AvailabilityCheckResponseDto>();
+
+        if (availabilityData == null || !availabilityData.IsAvailable)
+        {
+            return Result.Failure<ServiceOrder, Error>(BookingErrors.TimeUnavailable);
+        }
+
         var order = new ServiceOrder
         {
             Id = Guid.NewGuid(),
@@ -153,6 +174,23 @@ public class ServiceOrderService : IServiceOrderService
                     true)
             }
         };
+
+        var slotResponse = await specialistClient.PostAsJsonAsync(
+            "/internal/calendar/book-slot",
+            new
+            {
+                OrderId = order.Id,
+                order.SpecialistId,
+                order.ServiceId,
+                order.StartAt,
+                order.EndAt
+            });
+
+        if (!slotResponse.IsSuccessStatusCode)
+        {
+            return Result.Failure<ServiceOrder, Error>(
+                BookingErrors.TimeUnavailable);
+        }
 
         await _orderRepository.AddAsync(order);
 
@@ -261,14 +299,17 @@ public class ServiceOrderService : IServiceOrderService
         return Result.Success();
     }
 
-    public async Task<Result> CancelAsync(Guid orderId, Guid clientId, string? reason = null)
+    public async Task<Result> CancelAsync(Guid orderId, Guid userId, Guid? specialistId = null, string? reason = null)
     {
         var order = await _orderRepository.GetByIdAsync(orderId);
 
         if (order == null)
             return Result.Failure(BookingErrors.OrderNotFound.Description);
 
-        if (order.ClientId != clientId)
+        var hasAccess = order.ClientId == userId ||
+            (specialistId.HasValue && order.SpecialistId == specialistId.Value);
+
+        if (!hasAccess)
             return Result.Failure(BookingErrors.Forbidden.Description);
 
         if (order.Status == OrderStatus.Active)
@@ -283,7 +324,11 @@ public class ServiceOrderService : IServiceOrderService
 
         await _orderRepository.UpdateAsync(order);
 
-        _logger.LogInformation("Order {OrderId} canceled by client {ClientId}", orderId, clientId);
+        var specialistClient = _httpClientFactory.CreateClient("specialist");
+
+        await specialistClient.DeleteAsync($"/internal/calendar/booked-slots/order/{order.Id}");
+
+        _logger.LogInformation("Order {OrderId} canceled by user {UserId}", orderId, userId);
 
         return Result.Success();
     }

@@ -8,5 +8,5 @@ public class CalendarAvailabilityWindowEntity
     public DateOnly Date { get; set; }
     public TimeOnly StartTime { get; set; }
     public TimeOnly EndTime { get; set; }
-    public string? Comment { get; set; }
+    public Guid? ServiceId { get; set; }
 }

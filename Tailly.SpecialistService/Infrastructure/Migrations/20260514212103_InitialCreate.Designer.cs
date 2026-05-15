@@ -13,7 +13,7 @@ using Tailly.SpecialistService.Infrastructure.DataAccess;
 namespace Tailly.SpecialistService.Migrations
 {
     [DbContext(typeof(SpecialistDbContext))]
-    [Migration("20260510180027_InitialCreate")]
+    [Migration("20260514212103_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -189,14 +189,14 @@ namespace Tailly.SpecialistService.Migrations
                     b.Property<Guid>("CalendarId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Comment")
-                        .HasColumnType("text");
-
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
                     b.Property<TimeOnly>("EndTime")
                         .HasColumnType("time without time zone");
+
+                    b.Property<Guid?>("ServiceId")
+                        .HasColumnType("uuid");
 
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("time without time zone");
@@ -226,6 +226,9 @@ namespace Tailly.SpecialistService.Migrations
                     b.Property<Guid?>("OrderId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("ServiceId")
+                        .HasColumnType("uuid");
+
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("time without time zone");
 
@@ -234,37 +237,6 @@ namespace Tailly.SpecialistService.Migrations
                     b.HasIndex("CalendarId", "Date");
 
                     b.ToTable("CalendarBookedSlots");
-                });
-
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarBookingSettingsEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CalendarId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("DayEndTime")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("DayStartTime")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("DefaultDurationMinutes")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SlotStepMinutes")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CalendarId")
-                        .IsUnique();
-
-                    b.ToTable("CalendarBookingSettings");
                 });
 
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarDayOverrideEntity", b =>
@@ -297,10 +269,6 @@ namespace Tailly.SpecialistService.Migrations
 
                     b.Property<Guid>("SpecialistId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Timezone")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -616,17 +584,6 @@ namespace Tailly.SpecialistService.Migrations
                     b.Navigation("Calendar");
                 });
 
-            modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarBookingSettingsEntity", b =>
-                {
-                    b.HasOne("Tailly.SpecialistService.Core.Entities.Calendar.CalendarEntity", "Calendar")
-                        .WithOne("BookingSettings")
-                        .HasForeignKey("Tailly.SpecialistService.Core.Entities.Calendar.CalendarBookingSettingsEntity", "CalendarId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Calendar");
-                });
-
             modelBuilder.Entity("Tailly.SpecialistService.Core.Entities.Calendar.CalendarDayOverrideEntity", b =>
                 {
                     b.HasOne("Tailly.SpecialistService.Core.Entities.Calendar.CalendarEntity", "Calendar")
@@ -731,8 +688,6 @@ namespace Tailly.SpecialistService.Migrations
                     b.Navigation("AvailabilityWindows");
 
                     b.Navigation("BookedSlots");
-
-                    b.Navigation("BookingSettings");
 
                     b.Navigation("DayOverrides");
                 });

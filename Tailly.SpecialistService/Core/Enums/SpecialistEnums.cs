@@ -59,14 +59,6 @@ public enum ExperienceUnit
     Months
 }
 
-public enum BookingMode
-{
-    FixedSlot = 1,
-    TimeRange,
-    MultiDayStay,
-    OpenRequest
-}
-
 public enum SpecialistSort
 {
     RatingDesc = 1,
@@ -86,6 +78,8 @@ public enum ServiceType
 public enum CalendarDayStatus
 {
     Available = 1,
+    DayOff,
+    FullyBooked,
     PartiallyBooked
 }
 

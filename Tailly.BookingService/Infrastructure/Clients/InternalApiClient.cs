@@ -28,4 +28,30 @@ public class InternalApiClient : IInternalApiClient
         return await _httpClient.GetFromJsonAsync<SpecialistInternalDto>(
             $"http://specialist:8080/internal/specialists/{specialistId}");
     }
+
+    public async Task<AvailabilityCheckResponseDto?> CheckAvailabilityAsync(CheckAvailabilityRequestDto request)
+    {
+        var response = await _httpClient.PostAsJsonAsync(
+            "http://specialist:8080/internal/calendar/check-availability",
+            request);
+
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        return await response.Content
+            .ReadFromJsonAsync<AvailabilityCheckResponseDto>();
+    }
+
+    public async Task CreateBookedSlotAsync(CreateBookedSlotRequestDto request)
+    {
+        await _httpClient.PostAsJsonAsync(
+            "http://specialist:8080/internal/calendar/booked-slots",
+            request);
+    }
+
+    public async Task DeleteBookedSlotAsync(Guid orderId)
+    {
+        await _httpClient.DeleteAsync(
+            $"http://specialist:8080/internal/calendar/booked-slots/order/{orderId}");
+    }
 }

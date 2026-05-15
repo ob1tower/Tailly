@@ -38,7 +38,6 @@ public class SpecialistDbContext : DbContext
         modelBuilder.ApplyConfiguration(new CalendarDayOverrideConfiguration());
         modelBuilder.ApplyConfiguration(new CalendarAvailabilityWindowConfiguration());
         modelBuilder.ApplyConfiguration(new CalendarBookedSlotConfiguration());
-        modelBuilder.ApplyConfiguration(new CalendarBookingSettingsConfiguration());
     }
 
     public DbSet<SpecialistApplicationEntity> SpecialistApplications { get; set; }
@@ -54,5 +53,4 @@ public class SpecialistDbContext : DbContext
     public DbSet<CalendarDayOverrideEntity> CalendarDayOverrides { get; set; }
     public DbSet<CalendarAvailabilityWindowEntity> CalendarAvailabilityWindows { get; set; }
     public DbSet<CalendarBookedSlotEntity> CalendarBookedSlots { get; set; }
-    public DbSet<CalendarBookingSettingsEntity> CalendarBookingSettings { get; set; }
 }

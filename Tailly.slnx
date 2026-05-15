@@ -6,6 +6,7 @@
     <Build />
   </Project>
   <Project Path="Tailly.ApiGateway/Tailly.ApiGateway.csproj" Id="f1793168-cb40-4d0a-be92-d1f40b6e417b" />
+  <Project Path="Tailly.AuthService.Tests/Tailly.AuthService.Tests.csproj" Id="9ba5eba9-52e4-4369-b938-e5b500ca8765" />
   <Project Path="Tailly.AuthService/Tailly.AuthService.csproj" />
   <Project Path="Tailly.BookingService/Tailly.BookingService.csproj" Id="e377288b-f1ab-4995-a7a0-725799144949" />
   <Project Path="Tailly.ClientProfileService/Tailly.ClientProfileService.csproj" Id="3aa3b762-c114-433f-ae86-d7531b8a22a4" />

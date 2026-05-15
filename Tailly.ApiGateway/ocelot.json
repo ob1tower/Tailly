@@ -1140,7 +1140,7 @@
       "FileUpload": true
     },
     {
-      "DownstreamPathTemplate": "/api/SpecialistProfile/specialists/{slug}/services",
+      "DownstreamPathTemplate": "/api/SpecialistServices/specialists/{slug}/services",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -1152,7 +1152,7 @@
       "UpstreamHttpMethod": [ "POST" ]
     },
     {
-      "DownstreamPathTemplate": "/api/SpecialistProfile/specialists/{slug}/services/{id}",
+      "DownstreamPathTemplate": "/api/SpecialistServices/specialists/{slug}/services/{id}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -1174,6 +1174,66 @@
       ],
       "UpstreamPathTemplate": "/specialists/{slug}/reviews/{id}/reply",
       "UpstreamHttpMethod": [ "PUT" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Calendar/specialists/{slug}/slots",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{slug}/calendar/slots",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Calendar/specialists/{slug}/slots/{slotId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{slug}/calendar/slots/{slotId}",
+      "UpstreamHttpMethod": [ "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Calendar/specialists/{slug}/day-overrides",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{slug}/calendar/day-overrides",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Calendar/specialists/{slug}/day-overrides/{overrideId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{slug}/calendar/day-overrides/{overrideId}",
+      "UpstreamHttpMethod": [ "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Calendar/specialists/{slug}/days/{date}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "specialist",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/specialists/{slug}/calendar/days/{date}",
+      "UpstreamHttpMethod": [ "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/uploads/{everything}",

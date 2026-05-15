@@ -17,18 +17,21 @@ public class SpecialistApplicationService : ISpecialistApplicationService
 {
     private readonly ISpecialistApplicationRepository _applicationRepository;
     private readonly ISpecialistRepository _specialistRepository;
+    private readonly ICalendarRepository _calendarRepository;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly SpecialistTemporaryPasswordService _temporaryPasswordService;
     private readonly ILogger<SpecialistApplicationService> _logger;
 
     public SpecialistApplicationService(ISpecialistApplicationRepository applicationRepository,
                                         ISpecialistRepository specialistRepository,
+                                        ICalendarRepository calendarRepository,
                                         IPublishEndpoint publishEndpoint,
                                         SpecialistTemporaryPasswordService temporaryPasswordService,
                                         ILogger<SpecialistApplicationService> logger)
     {
         _applicationRepository = applicationRepository;
         _specialistRepository = specialistRepository;
+        _calendarRepository = calendarRepository;
         _publishEndpoint = publishEndpoint;
         _temporaryPasswordService = temporaryPasswordService;
         _logger = logger;
@@ -180,6 +183,8 @@ public class SpecialistApplicationService : ISpecialistApplicationService
         };
 
         await _specialistRepository.AddAsync(specialist);
+
+        await _calendarRepository.CreateAsync(specialist.Id);
 
         app.CreatedSpecialistId = specialist.Id;
         app.CreatedSpecialistSlug = specialist.Slug;
