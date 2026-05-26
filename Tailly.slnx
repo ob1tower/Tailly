@@ -8,10 +8,15 @@
   <Project Path="Tailly.ApiGateway/Tailly.ApiGateway.csproj" Id="f1793168-cb40-4d0a-be92-d1f40b6e417b" />
   <Project Path="Tailly.AuthService.Tests/Tailly.AuthService.Tests.csproj" Id="9ba5eba9-52e4-4369-b938-e5b500ca8765" />
   <Project Path="Tailly.AuthService/Tailly.AuthService.csproj" />
+  <Project Path="Tailly.BookingService.Tests/Tailly.BookingService.Tests.csproj" Id="d2315714-1734-466f-b80d-5039d5cec6df" />
   <Project Path="Tailly.BookingService/Tailly.BookingService.csproj" Id="e377288b-f1ab-4995-a7a0-725799144949" />
+  <Project Path="Tailly.ClientProfileService.Tests/Tailly.ClientProfileService.Tests.csproj" Id="c2b3502f-e251-4943-bb3a-010e528d4248" />
   <Project Path="Tailly.ClientProfileService/Tailly.ClientProfileService.csproj" Id="3aa3b762-c114-433f-ae86-d7531b8a22a4" />
   <Project Path="Tailly.Contracts/Tailly.Contracts.csproj" Id="3b0113a9-3355-4e9e-8eca-88519a1f331e" />
+  <Project Path="Tailly.PostsService.Tests/Tailly.PostsService.Tests.csproj" Id="2ea2561c-6d2b-464f-a751-d86a97784a69" />
   <Project Path="Tailly.PostsService/Tailly.PostsService.csproj" Id="b9c23f93-8f23-4def-9737-47c0a802e9e6" />
+  <Project Path="Tailly.ShopService.Tests/Tailly.ShopService.Tests.csproj" Id="31b5de73-a160-4601-9fe3-4bf7a90eefdf" />
   <Project Path="Tailly.ShopService/Tailly.ShopService.csproj" Id="f9f1c7f2-a5d9-4e49-9125-0953fb1f1720" />
+  <Project Path="Tailly.SpecialistService.Tests/Tailly.SpecialistService.Tests.csproj" Id="6ca6125e-8f48-41e0-9283-879f06aee61d" />
   <Project Path="Tailly.SpecialistService/Tailly.SpecialistService.csproj" Id="a6f5783d-c199-4f83-a6ef-b00ef5b4954e" />
 </Solution>
