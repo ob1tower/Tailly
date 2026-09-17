@@ -1,0 +1,6 @@
+@Tailly.ClientProfileService_HostAddress = http://localhost:5126
+
+GET {{Tailly.ClientProfileService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

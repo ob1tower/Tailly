@@ -1,0 +1,6 @@
+@Tailly.PostsService_HostAddress = http://localhost:5004
+
+GET {{Tailly.PostsService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

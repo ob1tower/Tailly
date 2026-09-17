@@ -1,0 +1,116 @@
+﻿using Tailly.ShopService.Core.Enums;
+
+namespace Tailly.ShopService.Application.Mappers;
+
+public static class ShopMapper
+{
+    public static string MapProductSort(ProductSort sort) => sort switch
+    {
+        ProductSort.Popular => "popular",
+        ProductSort.PriceAsc => "price-asc",
+        ProductSort.PriceDesc => "price-desc",
+        ProductSort.RatingDesc => "rating-desc",
+        ProductSort.Newest => "newest",
+        _ => "newest"
+    };
+
+    public static ProductSort ParseProductSort(string? sortValue)
+    {
+        if (string.IsNullOrWhiteSpace(sortValue))
+            return ProductSort.Newest;
+
+        return sortValue.Trim().ToLowerInvariant() switch
+        {
+            "popular" => ProductSort.Popular,
+            "price-asc" => ProductSort.PriceAsc,
+            "price-desc" => ProductSort.PriceDesc,
+            "rating-desc" => ProductSort.RatingDesc,
+            "newest" => ProductSort.Newest,
+            _ => ProductSort.Newest
+        };
+    }
+
+    public static string MapDeliveryMethod(DeliveryMethod method) => method switch
+    {
+        DeliveryMethod.Courier => "courier",
+        DeliveryMethod.PickupPoint => "pickup-point",
+        _ => "courier"
+    };
+
+    public static DeliveryMethod ParseDeliveryMethod(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return DeliveryMethod.Courier;
+
+        return value.Trim().ToLowerInvariant() switch
+        {
+            "courier" => DeliveryMethod.Courier,
+            "pickup" or "pickuppont" or "pickup-point" or "pickuppoint" => DeliveryMethod.PickupPoint,
+            _ => DeliveryMethod.Courier
+        };
+    }
+
+    public static string MapPaymentMethod(PaymentMethod method) => method switch
+    {
+        PaymentMethod.Card => "card",
+        PaymentMethod.Sbp => "sbp",
+        PaymentMethod.Cash => "cash",
+        PaymentMethod.CardOnDelivery => "card-on-delivery",
+        _ => "card"
+    };
+
+    public static PaymentMethod ParsePaymentMethod(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return PaymentMethod.Card;
+
+        return value.Trim().ToLowerInvariant() switch
+        {
+            "card" => PaymentMethod.Card,
+            "sbp" => PaymentMethod.Sbp,
+            "cash" => PaymentMethod.Cash,
+            "card-on-delivery" => PaymentMethod.CardOnDelivery,
+            _ => PaymentMethod.Card
+        };
+    }
+
+    public static string MapOrderStatus(OrderStatus status) => status switch
+    {
+        OrderStatus.Created => "created",
+        OrderStatus.Assembled => "assembled",
+        OrderStatus.Shipped => "shipped",
+        OrderStatus.Completed => "completed",
+        OrderStatus.Cancelled => "cancelled",
+        _ => "created"
+    };
+
+    public static string MapPickupProvider(PickupProvider provider) => provider switch
+    {
+        PickupProvider.Cdek => "cdek",
+        _ => "cdek"
+    };
+
+    public static string MapReviewSort(ReviewSortType sort) => sort switch
+    {
+        ReviewSortType.Newest => "newest",
+        ReviewSortType.Oldest => "oldest",
+        ReviewSortType.Positive => "positive",
+        ReviewSortType.Negative => "negative",
+        _ => "newest"
+    };
+
+    public static ReviewSortType ParseReviewSort(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return ReviewSortType.Newest;
+
+        return value.Trim().ToLowerInvariant() switch
+        {
+            "newest" => ReviewSortType.Newest,
+            "oldest" => ReviewSortType.Oldest,
+            "positive" => ReviewSortType.Positive,
+            "negative" => ReviewSortType.Negative,
+            _ => ReviewSortType.Newest
+        };
+    }
+}

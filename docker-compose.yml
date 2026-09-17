@@ -1,0 +1,171 @@
+version: '3.9'
+
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Tailly.ApiGateway/Dockerfile
+    ports:
+      - "5000:8080"
+    depends_on:
+      - auth
+      - clientprofile
+      - shop
+      - posts
+      - specialist
+      - booking
+
+  auth:
+    build:
+      context: .
+      dockerfile: Tailly.AuthService/Dockerfile
+    ports:
+      - "5001:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
+    dns:
+    - 8.8.8.8
+    - 1.1.1.1
+
+  clientprofile:
+    build:
+      context: .
+      dockerfile: Tailly.ClientProfileService/Dockerfile
+    ports:
+      - "5002:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - client_uploads:/app/wwwroot/uploads
+
+  shop:
+    build:
+      context: .
+      dockerfile: Tailly.ShopService/Dockerfile
+    ports:
+      - "5003:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - shop_uploads:/app/wwwroot/uploads
+
+  posts:
+    build:
+      context: .
+      dockerfile: Tailly.PostsService/Dockerfile
+    ports:
+      - "5004:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - post_uploads:/app/wwwroot/uploads
+
+  specialist:
+    build:
+      context: .
+      dockerfile: Tailly.SpecialistService/Dockerfile
+    ports:
+      - "5005:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - specialist_uploads:/app/wwwroot/uploads
+
+  booking:
+    build:
+      context: .
+      dockerfile: Tailly.BookingService/Dockerfile
+    ports:
+      - "5006:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - booking_uploads:/app/wwwroot/uploads
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: tailly_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.ru
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - db
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  db_data:
+  redis_data:
+  client_uploads:
+  post_uploads:
+  specialist_uploads:
+  booking_uploads:
+  shop_uploads:
