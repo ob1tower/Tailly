@@ -36,7 +36,7 @@ cd Tailly
 - **PostsService** (`Tailly.PostsService`) — `JwtConfig:SecretKey`
 - **SpecialistService** (`Tailly.SpecialistService`) — `JwtConfig:SecretKey`
 
-**Важно:** значение `JwtConfig:SecretKey` в остальных микросервисах должно совпадать с ключом в AuthService, если сервисы используют его для проверки JWT-токенов.
+**Важно:** значение `JwtConfig:SecretKey` в остальных микросервисах должно совпадать с ключом в AuthService.
 
 ### Запуск
 
