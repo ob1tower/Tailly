@@ -6,6 +6,82 @@
 
 Проект построен на основе микросервисной архитектуры и объединяет работу с пользователями, специалистами, услугами, бронированиями, товарами, профилями питомцев и контентом.
 
+## 🚀 Запуск проекта
+
+### Требования
+
+- Git.
+- Docker Desktop.
+
+### Клонирование репозитория
+
+```bash
+git clone https://github.com/ob1tower/Tailly.git
+cd Tailly
+```
+
+### Настройка
+
+Перед запуском укажите собственные значения в файлах `appsettings.Development.json`:
+
+- **AuthService** (`Tailly.AuthService`) — измените 4 поля:
+  - `JwtConfig:SecretKey`
+  - `Security:OtpPepper`
+  - `EmailSettings:Email`
+  - `EmailSettings:Password`
+
+- **BookingService** (`Tailly.BookingService`) — `JwtConfig:SecretKey`
+- **ClientProfileService** (`Tailly.ClientProfileService`) — `JwtConfig:SecretKey`
+- **ShopService** (`Tailly.ShopService`) — `JwtConfig:SecretKey`
+- **PostsService** (`Tailly.PostsService`) — `JwtConfig:SecretKey`
+- **SpecialistService** (`Tailly.SpecialistService`) — `JwtConfig:SecretKey`
+
+**Важно:** значение `JwtConfig:SecretKey` в остальных микросервисах должно совпадать с ключом в AuthService, если сервисы используют его для проверки JWT-токенов.
+
+### Запуск
+
+Запустите Docker Desktop и выполните команду из корневой папки проекта:
+
+```bash
+docker compose up --build -d
+```
+
+### Доступ к сервисам
+
+- **API Gateway:** http://localhost:5000
+- **AuthService (Swagger):** http://localhost:5001/swagger
+- **ClientProfileService (Swagger):** http://localhost:5002/swagger
+- **ShopService (Swagger):** http://localhost:5003/swagger
+- **PostsService (Swagger):** http://localhost:5004/swagger
+- **SpecialistService (Swagger):** http://localhost:5005/swagger
+- **BookingService (Swagger):** http://localhost:5006/swagger
+- **pgAdmin:** http://localhost:5050
+  - Логин: `admin@admin.ru`
+  - Пароль: `admin`
+- **RabbitMQ Management:** http://localhost:15672
+  - Логин: `guest`
+  - Пароль: `guest`
+
+### Управление контейнерами
+
+Проверка состояния контейнеров:
+
+```bash
+docker compose ps
+```
+
+Просмотр логов:
+
+```bash
+docker compose logs -f
+```
+
+Остановка проекта:
+
+```bash
+docker compose down
+```
+
 ## 🏗️ Архитектура проекта
 
 <img width="624" height="400" alt="Рисунок1" src="https://github.com/user-attachments/assets/5ad9da86-fbd5-4eed-ab85-ad090c451bbc" />
